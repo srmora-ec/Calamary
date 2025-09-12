@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
-import { supabase } from "@/lib/supabase"
+// import { supabase } from "@/lib/supabase"
 import Header from "@/components/Header"
 import ModelCard from "@/components/ModelCard"
 import CreateModelModal from "@/components/CreateModelModal"
@@ -37,59 +37,59 @@ export default function DashboardPage() {
     }
   }, [user, authLoading, router])
 
-  useEffect(() => {
-    if (user) {
-      loadModelos()
-      loadTotalModelos()
-    }
-  }, [user, currentPage, searchTerm])
+  // useEffect(() => {
+  //   if (user) {
+  //     loadModelos()
+  //     loadTotalModelos()
+  //   }
+  // }, [user, currentPage, searchTerm])
 
-  const loadTotalModelos = async () => {
-    if (!user) return
+  // const loadTotalModelos = async () => {
+  //   if (!user) return
 
-    try {
-      const { data, error } = await supabase.rpc("contar_modelos_usuario", {
-        p_idusuario: user.id,
-      })
-      if (error) throw error
-      setTotalModelos(data || 0)
-    } catch (error) {
-      console.error("Error loading total models:", error)
-    }
-  }
+  //   try {
+  //     const { data, error } = await supabase.rpc("contar_modelos_usuario", {
+  //       p_idusuario: user.id,
+  //     })
+  //     if (error) throw error
+  //     setTotalModelos(data || 0)
+  //   } catch (error) {
+  //     console.error("Error loading total models:", error)
+  //   }
+  // }
 
-  const loadModelos = async () => {
-    if (!user) return
+  // const loadModelos = async () => {
+  //   if (!user) return
 
-    setLoading(true)
-    try {
-      console.log(user.id)
-      const { data, error } = await supabase.rpc("get_modelos_paginados", {
-        p_idusuario: user.id,
-        p_pagina: currentPage,
-        p_tamano: 10,
-        p_busqueda: searchTerm,
+  //   setLoading(true)
+  //   try {
+  //     console.log(user.id)
+  //     const { data, error } = await supabase.rpc("get_modelos_paginados", {
+  //       p_idusuario: user.id,
+  //       p_pagina: currentPage,
+  //       p_tamano: 10,
+  //       p_busqueda: searchTerm,
 
-      })
+  //     })
 
-      if (error) throw error
-      setModelos(data || [])
-    } catch (error) {
-      console.error("Error loading models:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     if (error) throw error
+  //     setModelos(data || [])
+  //   } catch (error) {
+  //     console.error("Error loading models:", error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const handleModelCreated = () => {
-    loadModelos()
-    loadTotalModelos()
-  }
+  // const handleModelCreated = () => {
+  //   loadModelos()
+  //   loadTotalModelos()
+  // }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setCurrentPage(1)
-    loadModelos()
+    // loadModelos()
   }
 
   if (authLoading || !user) {
@@ -193,11 +193,11 @@ export default function DashboardPage() {
         )}
       </main>
 
-      <CreateModelModal
+      {/* <CreateModelModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onModelCreated={handleModelCreated}
-      />
+      /> */}
     </div>
   )
 }
