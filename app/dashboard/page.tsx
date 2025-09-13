@@ -4,11 +4,11 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/useAuth"
 import { supabase } from "@/lib/supabase"
 import Header from "@/components/Header"
 import ModelCard from "@/components/ModelCard"
 import CreateModelModal from "@/components/CreateModelModal"
+import { useAuthContext } from "@/context/AuthProvider"
 
 interface Modelo {
   id: string
@@ -22,20 +22,20 @@ interface Modelo {
 }
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth()
+    const { user, loading } = useAuthContext();
   const router = useRouter()
   const [modelos, setModelos] = useState<Modelo[]>([])
   const [totalModelos, setTotalModelos] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [loadingLocal, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login")
+ useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
     }
-  }, [user, authLoading, router])
+  }, [loading, user, router]);
 
   useEffect(() => {
     if (user) {
@@ -92,7 +92,7 @@ export default function DashboardPage() {
     loadModelos()
   }
 
-  if (authLoading || !user) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="spinner" style={{ width: "40px", height: "40px" }}></div>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
           </button>
         </div>
         {/* Models Grid */}
-        {loading ? (
+        {loadingLocal ? (
           <div className="flex justify-center py-8">
             <div className="spinner" style={{ width: "40px", height: "40px" }}></div>
           </div>

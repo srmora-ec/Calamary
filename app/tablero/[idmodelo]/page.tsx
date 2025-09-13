@@ -2,9 +2,11 @@
 "use client";
 
 import Tablero from "@/components/tablero";
+import { useAuthContext } from "@/context/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { Modelo, ModeloData } from "@/types/modelo";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
 
 export default function ModeloPage() {
@@ -12,6 +14,14 @@ export default function ModeloPage() {
   const [modelo, setModelo] = useState<Modelo | null>(null);//estructura del modelo
   const [orientacion, setOrientacion] = useState<"h" | "v">("h");//Para cambiar orientacion
   const [linea, setLinea] = useState<number>(1);//Para la linea
+  const { user, loading } = useAuthContext();//Verficamos que inicie sesión
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [loading, user, router]);
 
   useEffect(() => {
     const fetchModelo = async () => {//consultar el modelo
@@ -80,6 +90,14 @@ export default function ModeloPage() {
     }
     alert("Modelo actualizado");
     console.log("Modelo actualizado:", data);
+  }
+
+   if (loading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="spinner" style={{ width: "40px", height: "40px" }}></div>
+      </div>
+    )
   }
 
   return (

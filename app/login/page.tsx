@@ -45,7 +45,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--surface-color)" }}>
       <div className="card" style={{ width: "100%", maxWidth: "400px" }}>
         <div className="card-header text-center">
-          <Image src="/logo.png" alt="Calamary Logo" width={60} height={60} className="mx-auto mb-4" />
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logo.png"
+              alt="Calamary Logo"
+              width={60}
+              height={60}
+            />
+          </div>
           <h1 className="text-2xl font-bold text-primary">Calamary</h1>
           <p className="text-secondary mt-2">Inicia sesión en tu cuenta</p>
         </div>
