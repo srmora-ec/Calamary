@@ -34,7 +34,8 @@ export default function ModeloPage() {
       }
 
       if (data) {
-
+        console.log("Veamos ahora que pasa")
+        console.log(data)
         const mapped: ModeloData = {//Crear modeldata
           id: data.modelo.id?.toString(),
           nombre: data.modelo.nombre,
@@ -43,15 +44,15 @@ export default function ModeloPage() {
           linea: data.modelo.linea,
           publico: data.modelo.publico,
           nodos: {
-            nodes: (data.nodos ?? []).map((n: any) => ({
-              idnodo: n.idnodo,       // <-- renombramos el modelo
-              posx: n.posx,//posicionx
-              posy: n.posy,//posiciony
-              titulo: n.titulo,//titulo
-              idpadre: n.idpadre,//padre
-              peso: n.peso,//peso
-              pesofinal: n.pesofinal,//pesofinal
-              acortado: n.acortado//acortado
+            nodes: (data.modelo.nodos?.nodes ?? []).map((n: any) => ({
+              idnodo: n.idnodo,
+              posx: n.posx,
+              posy: n.posy,
+              titulo: n.titulo,
+              idpadre: n.idpadre,
+              peso: n.peso,
+              pesofinal: n.pesofinal,
+              acortado: n.acortado
             }))
           }
         };
@@ -92,7 +93,7 @@ export default function ModeloPage() {
     console.log("Modelo actualizado:", data);
   }
 
-   if (loading || !user) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="spinner" style={{ width: "40px", height: "40px" }}></div>
