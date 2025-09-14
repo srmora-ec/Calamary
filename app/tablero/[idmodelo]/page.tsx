@@ -1,10 +1,11 @@
 // app/modelos/[idmodelo]/page.tsx  (Next.js 13+ con App Router)
 "use client";
 
+import ConfigureModalNodo from "@/components/ConfiguredNodo";
 import Tablero from "@/components/tablero";
 import { useAuthContext } from "@/context/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { Modelo, ModeloData } from "@/types/modelo";
+import { Modelo, ModeloData, Nodo } from "@/types/modelo";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
@@ -15,6 +16,9 @@ export default function ModeloPage() {
   const [orientacion, setOrientacion] = useState<"h" | "v">("h");//Para cambiar orientacion
   const [linea, setLinea] = useState<number>(1);//Para la linea
   const { user, loading } = useAuthContext();//Verficamos que inicie sesión
+  const [isConfigureOpen, setIsConfigureOpen] = useState(false);
+  const [nodoActual, setNodoActual] = useState<Nodo | null>(null); //Para actualizar un nodo
+
   const router = useRouter();
 
   useEffect(() => {
@@ -34,8 +38,6 @@ export default function ModeloPage() {
       }
 
       if (data) {
-        console.log("Veamos ahora que pasa")
-        console.log(data)
         const mapped: ModeloData = {//Crear modeldata
           id: data.modelo.id?.toString(),
           nombre: data.modelo.nombre,
@@ -52,27 +54,28 @@ export default function ModeloPage() {
               idpadre: n.idpadre,
               peso: n.peso,
               pesofinal: n.pesofinal,
-              acortado: n.acortado
+              acortado: n.acortado,
+              beneficio: n.beneficio,
+              min:n.min,
+              max:n.max
             }))
           }
         };
 
-        console.log("luego queda")
-        console.log(mapped)
         const modeloObj = new Modelo(mapped);
         setModelo(modeloObj);
         setOrientacion(modeloObj.getOrientacion());
         setLinea(modeloObj.getLinea());
-        console.log("veamos")
-        console.log(modeloObj.getOrientacion())
-
       }
     };
     fetchModelo();
 
   }, [idmodelo]);
-
-  const handleModeloActualizado = async (modeloActual: Modelo) => {
+  const handleNodoActualizado = (nodo: Nodo) => {
+    setNodoActual(nodo);
+    setIsConfigureOpen(true);
+  }
+  const handleModeloActualizado = async (modeloActual: Modelo) => {//Para actualizar elmodelo en la base de datos
     const datamodelo = modeloActual.getData();
     const { data, error } = await supabase
       .rpc("update_modelo_con_nodos", {
@@ -103,15 +106,26 @@ export default function ModeloPage() {
 
   return (
     <div className="flex items-center justify-center h-screen">
+      {nodoActual && (
+        <ConfigureModalNodo
+          isOpen={isConfigureOpen}
+          onClose={() => { setIsConfigureOpen(false) }}
+          nodo={nodoActual}
+          onNodoUpdated={ setNodoActual}
+        />
+      )}
 
       {modelo ? (
-        <Tablero
-          modelo={modelo}
-          orientacion={orientacion}
-          linea={linea}
-          onActualizarModelo={handleModeloActualizado}
-        />
-
+        <>
+          <Tablero
+            modelo={modelo}
+            orientacion={orientacion}
+            linea={linea}
+            onActualizarModelo={handleModeloActualizado}
+            onActualizarNodo={handleNodoActualizado}
+            nodoCambios={nodoActual}
+          />
+        </>
       ) : (
         <p>Cargando...</p>
       )}    </div>

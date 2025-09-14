@@ -1,17 +1,20 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { Modelo } from "@/types/modelo"
+import { Modelo, Nodo } from "@/types/modelo"
 import { applyEdgeChanges, applyNodeChanges, Background, BackgroundVariant, Controls, MiniMap, ReactFlow } from "@xyflow/react"
 import '@xyflow/react/dist/style.css';
 import Switch from "./Switch";
+import CustomNodo from "./CustomNodo";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
   orientacion: "h" | "v", //Para actualizar la orientación
   linea: number // Para actualizar lineas
   onActualizarModelo?: (modeloActual: Modelo) => void // Para devolver el modelo creado
+  onActualizarNodo?: (nodoSeleccionado: Nodo) => void//Para solicitar cambios en un nodo
+  nodoCambios: Nodo | null//Para recibir cambios de nodo
 }
 
-const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo }) => {//recuperamos elmodelo de desición que vamos a diseñar
+const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios }) => {//recuperamos elmodelo de desición que vamos a diseñar
 
   const data = modelo.getData()
 
@@ -20,14 +23,28 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [nodes, setNodes] = useState(modelo.getNodosReactFlow()); // 1.1 Carga inicial de los nodos
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges
 
+  const nodeTypes = {
+  custom: CustomNodo,
+}
+
   useEffect(() => {// Por si se actualizan los datos de orientación
-    console.log("Esto llega desde modelo")
-    console.log(modelo.getOrientacion())
+
     modelo.setOrientacion(orientacion);
     modelo.setLinea(linea);
+
     setNodes(modelo.getNodosReactFlow());//volvemos a cargar los nodos
     setEdges(modelo.getEdgesReactFlow());//volvewmos a cargar los edges
   }, [orientacion, modelo, linea]);
+
+  useEffect(() => {// Por si se actualizan los datos de orientación
+    if (nodoCambios) {
+      console.log(nodoCambios)
+      modelo.actualizarNodo(nodoCambios.idnodo, nodoCambios)
+      setNodes(modelo.getNodosReactFlow());//volvemos a cargar los nodos
+
+    }
+  }, [nodoCambios]);
+
 
   // contexto (usamos position: fixed y clientX/clientY)
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; nodoId: number | null }>({
@@ -124,10 +141,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   // }
   // Crear hijo
   const crearHijo = (idPadre: number) => {
-    console.log(modelo.getOrientacion())
-    console.log(orientacion)
-    modelo.setNodos(convertirNodos(nodes))
-    const hijo = modelo.crearHijo(idPadre)
+    modelo.setPosicionesNodos(convertirNodos(nodes))//Guardamos el previo
+    modelo.crearHijo(idPadre)//Creamos el hijo
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
     closeContextMenu()
@@ -145,6 +160,21 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     modelo.setNodos(convertirNodos(nodes))
 
     modelo.eliminarNodo(idNodo)
+    setNodes(modelo.getNodosReactFlow())
+    setEdges(modelo.getEdgesReactFlow())
+    closeContextMenu()
+  }
+  const configurarNodo = (idnodo: number) => {
+    const nodo = modelo.getNodoById(idnodo)
+    //modelo.setNodos(convertirNodos(nodes))//Guardamos el previo
+    // setNodes(modelo.getNodosReactFlow())
+    // setEdges(modelo.getEdgesReactFlow())
+     if (nodo && onActualizarNodo) {
+    //   console.log("Nodo encontrado:", nodo.titulo)
+    onActualizarNodo(nodo)
+    // } else {
+    //   console.log("No existe un nodo con ese id")
+    }
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
     closeContextMenu()
@@ -217,9 +247,11 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes} 
           // onConnect={onConnect}
           onNodeContextMenu={handleNodeContextMenu as any}
           onClick={closeContextMenu}
+            multiSelectionKeyCode="Control"
           fitView
         >
           <Controls />
@@ -253,6 +285,12 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
             >
               Eliminar rama
+            </button>
+            <button
+              onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
+              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+            >
+              Configuración
             </button>
             <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
               Cancelar

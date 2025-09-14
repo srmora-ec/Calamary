@@ -9,6 +9,10 @@ export interface Nodo {
   peso?: number
   pesofinal?: number
   acortado?: string
+  min?: number
+  max?: number
+  criterioFinal?: boolean
+  beneficio?: boolean
 }
 
 export interface ModeloData {
@@ -38,12 +42,12 @@ export class Modelo {
   // Setter para actualizar los datos completos
   setData(newData: ModeloData): void {
     this.data = { ...newData }
+    this.actualizarCriterios()
+
   }
   //Para cambiar la orientacion del modelo (Aspecto estetico)
   setOrientacion(orientacion: "h" | "v") {
-     console.log("Primero mandamos a cambiar esto:"+this.data.orientacion+"  a esto :"+orientacion)
     this.data.orientacion = orientacion;
-    console.log(this.data.orientacion)
   }
   getOrientacion(): "h" | "v" {//Para recuperar la orientacion
     return this.data.orientacion;
@@ -62,24 +66,28 @@ export class Modelo {
     return this.data.nodos?.nodes || []
   }
   //Obtener los nodos con la estructura de reactflow
- getNodosReactFlow() {
-  const isHorizontal = this.data.orientacion === "h";
-console.log("Comprobemos")
-console.log(this.getNodos())
-  return this.getNodos().map((nodo) => ({
-    id: nodo.idnodo?.toString() ?? nodo.idnodo,
-    position: { x: nodo.posx, y: nodo.posy },
-    data: {
-      label: nodo.titulo ?? '',
-      peso: nodo.peso ?? 0,
-      pesofinal: nodo.pesofinal ?? 0,
-      acortado: nodo.acortado ?? ''
-    } as Record<string, unknown>,
-    parentNode: nodo.idpadre != null ? nodo.idpadre.toString() : undefined,
-    sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
-    targetPosition: isHorizontal ? Position.Left : Position.Top
-  }));
-}
+  getNodosReactFlow() {
+    const isHorizontal = this.data.orientacion === "h";
+    this.actualizarCriterios();
+    return this.getNodos().map((nodo) => ({
+      id: nodo.idnodo?.toString() ?? nodo.idnodo,
+      position: { x: nodo.posx, y: nodo.posy },
+      type: "custom",
+      data: {
+        label: nodo.titulo ?? '',
+        peso: nodo.peso ?? 0,
+        pesofinal: nodo.pesofinal ?? 0,
+        acortado: nodo.acortado ?? '',
+        min: nodo.min ?? -100,
+        max: nodo.max ?? 100,
+        criterioFinal: nodo.criterioFinal ?? false,
+        beneficio: nodo.beneficio ?? true
+      } as Record<string, unknown>,
+      parentNode: nodo.idpadre != null ? nodo.idpadre.toString() : undefined,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+      targetPosition: isHorizontal ? Position.Left : Position.Top
+    }));
+  }
 
   //Devolver los nodos con el formato de reactflow
   getEdgesReactFlow() {
@@ -168,8 +176,23 @@ console.log(this.getNodos())
   agregarNodo(nodo: Nodo): void {
     const nodos = this.getNodos()
     this.setNodos([...nodos, nodo])
+    this.actualizarCriterios()
+
   }
-// Crear hijo
+//Guardar Posiciones de los nodos. De tal manera solucionamos el bug
+  setPosicionesNodos(nuevosNodos: Pick<Nodo, "idnodo" | "posx" | "posy">[]): void {
+  const nodos = this.getNodos()
+
+  const nodosActualizados = nodos.map((nodo) => {
+    const nodoNuevo = nuevosNodos.find((n) => n.idnodo === nodo.idnodo)
+    return nodoNuevo
+      ? { ...nodo, posx: nodoNuevo.posx, posy: nodoNuevo.posy }
+      : nodo
+  })
+
+  this.setNodos(nodosActualizados)
+}
+  // Crear hijo
   crearHijo(idPadre: number): Nodo {
     const nodos = this.getNodos()
     const nuevoId = nodos.length ? Math.max(...nodos.map(n => n.idnodo)) + 1 : 1
@@ -183,11 +206,15 @@ console.log(this.getNodos())
       idnodo: nuevoId,
       posx: padre.posx + (this.getOrientacion() === "h" ? 150 : 0), // si horizontal → desplaza X
       posy: padre.posy + (this.getOrientacion() === "v" ? 100 : 50), // si vertical → desplaza Y
+      min: -100,
+      max: 100,
       titulo: `Nuevo nodo ${nuevoId}`,
-      idpadre: idPadre
+      idpadre: idPadre,
+      beneficio: true
     }
 
     this.agregarNodo(hijo)
+    this.actualizarCriterios()
     return hijo
   }
 
@@ -199,6 +226,8 @@ console.log(this.getNodos())
 
     const nodosRestantes = nodos.filter((nodo) => !nodosAEliminar.includes(nodo.idnodo))
     this.setNodos(nodosRestantes)
+    this.actualizarCriterios()
+
   }
 
   // Obtener todos los descendientes de un nodo
@@ -219,7 +248,24 @@ console.log(this.getNodos())
     const nodos = this.getNodos()
     const nodosActualizados = nodos.map((nodo) => (nodo.idnodo === idNodo ? { ...nodo, ...datosNuevos } : nodo))
     this.setNodos(nodosActualizados)
+    this.actualizarCriterios()
+
   }
+
+  // Obtener un nodo específico por ID
+  getNodoById(idNodo: number): Nodo | undefined {
+    return this.getNodos().find((nodo) => nodo.idnodo === idNodo)
+  }
+
+  actualizarCriterios() {//Para actualizar si tiene hijos
+    const nodos = this.getNodos()
+    const nodosActualizados = nodos.map(nodo => ({
+      ...nodo,
+      criterioFinal: !this.tieneHijos(nodo.idnodo)
+    }))
+    this.setNodos(nodosActualizados)
+  }
+
 
   // Obtener estadísticas del modelo
   getEstadisticas() {
