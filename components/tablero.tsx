@@ -24,8 +24,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges
 
   const nodeTypes = {
-  custom: CustomNodo,
-}
+    custom: CustomNodo,
+  }
 
   useEffect(() => {// Por si se actualizan los datos de orientación
 
@@ -169,11 +169,11 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     //modelo.setNodos(convertirNodos(nodes))//Guardamos el previo
     // setNodes(modelo.getNodosReactFlow())
     // setEdges(modelo.getEdgesReactFlow())
-     if (nodo && onActualizarNodo) {
-    //   console.log("Nodo encontrado:", nodo.titulo)
-    onActualizarNodo(nodo)
-    // } else {
-    //   console.log("No existe un nodo con ese id")
+    if (nodo && onActualizarNodo) {
+      //   console.log("Nodo encontrado:", nodo.titulo)
+      onActualizarNodo(nodo)
+      // } else {
+      //   console.log("No existe un nodo con ese id")
     }
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
@@ -181,6 +181,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   }
 
   const cambiarOrientacion = (val: "h" | "v") => {
+    modelo.setPosicionesNodos(convertirNodos(nodes))
     modelo.setOrientacion(val);
     // Forzar actualización de ReactFlow
     setNodes(modelo.getNodosReactFlow());
@@ -188,6 +189,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   }
 
   const cambiarLinea = (val: number) => {
+    modelo.setPosicionesNodos(convertirNodos(nodes))
+
     modelo.setLinea(val);
     // Forzar actualización de ReactFlow
     setNodes(modelo.getNodosReactFlow());
@@ -247,11 +250,11 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes} 
+          nodeTypes={nodeTypes}
           // onConnect={onConnect}
           onNodeContextMenu={handleNodeContextMenu as any}
           onClick={closeContextMenu}
-            multiSelectionKeyCode="Control"
+          multiSelectionKeyCode="Control"
           fitView
         >
           <Controls />
