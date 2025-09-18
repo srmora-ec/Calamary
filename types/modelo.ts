@@ -93,22 +93,30 @@ export class Modelo {
   getEdgesReactFlow() {
     const tipoEdgeMap: Record<number, string> = {
       1: 'straight',        // Directa
-      2: 'step',           // Escalonada
-      3: 'smoothstep',     // Escalonada suave
-      4: 'default',           // Sebier
+      2: 'step',            // Escalonada
+      3: 'smoothstep',      // Escalonada suave
+      4: 'default',         // Bézier
     }
 
     const edgeType = tipoEdgeMap[this.data.linea] || 'default'
 
     return this.getNodos()
       .filter((nodo) => nodo.idpadre !== null) // solo los que tienen padre
-      .map((nodo) => ({
-        id: `${nodo.idpadre}-${nodo.idnodo}`, // id único del edge
-        source: nodo.idpadre!.toString(), // el padre
-        target: nodo.idnodo.toString(),   // el hijo
-        type: edgeType,// tipo de linea
-      }))
+      .map((nodo) => {
+        const nodoHijo = nodo // nodo hijo actual
+        const pesoLabel = nodoHijo.peso?.toFixed(2) ?? ""
+
+        return {
+          id: `${nodo.idpadre}-${nodo.idnodo}`, // id único del edge
+          source: nodo.idpadre!.toString(), // el padre
+          target: nodo.idnodo.toString(),   // el hijo
+          type: edgeType,                    // tipo de línea
+          label: pesoLabel,                  // <-- agregamos el label aquí
+          labelStyle: { fill: "#000", fontWeight: 600, fontSize: 12 },
+        }
+      })
   }
+
   // Actualizar nodos
   setNodos(nodos: Nodo[]): void {
     this.data.nodos = { nodes: nodos }
@@ -179,56 +187,89 @@ export class Modelo {
     this.actualizarCriterios()
 
   }
-//Guardar Posiciones de los nodos. De tal manera solucionamos el bug
+  //Guardar Posiciones de los nodos. De tal manera solucionamos el bug
   setPosicionesNodos(nuevosNodos: Pick<Nodo, "idnodo" | "posx" | "posy">[]): void {
-  const nodos = this.getNodos()
+    const nodos = this.getNodos()
 
-  const nodosActualizados = nodos.map((nodo) => {
-    const nodoNuevo = nuevosNodos.find((n) => n.idnodo === nodo.idnodo)
-    return nodoNuevo
-      ? { ...nodo, posx: nodoNuevo.posx, posy: nodoNuevo.posy }
-      : nodo
-  })
+    const nodosActualizados = nodos.map((nodo) => {
+      const nodoNuevo = nuevosNodos.find((n) => n.idnodo === nodo.idnodo)
+      return nodoNuevo
+        ? { ...nodo, posx: nodoNuevo.posx, posy: nodoNuevo.posy }
+        : nodo
+    })
 
-  this.setNodos(nodosActualizados)
-}
+    this.setNodos(nodosActualizados)
+  }
+
+  //Calcular los pesos alcrear eliminar un hijo
+  private recalcularPesos(idPadre: number): void {
+    const nodos = this.getNodos()//obtenemos los nodos
+    const hijos = nodos.filter(n => n.idpadre === idPadre)//Filtramos  los hijos
+    if (hijos.length === 0) return
+
+    const peso = parseFloat((1 / hijos.length).toFixed(6))//Obtenemos el peso partido por igual
+    const nodosActualizados = nodos.map(n =>
+      hijos.some(h => h.idnodo === n.idnodo) ? { ...n, peso } : n
+    )//Re ubicamos los pesos en losnodos hijosseleccionados
+
+    this.setNodos(nodosActualizados)//Establecemos los nuevos nodos con los pesos arreglados
+  }
+
+
   // Crear hijo
   crearHijo(idPadre: number): Nodo {
-    const nodos = this.getNodos()
-    const nuevoId = nodos.length ? Math.max(...nodos.map(n => n.idnodo)) + 1 : 1
-    const padre = nodos.find(n => n.idnodo === idPadre)
+    const nodos = this.getNodos()//Obtenemos todos los nodos
+    const nuevoId = nodos.length ? Math.max(...nodos.map(n => n.idnodo)) + 1 : 1//Calculamos un nuevo id
+    const padre = nodos.find(n => n.idnodo === idPadre)//Encontramos el padre
 
-    if (!padre) {
+    if (!padre) {//Verificamos que hay padre
       throw new Error(`No se encontró el nodo padre con id ${idPadre}`)
     }
 
     const hijo: Nodo = {
       idnodo: nuevoId,
-      posx: padre.posx + (this.getOrientacion() === "h" ? 150 : 0), // si horizontal → desplaza X
-      posy: padre.posy + (this.getOrientacion() === "v" ? 100 : 50), // si vertical → desplaza Y
+      posx: padre.posx + (this.getOrientacion() === "h" ? 150 : 0),// Si es h lo ubicamos a la derecha
+      posy: padre.posy + (this.getOrientacion() === "v" ? 100 : 50),// si es v hacia abajo
       min: -100,
       max: 100,
       titulo: `Nuevo nodo ${nuevoId}`,
       idpadre: idPadre,
-      beneficio: true
+      beneficio: true,
+      peso: 0, // se recalculará más abajo
     }
 
-    this.agregarNodo(hijo)
+    // Agregamos el hijo
+    const nuevosNodos = [...nodos, hijo]
+    this.setNodos(nuevosNodos)
+
+    // Recalcular pesos de todos los hijos de ese padre
+    this.recalcularPesos(idPadre)
+
     this.actualizarCriterios()
     return hijo
   }
 
+
   // Eliminar un nodo y todos sus descendientes
   eliminarNodo(idNodo: number): void {
     const nodos = this.getNodos()
+    const nodo = nodos.find(n => n.idnodo === idNodo)
+    if (!nodo) return
+
     const nodosAEliminar = this.obtenerDescendientes(idNodo, nodos)
     nodosAEliminar.push(idNodo)
 
     const nodosRestantes = nodos.filter((nodo) => !nodosAEliminar.includes(nodo.idnodo))
     this.setNodos(nodosRestantes)
-    this.actualizarCriterios()
 
+    // Recalcular pesos de los hermanos restantes
+    if (nodo.idpadre !== null) {
+      this.recalcularPesos(nodo.idpadre)
+    }
+
+    this.actualizarCriterios()
   }
+
 
   // Obtener todos los descendientes de un nodo
   private obtenerDescendientes(idNodo: number, nodos: Nodo[]): number[] {

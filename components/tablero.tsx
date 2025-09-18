@@ -4,6 +4,7 @@ import { applyEdgeChanges, applyNodeChanges, Background, BackgroundVariant, Cont
 import '@xyflow/react/dist/style.css';
 import Switch from "./Switch";
 import CustomNodo from "./CustomNodo";
+import ConfigureModalPeso from "./pesos/ConfiguredPeso";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -22,6 +23,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   //1. Carga de datos
   const [nodes, setNodes] = useState(modelo.getNodosReactFlow()); // 1.1 Carga inicial de los nodos
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges
+  const [nodosSeleccionados, setNodosSeleccionados] = useState<Nodo[] | null>(null)
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const nodeTypes = {
     custom: CustomNodo,
@@ -139,6 +142,9 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   //   console.log("5:" + modelo.getOrientacion())
 
   // }
+
+
+  
   // Crear hijo
   const crearHijo = (idPadre: number) => {
     modelo.setPosicionesNodos(convertirNodos(nodes))//Guardamos el previo
@@ -157,8 +163,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
       closeContextMenu()
       return
     }
-    modelo.setNodos(convertirNodos(nodes))
-
+    modelo.setPosicionesNodos(convertirNodos(nodes))
     modelo.eliminarNodo(idNodo)
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
@@ -166,15 +171,18 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   }
   const configurarNodo = (idnodo: number) => {
     const nodo = modelo.getNodoById(idnodo)
-    //modelo.setNodos(convertirNodos(nodes))//Guardamos el previo
-    // setNodes(modelo.getNodosReactFlow())
-    // setEdges(modelo.getEdgesReactFlow())
     if (nodo && onActualizarNodo) {
-      //   console.log("Nodo encontrado:", nodo.titulo)
       onActualizarNodo(nodo)
-      // } else {
-      //   console.log("No existe un nodo con ese id")
     }
+    setNodes(modelo.getNodosReactFlow())
+    setEdges(modelo.getEdgesReactFlow())
+    closeContextMenu()
+  }
+  const configurarPesos = (idnodo: number) => {
+    const nodos = modelo.getHijos(idnodo)
+    setNodosSeleccionados(nodos)
+    console.log(nodos)
+    setIsOpenModal(true);
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
     closeContextMenu()
@@ -261,6 +269,10 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           {/* <MiniMap /> */}
           <Background color="#ccc" variant={BackgroundVariant.Cross} />
         </ReactFlow>
+        {nodosSeleccionados && (
+          <ConfigureModalPeso isOpen={isOpenModal} onClose={() => setIsOpenModal(false)} nodos={nodosSeleccionados} onNodosUpdated={() => console.log("hola")}></ConfigureModalPeso>
+        )}
+
         {contextMenu.visible && (
           <div
             ref={menuRef}
@@ -293,8 +305,17 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
               className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
             >
-              Configuración
+              Configuración de criterio
             </button>
+            {contextMenu.nodoId !== null &&
+              modelo.getNodos().some(n => n.idpadre === contextMenu.nodoId) && (
+                <button
+                  onClick={() => configurarPesos(contextMenu.nodoId!)}
+                  className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+                >
+                  Pesos
+                </button>
+              )}
             <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
               Cancelar
             </button>

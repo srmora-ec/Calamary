@@ -18,7 +18,7 @@ export default function CustomNodo({ data, selected, sourcePosition = Position.B
     <div
       className={`bg-white border-2 ${
         selected ? "border-blue-500 bg-blue-50" : "border-black bg-white"
-      } rounded-md px-4 py-4 min-w-[140px] text-left relative`}
+      } rounded-md px-4 py-4 min-w-[200px] text-left relative`}
     >
       {/* Contenedor Título + Imagen */}
       <div className="flex justify-between items-start mb-2">

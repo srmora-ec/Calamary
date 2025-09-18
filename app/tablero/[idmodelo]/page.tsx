@@ -1,7 +1,8 @@
 // app/modelos/[idmodelo]/page.tsx  (Next.js 13+ con App Router)
 "use client";
 
-import ConfigureModalNodo from "@/components/ConfiguredNodo";
+import ConfigureModalNodo from "@/components/ConfiguredNodo";//Configurar la información del nodo
+import ConfigureModalPeso from "@/components/pesos/ConfiguredPeso";//Modal para confugurar el peso
 import Tablero from "@/components/tablero";
 import { useAuthContext } from "@/context/AuthProvider";
 import { supabase } from "@/lib/supabase";
@@ -11,12 +12,13 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
 
 export default function ModeloPage() {
-  const { idmodelo } = useParams();// Cargar el parametro delid
-  const [modelo, setModelo] = useState<Modelo | null>(null);//estructura del modelo
-  const [orientacion, setOrientacion] = useState<"h" | "v">("h");//Para cambiar orientacion
-  const [linea, setLinea] = useState<number>(1);//Para la linea
-  const { user, loading } = useAuthContext();//Verficamos que inicie sesión
+  const { idmodelo } = useParams(); // Cargar el parametro delicado
+  const [modelo, setModelo] = useState<Modelo | null>(null); //estructura del modelo
+  const [orientacion, setOrientacion] = useState<"h" | "v">("h"); //Para cambiar orientacion
+  const [linea, setLinea] = useState<number>(1); //Para la linea
+  const { user, loading } = useAuthContext(); //Verficamos que inicie sesión
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
+  const [isPesoOpen, setIsPesoOpen] = useState(false); //Para abrir 
   const [nodoActual, setNodoActual] = useState<Nodo | null>(null); //Para actualizar un nodo
 
   const router = useRouter();
@@ -56,8 +58,8 @@ export default function ModeloPage() {
               pesofinal: n.pesofinal,
               acortado: n.acortado,
               beneficio: n.beneficio,
-              min:n.min,
-              max:n.max
+              min: n.min,
+              max: n.max
             }))
           }
         };
@@ -71,10 +73,12 @@ export default function ModeloPage() {
     fetchModelo();
 
   }, [idmodelo]);
+
   const handleNodoActualizado = (nodo: Nodo) => {
     setNodoActual(nodo);
     setIsConfigureOpen(true);
   }
+
   const handleModeloActualizado = async (modeloActual: Modelo) => {//Para actualizar elmodelo en la base de datos
     const datamodelo = modeloActual.getData();
     const { data, error } = await supabase
@@ -111,7 +115,7 @@ export default function ModeloPage() {
           isOpen={isConfigureOpen}
           onClose={() => { setIsConfigureOpen(false) }}
           nodo={nodoActual}
-          onNodoUpdated={ setNodoActual}
+          onNodoUpdated={setNodoActual}
         />
       )}
 
@@ -128,6 +132,7 @@ export default function ModeloPage() {
         </>
       ) : (
         <p>Cargando...</p>
-      )}    </div>
+      )}
+    </div>
   );
 }
