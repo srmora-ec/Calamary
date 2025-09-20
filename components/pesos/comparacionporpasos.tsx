@@ -45,6 +45,7 @@ interface InconsistentComparison {
   index: number
   deviation: number
   suggestedValue?: number
+  impactScore?: number
 }
 
 const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave }) => {
@@ -54,7 +55,6 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
   const [consistencyRatio, setConsistencyRatio] = useState<number>(0)
   const [showResults, setShowResults] = useState(false)
   const [inconsistentComparisons, setInconsistentComparisons] = useState<InconsistentComparison[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
 
   useEffect(() => {
     const allComparisons: Comparison[] = []
@@ -129,18 +129,22 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
       const theoreticalValue = ahpWeights[nodeIndex1] / ahpWeights[nodeIndex2]
       const deviation = Math.abs(Math.log(currentValue) - Math.log(theoreticalValue))
 
-      if (deviation > 0.3) {
+      if (deviation > 0.5) {
         const suggestedValue = theoreticalValue
+        const impactScore = deviation * (ahpWeights[nodeIndex1] + ahpWeights[nodeIndex2])
         inconsistent.push({
           comparison: comp,
           index: i,
           deviation,
           suggestedValue,
+          impactScore,
         })
       }
     }
 
-    return inconsistent.sort((a, b) => b.deviation - a.deviation).slice(0, 5)
+    return inconsistent
+      .sort((a, b) => (b.impactScore || b.deviation) - (a.impactScore || a.deviation))
+      .slice(0, Math.min(3, Math.ceil(inconsistent.length * 0.3)))
   }
 
   const calcularPesos = () => {
@@ -163,8 +167,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
 
     setWeights(pesosCalculados)
     setConsistencyRatio(ahpResult.CR)
-
-    if (ahpResult.CR >= 0.1 && showSuggestions) {
+    if (ahpResult.CR >= 0.1) {
       const inconsistent = detectInconsistentComparisons(matrizCompleta, ahpResult.weights)
       setInconsistentComparisons(inconsistent)
     } else {
@@ -173,7 +176,6 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
   }
 
   const handleCalculate = () => {
-    setShowSuggestions(true)
     calcularPesos()
   }
 
@@ -182,7 +184,6 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
     setConsistencyRatio(0)
     setInconsistentComparisons([])
     setShowResults(false)
-    setShowSuggestions(false)
 
     const initialMatrix: Record<string, number> = {}
     for (let i = 0; i < nodos.length; i++) {
@@ -263,7 +264,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
         <div className="space-y-4">
           {comparisons.map((comparison, index) => {
             const currentValue = getMatrixValue(comparison.nodeId1, comparison.nodeId2)
-            const isInconsistent = showSuggestions && inconsistentComparisons.some((inc) => inc.index === index)
+            const isInconsistent = inconsistentComparisons.some((inc) => inc.index === index)
 
             return (
               <div
@@ -316,7 +317,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
                                 ? "bg-gray-100 dark:bg-gray-800 border-gray-400 dark:border-gray-600"
                                 : isLeftSide
                                   ? "bg-blue-100 dark:bg-blue-900 border-blue-400 dark:border-blue-600"
-                                  : "bg-green-100 dark:bg-green-900 border-green-400 dark:border-green-600"
+                                  : "bg-green-100 dark:bg-green-950 border-green-400 dark:border-green-600"
                               : "bg-background border-border hover:bg-muted"
                           }`}
                         >
@@ -351,12 +352,22 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
                         const nearestSaaty = findNearestSaatyValue(inconsistentComp.suggestedValue)
                         return (
                           <div className="p-2 bg-yellow-50 dark:bg-yellow-950 rounded border border-yellow-200 dark:border-yellow-800">
-                            <span className="text-xs text-yellow-700 dark:text-yellow-300">
-                              Valor sugerido para mejor consistencia: <strong>{nearestSaaty.display}</strong>
-                              <span className="text-xs text-muted-foreground ml-2">
-                                (Seleccione manualmente el valor sugerido)
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs text-yellow-700 dark:text-yellow-300">
+                                💡 <strong>Cambio sugerido:</strong> {nearestSaaty.display}
+                                <span className="block text-xs text-muted-foreground mt-1">
+                                  Este cambio tendrá alto impacto en la consistencia
+                                </span>
                               </span>
-                            </span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => applySuggestedValue(comparison, nearestSaaty.value)}
+                                className="text-xs px-2 py-1 h-auto"
+                              >
+                                Aplicar
+                              </Button>
+                            </div>
                           </div>
                         )
                       }
@@ -443,12 +454,13 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
                 </div>
               </div>
 
-              {!isConsistent && showSuggestions && (
-                <Alert variant="destructive">
+              {!isConsistent && inconsistentComparisons.length > 0 && (
+                <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    La consistencia de las comparaciones es inadecuada. Las comparaciones marcadas en rojo tienen
-                    valores sugeridos para mejorar la coherencia.
+                    <strong>Consistencia mejorable:</strong> Se sugieren {inconsistentComparisons.length} cambios
+                    estratégicos (de {comparisons.length} comparaciones) para optimizar la coherencia. Estos cambios
+                    tendrán el mayor impacto positivo.
                   </AlertDescription>
                 </Alert>
               )}
