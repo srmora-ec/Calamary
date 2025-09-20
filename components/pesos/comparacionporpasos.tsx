@@ -147,10 +147,11 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
       .slice(0, Math.min(3, Math.ceil(inconsistent.length * 0.3)))
   }
 
-  const calcularPesos = () => {
+  const calcularPesos = async () => {
     const n = nodos.length
     const matrizCompleta: number[][] = []
 
+    // Construir la matriz completa
     for (let i = 0; i < n; i++) {
       matrizCompleta[i] = []
       for (let j = 0; j < n; j++) {
@@ -158,20 +159,27 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
       }
     }
 
-    const ahpResult = calculateAHP(matrizCompleta)
+    try {
+      const ahpResult = await calculateAHP(matrizCompleta)
 
-    const pesosCalculados: Record<number, number> = {}
-    nodos.forEach((nodo, index) => {
-      pesosCalculados[nodo.idnodo] = ahpResult.weights[index]
-    })
+      // Asignar pesos en el orden de los nodos
+      const pesosCalculados: Record<number, number> = {}
+      nodos.forEach((nodo, index) => {
+        pesosCalculados[nodo.idnodo] = ahpResult.weights[index]
+      })
 
-    setWeights(pesosCalculados)
-    setConsistencyRatio(ahpResult.CR)
-    if (ahpResult.CR >= 0.1) {
-      const inconsistent = detectInconsistentComparisons(matrizCompleta, ahpResult.weights)
-      setInconsistentComparisons(inconsistent)
-    } else {
-      setInconsistentComparisons([])
+      setWeights(pesosCalculados)
+      setConsistencyRatio(ahpResult.CR)
+
+      // Detectar comparaciones inconsistentes si CR ≥ 0.1
+      if (ahpResult.CR >= 0.1) {
+        const inconsistent = detectInconsistentComparisons(matrizCompleta, ahpResult.weights)
+        setInconsistentComparisons(inconsistent)
+      } else {
+        setInconsistentComparisons([])
+      }
+    } catch (error) {
+      console.error("Error al calcular AHP:", error)
     }
   }
 
@@ -311,15 +319,14 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos, onSave
                         <button
                           key={`${option.value}-${option.position}`}
                           onClick={() => handleComparisonChange(comparison.nodeId1, comparison.nodeId2, option.value)}
-                          className={`p-1 rounded border transition-all text-center min-h-[35px] flex flex-col items-center justify-center ${
-                            isSelected
+                          className={`p-1 rounded border transition-all text-center min-h-[35px] flex flex-col items-center justify-center ${isSelected
                               ? isCenter
                                 ? "bg-gray-100 dark:bg-gray-800 border-gray-400 dark:border-gray-600"
                                 : isLeftSide
                                   ? "bg-blue-100 dark:bg-blue-900 border-blue-400 dark:border-blue-600"
                                   : "bg-green-100 dark:bg-green-950 border-green-400 dark:border-green-600"
                               : "bg-background border-border hover:bg-muted"
-                          }`}
+                            }`}
                         >
                           <span className="font-mono text-xs font-bold">
                             {option.value === 1 / 2

@@ -348,7 +348,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           </div>
         )}
       </div>
-      <div className="p-4 border rounded-lg shadow-md bg-white">
+      {/* <div className="p-4 border rounded-lg shadow-md bg-white">
         <h2 className="text-xl font-bold mb-2">{data.nombre}</h2>
         <p className="text-gray-600 mb-4">{data.descripcion ?? "Sin descripción"}</p>
 
@@ -370,7 +370,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           ))}
         </ul>
       </div>
-
+ */}
 
     </>
 

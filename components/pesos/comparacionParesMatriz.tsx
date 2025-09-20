@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle2, RotateCcw, Calculator } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { calculateAHP } from "./metodos/pesosComPares"
 
 interface ComparacionPorParesProps {
   nodos: Nodo[]
@@ -172,64 +173,41 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave
   }
 
   // Calcular pesos usando el método del eigenvector principal
-  const calcularPesos = () => {
+
+  const calcularPesos = async () => {
     if (!verificarCoherencia()) {
-      return
+      return;
     }
 
-    const n = nodos.length
-    const matrizCompleta: number[][] = []
+    const n = nodos.length;
+    const matrizCompleta: number[][] = [];
 
     // Construir matriz completa
     for (let i = 0; i < n; i++) {
-      matrizCompleta[i] = []
+      matrizCompleta[i] = [];
       for (let j = 0; j < n; j++) {
-        matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
+        matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo);
       }
     }
 
-    // Método simplificado: promedio de filas normalizadas
-    const sumasFilas = matrizCompleta.map((fila) => fila.reduce((sum, val) => sum + val, 0))
-    const sumaTotal = sumasFilas.reduce((sum, val) => sum + val, 0)
+    try {
+      const result = await calculateAHP(matrizCompleta); // Llama al FastAPI
 
-    const pesosCalculados: Record<number, number> = {}
-    nodos.forEach((nodo, index) => {
-      pesosCalculados[nodo.idnodo] = sumasFilas[index] / sumaTotal
-    })
+      // Asignar pesos en orden de llegada
+      const newWeights: Record<number, number> = {};
+      nodos.forEach((nodo, index) => {
+        newWeights[nodo.idnodo] = result.weights[index];
+      });
 
-    setWeights(pesosCalculados)
-
-    // Calcular índice de consistencia
-    const calcularConsistencia = () => {
-      // Calcular lambda max (eigenvalor principal)
-      let lambdaMax = 0
-      for (let i = 0; i < n; i++) {
-        let suma = 0
-        for (let j = 0; j < n; j++) {
-          suma += matrizCompleta[i][j] * pesosCalculados[nodos[j].idnodo]
-        }
-        lambdaMax += suma / pesosCalculados[nodos[i].idnodo]
-      }
-      lambdaMax /= n
-
-      // Índice de consistencia
-      const CI = (lambdaMax - n) / (n - 1)
-
-      // Índice aleatorio según Saaty
-      const RI = [0, 0, 0.58, 0.9, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49][n] || 1.49
-
-      // Ratio de consistencia
-      const CR = CI / RI
-
-      setConsistencyRatio(CR)
+      setWeights(newWeights);
+      setConsistencyRatio(result.CR);
+      setIsCalculated(true);
+      setErrors([]);
+    } catch (err) {
+      console.error("Error al calcular AHP:", err);
+      setErrors(["No se pudo calcular los pesos desde el servidor."]);
     }
-
-    if (n > 2) {
-      calcularConsistencia()
-    }
-
-    setIsCalculated(true)
-  }
+  };
 
   const resetearMatriz = () => {
     const resetMatrix: Record<string, number> = {}
