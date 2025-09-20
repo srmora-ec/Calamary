@@ -1,6 +1,14 @@
 "use client"
-import React, { useState, useEffect } from "react"
-import { Nodo } from "@/types/modelo"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import type { Nodo } from "@/types/modelo"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { AlertCircle, CheckCircle2, RotateCcw } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface AsignarPesosProps {
   nodos: Nodo[]
@@ -9,119 +17,190 @@ interface AsignarPesosProps {
 
 const AsignarPesos: React.FC<AsignarPesosProps> = ({ nodos, onSave }) => {
   const [weights, setWeights] = useState<Record<number, number>>({})
-  const [selectedView, setSelectedView] = useState<"lower" | "average" | "upper">("average")
-  const [error, setError] = useState<string | null>(null)
+  const [errors, setErrors] = useState<Record<number, string>>({})
 
-  // Obtener todos los nodos padres (idpadre === null)
-  const padres = nodos.filter(n => n.idpadre === null)
-
-  // Hacer un mapa padreId -> hijos
-  const hijosPorPadre: Record<number, Nodo[]> = {}
-  padres.forEach(p => {
-    hijosPorPadre[p.idnodo] = nodos.filter(n => n.idpadre === p.idnodo)
-  })
-
+  // Inicializar pesos uniformemente distribuidos
   useEffect(() => {
     const initialWeights: Record<number, number> = {}
-    Object.values(hijosPorPadre).forEach(hijos => {
-      const defaultWeight = hijos.length > 0 ? 1 / hijos.length : 0
-      hijos.forEach(h => {
-        initialWeights[h.idnodo] = h.peso ?? defaultWeight
-      })
+    const equalWeight = nodos.length > 0 ? 1 / nodos.length : 0
+
+    nodos.forEach((nodo) => {
+      initialWeights[nodo.idnodo] = nodo.peso || Number.parseFloat(equalWeight.toFixed(6))
     })
+
     setWeights(initialWeights)
   }, [nodos])
 
+  // Calcular suma total de pesos
+  const totalWeight = Object.values(weights).reduce((sum, weight) => sum + weight, 0)
+  const isValidSum = Math.abs(totalWeight - 1) < 1e-6 + Number.EPSILON // Tolerancia para decimales
+
+  // Manejar cambio de peso
   const handleWeightChange = (nodeId: number, value: string) => {
-    const numValue = parseFloat(value) || 0
-    setWeights(prev => ({ ...prev, [nodeId]: numValue }))
-  }
+    const numValue = Number.parseFloat(value)
 
-  const validateWeights = () => {
-    for (const hijos of Object.values(hijosPorPadre)) {
-      const sum = hijos.reduce((acc, h) => acc + (weights[h.idnodo] ?? 0), 0)
-      if (Math.abs(sum - 1) > 0.000001) {
-        setError("La suma de los pesos de cada conjunto de hijos debe ser 1")
-        return false
-      }
+    // Validar entrada
+    if (value === "" || isNaN(numValue)) {
+      setWeights((prev) => ({ ...prev, [nodeId]: 0 }))
+      setErrors((prev) => ({ ...prev, [nodeId]: "Valor inválido" }))
+      return
     }
-    setError(null)
-    return true
+
+    if (numValue < 0) {
+      setErrors((prev) => ({ ...prev, [nodeId]: "El peso no puede ser negativo" }))
+      return
+    }
+
+    if (numValue > 1) {
+      setErrors((prev) => ({ ...prev, [nodeId]: "El peso no puede ser mayor a 1" }))
+      return
+    }
+
+    // Verificar decimales (máximo 6)
+    const decimalPlaces = (value.split(".")[1] || "").length
+    if (decimalPlaces > 6) {
+      setErrors((prev) => ({ ...prev, [nodeId]: "Máximo 6 decimales permitidos" }))
+      return
+    }
+
+    setWeights((prev) => ({ ...prev, [nodeId]: numValue }))
+    setErrors((prev) => {
+      const newErrors = { ...prev }
+      delete newErrors[nodeId]
+      return newErrors
+    })
   }
 
+  // Redistribuir pesos uniformemente
+  const redistributeWeights = () => {
+    const equalWeight = Number.parseFloat((1 / nodos.length).toFixed(6))
+    const newWeights: Record<number, number> = {}
+
+    nodos.forEach((nodo) => {
+      newWeights[nodo.idnodo] = equalWeight
+    })
+
+    setWeights(newWeights)
+    setErrors({})
+  }
+
+  // Normalizar pesos para que sumen 1
+  const normalizeWeights = () => {
+    if (totalWeight === 0) return
+
+    const normalizedWeights: Record<number, number> = {}
+    Object.entries(weights).forEach(([nodeId, weight]) => {
+      normalizedWeights[Number.parseInt(nodeId)] = Number.parseFloat((weight / totalWeight).toFixed(6))
+    })
+
+    setWeights(normalizedWeights)
+    setErrors({})
+  }
+
+  // Guardar pesos
   const handleSave = () => {
-    if (validateWeights()) {
+    if (isValidSum && Object.keys(errors).length === 0) {
       onSave(weights)
     }
   }
 
-  return (
-    <div className="bg-white rounded-lg shadow-lg p-6 w-full">
-      {/* Radios */}
-      <div className="flex space-x-6 mb-4">
-        {["lower", "average", "upper"].map(val => (
-          <label key={val} className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="radio"
-              value={val}
-              checked={selectedView === val}
-              onChange={e => setSelectedView(e.target.value as any)}
-              className="text-blue-600"
-            />
-            <span className="capitalize">{val}</span>
-          </label>
-        ))}
-      </div>
+  // Obtener color para la barra de progreso
+  const getProgressColor = (weight: number) => {
+    const percentage = weight * 100
+    if (percentage < 10) return "bg-red-500"
+    if (percentage < 25) return "bg-orange-500"
+    if (percentage < 50) return "bg-yellow-500"
+    return "bg-green-500"
+  }
 
-      {/* Contenido */}
-      {padres.map(padre => {
-        const hijos = hijosPorPadre[padre.idnodo]
-        return (
-          <div key={padre.idnodo} className="mb-6">
-            <div className="text-center font-semibold mb-2">{padre.titulo}</div>
-            <div className="flex gap-6">
-              <div className="w-2/5 border rounded-lg p-4 flex flex-col items-center">
-                {hijos.map(hijo => (
-                  <div key={hijo.idnodo} className="flex items-center mb-2">
-                    <div className="mr-2 text-sm">{weights[hijo.idnodo]?.toFixed(6)}</div>
-                    <div className="border px-3 py-1">{hijo.titulo}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="w-3/5 border rounded-lg p-4 space-y-4">
-                {hijos.map(hijo => (
-                  <div key={hijo.idnodo} className="flex items-center gap-4">
-                    <input
-                      type="number"
-                      value={weights[hijo.idnodo]}
-                      onChange={e => handleWeightChange(hijo.idnodo, e.target.value)}
-                      step="0.000001"
-                      className="w-28 px-2 py-1 border rounded"
-                    />
-                    <div className="flex-1 h-8 border rounded overflow-hidden">
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            
+            Suma total:{" "}
+            <span className={`font-mono ${isValidSum ? "text-green-600" : "text-red-600"}`}>
+              {totalWeight.toFixed(6)}
+              
+            </span>
+            
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={redistributeWeights}
+              className="flex items-center gap-1 bg-transparent"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Redistribuir
+            </Button>
+            <Button variant="outline" size="sm" onClick={normalizeWeights} disabled={totalWeight === 0}>
+              Normalizar
+            </Button>
+          </div>
+        </div>
+
+        {!isValidSum && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>La suma de los pesos debe ser exactamente 1.000000</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-4">
+          {nodos.map((nodo) => {
+            const weight = weights[nodo.idnodo] || 0
+            const percentage = weight * 100
+            const hasError = errors[nodo.idnodo]
+
+            return (
+              <div key={nodo.idnodo} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={`peso-${nodo.idnodo}`} className="font-medium">
+                    {nodo.titulo}
+                  </Label>
+                  <span className="text-sm text-muted-foreground font-mono">{percentage.toFixed(2)}%</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Input
+                    id={`peso-${nodo.idnodo}`}
+                    type="number"
+                    step="0.000001"
+                    min="0"
+                    max="1"
+                    value={weight.toString()}
+                    onChange={(e) => handleWeightChange(nodo.idnodo, e.target.value)}
+                    className={`w-32 font-mono ${hasError ? "border-red-500" : ""}`}
+                    placeholder="0.000000"
+                  />
+
+                  <div className="flex-1">
+                    <div className="w-full bg-muted rounded-full h-3">
                       <div
-                        className="h-full bg-blue-500 transition-all duration-300"
-                        style={{ width: `${weights[hijo.idnodo] * 100}%` }}
+                        className={`h-3 rounded-full transition-all duration-300 ${getProgressColor(weight)}`}
+                        style={{ width: `${percentage}%` }}
                       />
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {hasError && <p className="text-sm text-red-500">{hasError}</p>}
               </div>
-            </div>
-          </div>
-        )
-      })}
+            )
+          })}
+        </div>
 
-      {error && <div className="text-red-500 mb-2">{error}</div>}
-
-      <div className="flex justify-end gap-4 mt-4">
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-          Guardar
-        </button>
-      </div>
+        <div className="flex justify-end pt-4">
+          <Button
+            onClick={handleSave}
+            disabled={!isValidSum || Object.keys(errors).length > 0}
+            className="min-w-[120px]"
+          >
+            Guardar Pesos
+          </Button>
+        </div>
     </div>
   )
 }

@@ -89,6 +89,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
   const handleActualizar = () => {//Para devolver elmodelo actualizado
     if (onActualizarModelo) {
+          guardarpos()
       onActualizarModelo(modelo);
     }
   };
@@ -143,11 +144,13 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
   // }
 
+  const guardarpos = () => {
+    modelo.setPosicionesNodos(convertirNodos(nodes))//Guardamos el previo
+  }
 
-  
   // Crear hijo
   const crearHijo = (idPadre: number) => {
-    modelo.setPosicionesNodos(convertirNodos(nodes))//Guardamos el previo
+    guardarpos();
     modelo.crearHijo(idPadre)//Creamos el hijo
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
@@ -163,13 +166,14 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
       closeContextMenu()
       return
     }
-    modelo.setPosicionesNodos(convertirNodos(nodes))
+    guardarpos()
     modelo.eliminarNodo(idNodo)
     setNodes(modelo.getNodosReactFlow())
     setEdges(modelo.getEdgesReactFlow())
     closeContextMenu()
   }
   const configurarNodo = (idnodo: number) => {
+    guardarpos()
     const nodo = modelo.getNodoById(idnodo)
     if (nodo && onActualizarNodo) {
       onActualizarNodo(nodo)
@@ -179,6 +183,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     closeContextMenu()
   }
   const configurarPesos = (idnodo: number) => {
+    guardarpos()
     const nodos = modelo.getHijos(idnodo)
     setNodosSeleccionados(nodos)
     console.log(nodos)
@@ -219,6 +224,21 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
       pesofinal: n.data?.pesofinal,
       acortado: n.data?.acortado,
     }))
+  }
+
+
+  const handleNodosUpdated = (nodosActualizados: Nodo[]) => {
+    // actualiza los nodos en el modelo
+    nodosActualizados.forEach((nodo) => {
+      modelo.actualizarNodo(nodo.idnodo, nodo)
+    })
+
+    // refresca los nodos en ReactFlow
+    setNodes(modelo.getNodosReactFlow())
+    setEdges(modelo.getEdgesReactFlow())
+
+    // cerrar el modal
+    setIsOpenModal(false)
   }
 
 
@@ -270,7 +290,13 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           <Background color="#ccc" variant={BackgroundVariant.Cross} />
         </ReactFlow>
         {nodosSeleccionados && (
-          <ConfigureModalPeso isOpen={isOpenModal} onClose={() => setIsOpenModal(false)} nodos={nodosSeleccionados} onNodosUpdated={() => console.log("hola")}></ConfigureModalPeso>
+          <ConfigureModalPeso
+            isOpen={isOpenModal}
+            onClose={() => setIsOpenModal(false)}
+            nodos={nodosSeleccionados}
+            onNodosUpdated={handleNodosUpdated}
+          >
+          </ConfigureModalPeso>
         )}
 
         {contextMenu.visible && (
