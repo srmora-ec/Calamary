@@ -1,7 +1,6 @@
 // pesosComPares.ts
 export async function calculateAHP(matrix: number[][]) {
   try {
-    alert("1224")
     const response = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/ahp`, {
       method: "POST",
       headers: {
