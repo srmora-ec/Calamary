@@ -33,25 +33,25 @@ const AsignarPesos: React.FC<AsignarPesosProps> = ({ nodos, onSave }) => {
 
   // Calcular suma total de pesos
   const totalWeight = Object.values(weights).reduce((sum, weight) => sum + weight, 0)
-  const isValidSum = Math.abs(totalWeight - 1) < 1e-6 + Number.EPSILON // Tolerancia para decimales
+  const isValidSum = Math.abs(totalWeight - 1) < 1e-6 + Number.EPSILON // Usamos 6 decimales
 
   // Manejar cambio de peso
   const handleWeightChange = (nodeId: number, value: string) => {
     const numValue = Number.parseFloat(value)
 
-    // Validar entrada
-    if (value === "" || isNaN(numValue)) {
+    // Verificamos que estamos colocando algo correcto
+    if (value === "" || isNaN(numValue)) {//no puede esta rvacio
       setWeights((prev) => ({ ...prev, [nodeId]: 0 }))
       setErrors((prev) => ({ ...prev, [nodeId]: "Valor inválido" }))
       return
     }
 
-    if (numValue < 0) {
+    if (numValue < 0) {//No podemos meter negativos
       setErrors((prev) => ({ ...prev, [nodeId]: "El peso no puede ser negativo" }))
       return
     }
 
-    if (numValue > 1) {
+    if (numValue > 1) { //Ni un número mayor a 1
       setErrors((prev) => ({ ...prev, [nodeId]: "El peso no puede ser mayor a 1" }))
       return
     }
@@ -63,8 +63,8 @@ const AsignarPesos: React.FC<AsignarPesosProps> = ({ nodos, onSave }) => {
       return
     }
 
-    setWeights((prev) => ({ ...prev, [nodeId]: numValue }))
-    setErrors((prev) => {
+    setWeights((prev) => ({ ...prev, [nodeId]: numValue }))//guardamos los pesos
+    setErrors((prev) => {//
       const newErrors = { ...prev }
       delete newErrors[nodeId]
       return newErrors
@@ -73,39 +73,39 @@ const AsignarPesos: React.FC<AsignarPesosProps> = ({ nodos, onSave }) => {
 
   // Redistribuir pesos uniformemente
   const redistributeWeights = () => {
-    const equalWeight = Number.parseFloat((1 / nodos.length).toFixed(6))
-    const newWeights: Record<number, number> = {}
+    const equalWeight = Number.parseFloat((1 / nodos.length).toFixed(6))//1/para el total de nodos... 
+    const newWeights: Record<number, number> = {}//Estructura para los pesos
 
-    nodos.forEach((nodo) => {
-      newWeights[nodo.idnodo] = equalWeight
+    nodos.forEach((nodo) => {//Recoremos los nodos
+      newWeights[nodo.idnodo] = equalWeight // a cada nodo le asignamos un peso
     })
 
-    setWeights(newWeights)
+    setWeights(newWeights)//guardamos los pesos
     setErrors({})
   }
 
   // Normalizar pesos para que sumen 1
   const normalizeWeights = () => {
-    if (totalWeight === 0) return
+    if (totalWeight === 0) return//Prevenimos para no dividir entre cero
 
-    const normalizedWeights: Record<number, number> = {}
-    Object.entries(weights).forEach(([nodeId, weight]) => {
-      normalizedWeights[Number.parseInt(nodeId)] = Number.parseFloat((weight / totalWeight).toFixed(6))
+    const normalizedWeights: Record<number, number> = {}//Estructura para los nodos
+    Object.entries(weights).forEach(([nodeId, weight]) => {//Recorremos los pesos
+      normalizedWeights[Number.parseInt(nodeId)] = Number.parseFloat((weight / totalWeight).toFixed(6))//Peso actual/para la suma de los pesos
     })
 
-    setWeights(normalizedWeights)
+    setWeights(normalizedWeights)//guardamos nuevos pesos
     setErrors({})
   }
 
   // Guardar pesos
   const handleSave = () => {
     if (isValidSum && Object.keys(errors).length === 0) {
-      onSave(weights)
+      onSave(weights)//Enviamos los nuevos pesos
     }
   }
 
   // Obtener color para la barra de progreso
-  const getProgressColor = (weight: number) => {
+  const getProgressColor = (weight: number) => {//Logica de color para distinguir los mas pesados
     const percentage = weight * 100
     if (percentage < 10) return "bg-red-500"
     if (percentage < 25) return "bg-orange-500"

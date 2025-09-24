@@ -89,7 +89,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
   const handleActualizar = () => {//Para devolver elmodelo actualizado
     if (onActualizarModelo) {
-          guardarpos()
+      guardarpos()
       onActualizarModelo(modelo);
     }
   };
@@ -291,6 +291,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
         </ReactFlow>
         {nodosSeleccionados && (
           <ConfigureModalPeso
+            idmodelo={Number(modelo.getId())}
             isOpen={isOpenModal}
             onClose={() => setIsOpenModal(false)}
             nodos={nodosSeleccionados}

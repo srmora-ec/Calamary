@@ -11,11 +11,12 @@ import ComparacionPorPasos from "./comparacionporpasos"
 interface ConfigureModalPesoProps {
     isOpen: boolean//abir
     onClose: () => void//cerrar
+    idmodelo: number
     nodos: Nodo[]
     onNodosUpdated: (nodosActualizado: Nodo[]) => void
 }
 
-export default function ConfigureModalPeso({ isOpen, onClose, nodos, onNodosUpdated }: ConfigureModalPesoProps) {
+export default function ConfigureModalPeso({ isOpen, onClose, idmodelo, nodos, onNodosUpdated }: ConfigureModalPesoProps) {
     // const [formData, setFormData] = useState<Nodo>(nodo)//formdata
     const [loading, setLoading] = useState(false)//loading
     const [error, setError] = useState("")//Errores
@@ -50,17 +51,18 @@ export default function ConfigureModalPeso({ isOpen, onClose, nodos, onNodosUpda
                 </Tab>
                 <Tab label="Método Saaty (Matriz)">
 
-                            <ComparacionPorPares
-                                nodos={nodos}
-                                onSave={handleGuardarPesos}
-                            />
+                    <ComparacionPorPares
+                        idmodelo={idmodelo}
+                        nodos={nodos}
+                        onSave={handleGuardarPesos}
+                    />
                 </Tab>
-                  <Tab label="Método Saaty (Por pasos)">
-                            <ComparacionPorPasos
-                                nodos={nodos}
-                                onSave={handleGuardarPesos}
-                            />
-                        </Tab>
+                <Tab label="Método Saaty (Por pasos)">
+                    <ComparacionPorPasos
+                        nodos={nodos}
+                        onSave={handleGuardarPesos}
+                    />
+                </Tab>
             </Tabs>
         </Modal >
     )

@@ -39,6 +39,10 @@ export class Modelo {
     return { ...this.data }
   }
 
+  getId(): string {
+  return this.data.id
+}
+  
   // Setter para actualizar los datos completos
   setData(newData: ModeloData): void {
     this.data = { ...newData }

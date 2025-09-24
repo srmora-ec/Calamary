@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle2, RotateCcw, Calculator } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { calculateAHP } from "./metodos/pesosComPares"
+import { actualizarMatriz, cargarMatriz, guardarMatriz } from "./funciones/GuardarMatrizParams"
 
 interface ComparacionPorParesProps {
-  nodos: Nodo[]
-  onSave: (weights: Record<number, number>) => void
+  idmodelo: number//El modelo para guardar
+  nodos: Nodo[]//Los nodos
+  onSave: (weights: Record<number, number>) => void//Metodo para enviar los resultados
 }
 
-// Escala de Saaty
+// Escala de Saaty: valores numéricos con su descripción
 const SAATY_SCALE = [
   { value: 9, label: "9 - Extremadamente más importante" },
   { value: 7, label: "7 - Muy fuertemente más importante" },
@@ -28,27 +30,29 @@ const SAATY_SCALE = [
   { value: 1 / 9, label: "1/9 - Extremadamente menos importante" },
 ]
 
+// Función que convierte las fracciones a decimales 
 const parseFraction = (input: string): number => {
   const trimmed = input.trim()
 
-  // Check if it's a fraction like "1/5"
+  // Si el valor tiene "/", tratamos de interpretarlo como fracción
   if (trimmed.includes("/")) {
-    const parts = trimmed.split("/")
-    if (parts.length === 2) {
-      const numerator = Number.parseFloat(parts[0])
-      const denominator = Number.parseFloat(parts[1])
-      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-        return numerator / denominator
+    const parts = trimmed.split("/")//Separamos el texto por / entonces parts contiene numerador y divisor
+    if (parts.length === 2) {//Esto debe valer 2 (num/div)
+      const numerator = Number.parseFloat(parts[0])//Convertimos elnúmerador en flotante
+      const denominator = Number.parseFloat(parts[1])//Convertimos el denominador en flotante
+      if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {//verificamos que todo valga(no dividir poe cero)
+        return numerator / denominator//Realizamos la operación
       }
     }
   }
 
-  // Otherwise try to parse as regular number
+  // Si no es fracción, lo devolvemos como número
   return Number.parseFloat(trimmed)
 }
 
+// Función para mostrar los valores en formato de fraccion
 const formatValue = (value: number): string => {
-  // Check for common fractions
+  // Si el valor es cercano a una fracción conocida, mostramos esa fracción
   if (Math.abs(value - 1 / 3) < 0.001) return "1/3"
   if (Math.abs(value - 1 / 5) < 0.001) return "1/5"
   if (Math.abs(value - 1 / 7) < 0.001) return "1/7"
@@ -58,41 +62,43 @@ const formatValue = (value: number): string => {
   if (Math.abs(value - 2 / 7) < 0.001) return "2/7"
   if (Math.abs(value - 2 / 9) < 0.001) return "2/9"
 
-  // For whole numbers or close to whole numbers
+  // Si es un número entero o cercano, lo mostramos entero
   if (Math.abs(value - Math.round(value)) < 0.001) {
     return Math.round(value).toString()
   }
 
-  // Otherwise return decimal with 2 places
+  // Si no, lo mostramos con 2 decimales
   return value.toFixed(2)
 }
 
+// Validación de input: solo permite números, punto y "/"
 const validateInput = (value: string): string => {
-  // Only allow numbers, decimal point, and forward slash
   return value.replace(/[^0-9./]/g, "")
 }
 
-const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave }) => {
-  const [matrix, setMatrix] = useState<Record<string, number>>({})
-  const [displayValues, setDisplayValues] = useState<Record<string, string>>({})
-  const [weights, setWeights] = useState<Record<number, number>>({})
-  const [consistencyRatio, setConsistencyRatio] = useState<number>(0)
-  const [errors, setErrors] = useState<string[]>([])
-  const [isCalculated, setIsCalculated] = useState(false)
+// Componente principal
+const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, idmodelo, onSave }) => {
+  // Estados del componente
+  const [loadMessage, setLoadMessage] = useState<string | null>(null) // mensaje de advertencia al cargar para cuando cargamos pesos ya existentes
+  const [matrix, setMatrix] = useState<Record<string, number>>({}) // matriz de comparaciones
+  const [displayValues, setDisplayValues] = useState<Record<string, string>>({}) // valores visibles en inputs (Se llenaran de la carga de supabase)
+  const [weights, setWeights] = useState<Record<number, number>>({}) // pesos calculados
+  const [consistencyRatio, setConsistencyRatio] = useState<number>(0) // ratio de consistencia
+  const [errors, setErrors] = useState<string[]>([]) // lista de errores
+  const [isCalculated, setIsCalculated] = useState(false) // flag si se calcularon los pesos
 
-  // Inicializar matriz con valores por defecto (1 para comparaciones iguales)
+  // Al iniciar, construir una matriz identidad (1s en la diagonal)
   useEffect(() => {
-    const initialMatrix: Record<string, number> = {}
+    const initialMatrix: Record<string, number> = {}// Creamos un objeto vacío donde vamos a guardar los valores numéricos de la matriz
+    // La clave será "idNodo1-idNodo2" y el valor será el peso numérico de esa comparación
+    // Creamos otro objeto vacío donde guardaremos los valores como texto para mostrarlos en los inputs
+    // La clave es la misma, pero el valor será una cadena (ejemplo: "1", "1/3", etc.)
     const initialDisplayValues: Record<string, string> = {}
-
-    for (let i = 0; i < nodos.length; i++) {
-      for (let j = 0; j < nodos.length; j++) {
-        const key = `${nodos[i].idnodo}-${nodos[j].idnodo}`
-        if (i === j) {
-          initialMatrix[key] = 1 // Diagonal principal siempre es 1
-          initialDisplayValues[key] = "1"
-        } else if (i < j) {
-          initialMatrix[key] = 1 // Valor por defecto para comparaciones
+    for (let i = 0; i < nodos.length; i++) {//Hacemos doble bucle para crear lamatriz (recorremos los nodos)
+      for (let j = 0; j < nodos.length; j++) {//dos veces
+        const key = `${nodos[i].idnodo}-${nodos[j].idnodo}`//Creamos la clave con los nodos i j
+        if (i <= j) {//Toda la parte de la matriz superior es uno
+          initialMatrix[key] = 1
           initialDisplayValues[key] = "1"
         }
       }
@@ -102,67 +108,96 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave
     setDisplayValues(initialDisplayValues)
   }, [nodos])
 
-  // Obtener valor de la matriz
-  const getMatrixValue = (nodeId1: number, nodeId2: number): number => {
-    if (nodeId1 === nodeId2) return 1
+  // cargar una matriz guardada desde Supabase
+  useEffect(() => {
+    const fetchMatriz = async () => {
+      if (nodos.length === 0) return//Verificamos que hay nodos
+      const idpadre = nodos[0]?.idpadre//Sacamos el un idpadre para hacer la consulta
+      if (!idpadre) return//Si no hay idpadre volvemos
 
-    const key1 = `${nodeId1}-${nodeId2}`
-    const key2 = `${nodeId2}-${nodeId1}`
+      try {
+        const savedMatrix = await cargarMatriz(idmodelo, idpadre)//carganos la matriz
 
-    if (matrix[key1] !== undefined) {
-      return matrix[key1]
-    } else if (matrix[key2] !== undefined) {
-      return 1 / matrix[key2]
+        if (savedMatrix) {//Si hay matriz
+          // Verificamos que la matriz guardada y la actual sean igual
+          const nCurrent = nodos.length//sacamos la cantidad de los nodos de la actual
+          const nSaved = Math.round(Math.sqrt(Object.keys(savedMatrix.matrix || {}).length * 2 + 0.25) - 0.5)
+//Arriba. Caclulamos la cantidad actual de la rescatada de supabase.
+//Sacamos la matriz savedMatrix.matrix de eso le sacamos eltamaño .length
+//a ese valor lo multiplicamos por dos y le sumanos 0.25
+//a eso le sacamos la raiz cuadrada
+//y a eso le restamos0.5 y asi sacamos la cantidad de nodos 
+          if (nSaved !== nCurrent) {//si no es compatible avisamos que no se puede
+            setLoadMessage(
+              `⚠️ La matriz guardada el ${new Date(savedMatrix.created_at).toLocaleDateString()} ya no es compatible con la estructura actual del modelo.`
+            )
+            return
+          }
+
+          // Cargar la matriz y pesos previos
+          setMatrix(savedMatrix.matrix)
+          setDisplayValues(
+            Object.fromEntries(
+              Object.entries(savedMatrix.matrix).map(([k, v]) => [k, formatValue(v as number)])
+            )
+          )//Mapeamos el savedMatrix para registrar los valores
+          setWeights(savedMatrix.pesos || {}) //registramos los pesos con SavedPesos
+          setConsistencyRatio(0)//Guardamos la consistencia en 0
+          setIsCalculated(false) //Ponemos queno ha calculado
+          setLoadMessage(null)//quitamos el aviso (SI hay)
+        }
+      } catch (err) {
+        console.error(err)
+      }
     }
 
-    return 1
+    fetchMatriz()
+  }, [idmodelo, nodos])
+
+  // Obtiene el valor de la matriz entre dos nodos
+  const getMatrixValue = (nodeId1: number, nodeId2: number): number => {//recibe las coordenadas
+    if (nodeId1 === nodeId2) return 1//si es igual siempre es 1
+    const key1 = `${nodeId1}-${nodeId2}`//creamos la clave
+    const key2 = `${nodeId2}-${nodeId1}`//cramos la clave del inverso
+
+    if (matrix[key1] !== undefined) return matrix[key1]//retornamos su valor normal
+    else if (matrix[key2] !== undefined) return 1 / matrix[key2]//retoprnamos su inverso
+
+    return 1//si no retornamos 1
   }
 
+  // Actualiza el valor de la matriz cuando el usuario edita un input
   const updateMatrixValue = (nodeId1: number, nodeId2: number, value: string) => {
     const cleanValue = validateInput(value)
     const numValue = parseFraction(cleanValue)
 
+    // Validaciones: debe ser positivo y estar en la escala de Saaty
     if (isNaN(numValue) || numValue <= 0) {
-      setErrors((prev) => [...prev, "Los valores deben ser números positivos o fracciones válidas (ej: 1/5)"])
+      setErrors((prev) => [...prev, "Valores inválidos (usa números positivos o fracciones tipo 1/5)"])
       return
     }
-
-    // Validar que esté en la escala de Saaty (1/9 a 9)
     if (numValue < 1 / 9 || numValue > 9) {
       setErrors((prev) => [...prev, "Los valores deben estar entre 1/9 y 9"])
       return
     }
 
-    const key = `${nodeId1}-${nodeId2}`
-    setMatrix((prev) => ({
-      ...prev,
-      [key]: numValue,
-    }))
-
-    setDisplayValues((prev) => ({
-      ...prev,
-      [key]: cleanValue,
-    }))
-
+    const key = `${nodeId1}-${nodeId2}`//creamos clave
+    setMatrix((prev) => ({ ...prev, [key]: numValue }))
+    setDisplayValues((prev) => ({ ...prev, [key]: cleanValue }))
     setErrors([])
     setIsCalculated(false)
   }
 
-  // Verificar coherencia de inversos
+  // Verifica que los valores sean consistentes (valor * inverso ≈ 1)
   const verificarCoherencia = (): boolean => {
     const erroresCoherencia: string[] = []
 
-    for (let i = 0; i < nodos.length; i++) {
+    for (let i = 0; i < nodos.length; i++) {//Solo recorremos la matriz normal y comparamos por la inversa
       for (let j = i + 1; j < nodos.length; j++) {
-        const nodeId1 = nodos[i].idnodo
-        const nodeId2 = nodos[j].idnodo
+        const valor = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
+        const inverso = getMatrixValue(nodos[j].idnodo, nodos[i].idnodo)
 
-        const valor = getMatrixValue(nodeId1, nodeId2)
-        const inverso = getMatrixValue(nodeId2, nodeId1)
-
-        // Verificar que sean inversos (con tolerancia para decimales)
-        const producto = valor * inverso
-        if (Math.abs(producto - 1) > 0.001) {
+        if (Math.abs(valor * inverso - 1) > 0.001) {
           erroresCoherencia.push(`Incoherencia entre ${nodos[i].titulo} y ${nodos[j].titulo}`)
         }
       }
@@ -172,43 +207,39 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave
     return erroresCoherencia.length === 0
   }
 
-  // Calcular pesos usando el método del eigenvector principal
-
+  // Calcula los pesos usando AHP (via API FastAPI)
   const calcularPesos = async () => {
-    if (!verificarCoherencia()) {
-      return;
-    }
+    if (!verificarCoherencia()) return
 
-    const n = nodos.length;
-    const matrizCompleta: number[][] = [];
+    const n = nodos.length
+    const matrizCompleta: number[][] = []
 
-    // Construir matriz completa
+    // Construir matriz cuadrada completa
     for (let i = 0; i < n; i++) {
-      matrizCompleta[i] = [];
+      matrizCompleta[i] = []
       for (let j = 0; j < n; j++) {
-        matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo);
+        matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
       }
     }
 
     try {
-      const result = await calculateAHP(matrizCompleta); // Llama al FastAPI
-
-      // Asignar pesos en orden de llegada
-      const newWeights: Record<number, number> = {};
+      const result = await calculateAHP(matrizCompleta) // API calcula pesos y CR
+      const newWeights: Record<number, number> = {}
       nodos.forEach((nodo, index) => {
-        newWeights[nodo.idnodo] = result.weights[index];
-      });
+        newWeights[nodo.idnodo] = result.weights[index]
+      })
 
-      setWeights(newWeights);
-      setConsistencyRatio(result.CR);
-      setIsCalculated(true);
-      setErrors([]);
+      setWeights(newWeights)
+      setConsistencyRatio(result.CR)
+      setIsCalculated(true)
+      setErrors([])
     } catch (err) {
-      console.error("Error al calcular AHP:", err);
-      setErrors(["No se pudo calcular los pesos desde el servidor."]);
+      console.error("Error al calcular AHP:", err)
+      setErrors(["No se pudo calcular los pesos desde el servidor."])
     }
-  };
+  }
 
+  // Resetea la matriz a identidad
   const resetearMatriz = () => {
     const resetMatrix: Record<string, number> = {}
     const resetDisplayValues: Record<string, string> = {}
@@ -216,13 +247,8 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave
     for (let i = 0; i < nodos.length; i++) {
       for (let j = 0; j < nodos.length; j++) {
         const key = `${nodos[i].idnodo}-${nodos[j].idnodo}`
-        if (i === j) {
-          resetMatrix[key] = 1
-          resetDisplayValues[key] = "1"
-        } else if (i < j) {
-          resetMatrix[key] = 1
-          resetDisplayValues[key] = "1"
-        }
+        resetMatrix[key] = 1
+        resetDisplayValues[key] = "1"
       }
     }
 
@@ -234,13 +260,35 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave
     setIsCalculated(false)
   }
 
-  // Guardar pesos
-  const handleSave = () => {
-    if (isCalculated && errors.length === 0) {
+  // Guardar matriz y pesos en Supabase
+  const handleSave = async () => {
+    if (!isCalculated || errors.length > 0) return
+    const idpadre = nodos[0]?.idpadre
+    if (!idpadre) {
+      setErrors(["No se encontró el idpadre de los nodos."])
+      return
+    }
+
+    try {
+      const existingMatrix = await cargarMatriz(idmodelo, idpadre)
+      let data
+      if (existingMatrix) {
+        // Actualizar matriz existente
+        data = await actualizarMatriz({ idmodelo, nodopadre: idpadre, matrix, pesos: weights })
+      } else {
+        // Crear nueva
+        data = await guardarMatriz({ idmodelo, nodopadre: idpadre, matrix, pesos: weights })
+      }
+
       onSave(weights)
+      alert(`Matriz ${existingMatrix ? "actualizada" : "guardada"} correctamente.`)
+    } catch (err) {
+      console.error(err)
+      setErrors(["Error al guardar la matriz."])
     }
   }
 
+  // Condiciones de consistencia
   const isConsistent = consistencyRatio < 0.1
   const consistencyPercentage = (consistencyRatio * 100).toFixed(1)
 
@@ -258,6 +306,12 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, onSave
             </div>
           ))}
         </div>
+        {loadMessage && (
+          <div className="p-3 mb-4 border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 rounded">
+            {loadMessage}
+          </div>
+        )}
+
       </CardContent>
       <br />
       {/* Matriz de comparación */}
