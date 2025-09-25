@@ -2,6 +2,8 @@
 
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import Spinner from "./pesos/Spinner"
 
 interface Modelo {
   id: string
@@ -34,9 +36,11 @@ const getLineaText = (linea: number) => {
 }
 
 export default function ModelCard({ modelo }: ModelCardProps) {
+  const [loading,SetLoading] = useState(false);
     const router = useRouter()
   return (
     <div className="card">
+      <Spinner visible={loading}/>
       <div className="card-header">
         <div className="flex justify-between items-start">
           <div className="flex-1">
@@ -62,6 +66,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
           <span className="text-secondary">{new Date(modelo.updated_at||modelo.created_at).toLocaleDateString()}</span>
           <button
             onClick={() => {
+SetLoading(true);
                router.push("/tablero/"+modelo.id)
             }}
             className="focus:outline-none cursor-pointer"

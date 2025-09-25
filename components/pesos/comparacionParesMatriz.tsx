@@ -10,6 +10,7 @@ import { AlertCircle, CheckCircle2, RotateCcw, Calculator } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { calculateAHP } from "./metodos/pesosComPares"
 import { actualizarMatriz, cargarMatriz, guardarMatriz } from "./funciones/GuardarMatrizParams"
+import Spinner from "./Spinner"
 
 interface ComparacionPorParesProps {
   idmodelo: number//El modelo para guardar
@@ -86,7 +87,7 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, idmode
   const [consistencyRatio, setConsistencyRatio] = useState<number>(0) // ratio de consistencia
   const [errors, setErrors] = useState<string[]>([]) // lista de errores
   const [isCalculated, setIsCalculated] = useState(false) // flag si se calcularon los pesos
-
+const [loading, setLoading] = useState(false)
   // Al iniciar, construir una matriz identidad (1s en la diagonal)
   useEffect(() => {
     const initialMatrix: Record<string, number> = {}// Creamos un objeto vacío donde vamos a guardar los valores numéricos de la matriz
@@ -209,6 +210,7 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, idmode
 
   // Calcula los pesos usando AHP (via API FastAPI)
   const calcularPesos = async () => {
+    setLoading(true);
     if (!verificarCoherencia()) return
 
     const n = nodos.length
@@ -233,9 +235,12 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, idmode
       setConsistencyRatio(result.CR)
       setIsCalculated(true)
       setErrors([])
+      
     } catch (err) {
       console.error("Error al calcular AHP:", err)
       setErrors(["No se pudo calcular los pesos desde el servidor."])
+    } finally{
+      setLoading(false);
     }
   }
 
@@ -294,6 +299,7 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, idmode
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
+      <Spinner visible={loading}/>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Escala de Saaty</CardTitle>
       </CardHeader>
