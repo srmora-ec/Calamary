@@ -9,7 +9,7 @@ export default function Spinner({ visible }: SpinnerProps) {
   if (!visible) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-800/70 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-800/70 backdrop-blur-sm">
       <div className="flex flex-col items-center justify-center relative">
         <Image
           src="/logo.png"

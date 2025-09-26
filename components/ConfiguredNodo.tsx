@@ -83,6 +83,17 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                     />
                 </div>
 
+                <div className="form-group">
+                    <label className="form-label">Descripción</label>
+                    <textarea
+                        className="form-input"
+                        value={formData.descripcion}
+                        onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                        maxLength={200}
+                        rows={4} // opcional, para definir alto inicial
+                    />
+                </div>
+
                 {formData.criterioFinal && (
 
                     <>

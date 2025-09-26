@@ -5,6 +5,7 @@ export interface Nodo {
   posx: number
   posy: number
   titulo: string
+  descripcion: string
   idpadre: number | null
   peso?: number
   pesofinal?: number
@@ -237,6 +238,7 @@ export class Modelo {
       min: -100,
       max: 100,
       titulo: `Nuevo nodo ${nuevoId}`,
+      descripcion: '',
       idpadre: idPadre,
       beneficio: true,
       peso: 0, // se recalculará más abajo

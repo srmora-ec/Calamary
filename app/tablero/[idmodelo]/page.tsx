@@ -3,6 +3,7 @@
 
 import ConfigureModalNodo from "@/components/ConfiguredNodo";//Configurar la información del nodo
 import ConfigureModalPeso from "@/components/pesos/ConfiguredPeso";//Modal para confugurar el peso
+import Spinner from "@/components/pesos/Spinner";
 import Tablero from "@/components/tablero";
 import { useAuthContext } from "@/context/AuthProvider";
 import { supabase } from "@/lib/supabase";
@@ -102,9 +103,7 @@ export default function ModeloPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner" style={{ width: "40px", height: "40px" }}></div>
-      </div>
+      <Spinner visible={true}/>
     )
   }
 
@@ -119,7 +118,7 @@ export default function ModeloPage() {
         />
       )}
 
-      {modelo ? (
+      {modelo && (
         <>
           <Tablero
             modelo={modelo}
@@ -130,9 +129,7 @@ export default function ModeloPage() {
             nodoCambios={nodoActual}
           />
         </>
-      ) : (
-        <p>Cargando...</p>
-      )}
+      ) }
     </div>
   );
 }

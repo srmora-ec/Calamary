@@ -1,13 +1,16 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Slider } from "antd"
 import type { Nodo } from "@/types/modelo"
 import { calculateAHP } from "./metodos/pesosComPares"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import HelpButton from "../HelpButton"
+import Modal from "../Modal"
+import NodoInfo from "../NodoInfo"
 
 interface ComparacionPorPasosProps {
   nodos: Nodo[]
@@ -56,16 +59,19 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
   const [consistencyRatio, setConsistencyRatio] = useState<number>(0)
   const [showResults, setShowResults] = useState(false)
   const [inconsistentComparisons, setInconsistentComparisons] = useState<InconsistentComparison[]>([])
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedNodoId, setSelectedNodoId] = useState<number | null>(null)
 
-  useEffect(() => {
-    if (!nodos || nodos.length === 0) {
-      setComparisons([])
-      setMatrix({})
-      return
-    }
+  // Memoizar el nodo seleccionado para evitar re-renders innecesarios
+  const selectedNodo = useMemo(() => {
+    return selectedNodoId ? nodos.find(n => n.idnodo === selectedNodoId) || null : null
+  }, [selectedNodoId, nodos])
+
+  // Memoizar las comparaciones para evitar recálculos
+  const memoizedComparisons = useMemo(() => {
+    if (!nodos || nodos.length === 0) return []
 
     const allComparisons: Comparison[] = []
-
     for (let i = 0; i < nodos.length; i++) {
       for (let j = i + 1; j < nodos.length; j++) {
         allComparisons.push({
@@ -76,8 +82,16 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
         })
       }
     }
+    return allComparisons
+  }, [nodos])
 
-    setComparisons(allComparisons)
+  useEffect(() => {
+    setComparisons(memoizedComparisons)
+
+    if (!nodos || nodos.length === 0) {
+      setMatrix({})
+      return
+    }
 
     const initialMatrix: Record<string, number> = {}
     for (let i = 0; i < nodos.length; i++) {
@@ -94,20 +108,34 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
       }
     }
     setMatrix(initialMatrix)
-  }, [nodos])
+  }, [memoizedComparisons, nodos])
 
-  const handleSliderChange = (nodeId1: number, nodeId2: number, sliderValue: number) => {
+  // Optimizar el manejo del modal con useCallback
+  const handleHelpClick = useCallback((nodoId: number) => {
+    setSelectedNodoId(nodoId)
+    setModalOpen(true)
+  }, [])
+
+  const handleCloseModal = useCallback(() => {
+    setModalOpen(false)
+    // Usar setTimeout para permitir que la animación de cierre se complete antes de limpiar el estado
+    setTimeout(() => {
+      setSelectedNodoId(null)
+    }, 200)
+  }, [])
+
+  const handleSliderChange = useCallback((nodeId1: number, nodeId2: number, sliderValue: number) => {
     const saatyValue = SAATY_OPTIONS[sliderValue].value
     handleComparisonChange(nodeId1, nodeId2, saatyValue)
-  }
+  }, [])
 
-  const getSliderPosition = (nodeId1: number, nodeId2: number): number => {
+  const getSliderPosition = useCallback((nodeId1: number, nodeId2: number): number => {
     const currentValue = getMatrixValue(nodeId1, nodeId2)
     const index = SAATY_OPTIONS.findIndex((option) => Math.abs(option.value - currentValue) < 0.001)
     return index !== -1 ? index : 8
-  }
+  }, [matrix])
 
-  const getDescriptiveText = (
+  const getDescriptiveText = useCallback((
     sliderValue: number,
     nodeId1: number,
     nodeId2: number,
@@ -116,22 +144,20 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     if (!option.label) return { left: "", right: "" }
 
     if (option.position < 0) {
-      // Left criterion gets the "más importante" label, right gets "menos importante"
       return {
-        left: option.label, // Keep original label (más importante)
-        right: option.label.replace("más importante", "menos importante"), // Convert to menos importante
+        left: option.label,
+        right: option.label.replace("más importante", "menos importante"),
       }
     } else if (option.position > 0) {
-      // Left criterion gets "menos importante", right gets "más importante"
       return {
-        left: option.label.replace("menos importante", "más importante"), // Convert to más importante
-        right: option.label, // Keep original label (menos importante)
+        left: option.label.replace("menos importante", "más importante"),
+        right: option.label,
       }
     }
-    return { left: option.label, right: option.label } // Igual importancia
-  }
+    return { left: option.label, right: option.label }
+  }, [])
 
-  const getSliderDisplayValue = (sliderValue: number): string => {
+  const getSliderDisplayValue = useCallback((sliderValue: number): string => {
     const option = SAATY_OPTIONS[sliderValue]
     if (option.value === 1 / 2) return "1/2"
     if (option.value === 1 / 3) return "1/3"
@@ -142,17 +168,17 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     if (option.value === 1 / 8) return "1/8"
     if (option.value === 1 / 9) return "1/9"
     return option.value.toString()
-  }
+  }, [])
 
-  const handleComparisonChange = (nodeId1: number, nodeId2: number, value: number) => {
+  const handleComparisonChange = useCallback((nodeId1: number, nodeId2: number, value: number) => {
     const key = `${nodeId1}-${nodeId2}`
     setMatrix((prev) => ({
       ...prev,
       [key]: value,
     }))
-  }
+  }, [])
 
-  const getMatrixValue = (nodeId1: number, nodeId2: number): number => {
+  const getMatrixValue = useCallback((nodeId1: number, nodeId2: number): number => {
     if (nodeId1 === nodeId2) return 1
 
     const key1 = `${nodeId1}-${nodeId2}`
@@ -165,9 +191,9 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     }
 
     return 1
-  }
+  }, [matrix])
 
-  const detectInconsistentComparisons = (
+  const detectInconsistentComparisons = useCallback((
     matrizCompleta: number[][],
     ahpWeights: number[],
   ): InconsistentComparison[] => {
@@ -204,9 +230,9 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     return inconsistent
       .sort((a, b) => (b.impactScore || b.deviation) - (a.impactScore || a.deviation))
       .slice(0, Math.min(3, Math.ceil(inconsistent.length * 0.3)))
-  }
+  }, [comparisons, nodos])
 
-  const calcularPesos = async () => {
+  const calcularPesos = useCallback(async () => {
     if (!nodos || nodos.length === 0) {
       console.error("No hay nodos para calcular")
       return
@@ -242,13 +268,13 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     } catch (error) {
       console.error("Error al calcular AHP:", error)
     }
-  }
+  }, [nodos, getMatrixValue, detectInconsistentComparisons])
 
-  const handleCalculate = () => {
+  const handleCalculate = useCallback(() => {
     calcularPesos()
-  }
+  }, [calcularPesos])
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setWeights({})
     setConsistencyRatio(0)
     setInconsistentComparisons([])
@@ -274,20 +300,21 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
       }
     }
     setMatrix(initialMatrix)
-  }
+  }, [nodos])
 
-  const applySuggestedValue = (comparison: Comparison, suggestedValue: number) => {
+  const applySuggestedValue = useCallback((comparison: Comparison, suggestedValue: number) => {
     handleComparisonChange(comparison.nodeId1, comparison.nodeId2, suggestedValue)
-  }
+  }, [handleComparisonChange])
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     onSave(weights)
-  }
+  }, [onSave, weights])
 
-  const isConsistent = consistencyRatio < 0.1
-  const consistencyPercentage = (consistencyRatio * 100).toFixed(1)
+  // Memoizar valores calculados
+  const isConsistent = useMemo(() => consistencyRatio < 0.1, [consistencyRatio])
+  const consistencyPercentage = useMemo(() => (consistencyRatio * 100).toFixed(1), [consistencyRatio])
 
-  const findNearestSaatyValue = (decimalValue: number): { value: number; display: string } => {
+  const findNearestSaatyValue = useCallback((decimalValue: number): { value: number; display: string } => {
     const saatyValues = [9, 8, 7, 6, 5, 4, 3, 2, 1, 1 / 2, 1 / 3, 1 / 4, 1 / 5, 1 / 6, 1 / 7, 1 / 8, 1 / 9]
 
     let closest = saatyValues[0]
@@ -303,9 +330,9 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
 
     const display = closest < 1 ? `1/${Math.round(1 / closest)}` : closest.toString()
     return { value: closest, display }
-  }
+  }, [])
 
-  const sliderMarks: any["marks"] = {
+  const sliderMarks: any["marks"] = useMemo(() => ({
     0: { label: "9", style: { fontSize: "11px", fontWeight: "bold" } },
     1: { label: "8", style: { fontSize: "11px", fontWeight: "bold" } },
     2: { label: "7", style: { fontSize: "11px", fontWeight: "bold" } },
@@ -323,7 +350,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     14: { label: "1/7", style: { fontSize: "11px", fontWeight: "bold" } },
     15: { label: "1/8", style: { fontSize: "11px", fontWeight: "bold" } },
     16: { label: "1/9", style: { fontSize: "11px", fontWeight: "bold" } },
-  }
+  }), [])
 
   if (!nodos || nodos.length === 0) {
     return (
@@ -379,6 +406,9 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
             const isInconsistent = inconsistentComparisons.some((inc) => inc.index === index)
             const descriptiveTexts = getDescriptiveText(currentSliderValue, comparison.nodeId1, comparison.nodeId2)
 
+            const nodo1 = nodos.find((n) => n.idnodo === comparison.nodeId1)
+            const nodo2 = nodos.find((n) => n.idnodo === comparison.nodeId2)
+
             return (
               <div
                 key={`${comparison.nodeId1}-${comparison.nodeId2}`}
@@ -388,17 +418,20 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
-                        <h3
-                          className="font-medium text-sm text-blue-700 dark:text-blue-300 truncate"
-                          title={comparison.node1Title}
-                        >
-                          {comparison.node1Title}
-                          {descriptiveTexts.left && (
-                            <span className="block text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              ({descriptiveTexts.left})
-                            </span>
-                          )}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          {nodo1 && <HelpButton onClick={() => handleHelpClick(nodo1.idnodo)} />}
+                          <h3
+                            className="font-medium text-sm text-blue-700 dark:text-blue-300 truncate flex-1"
+                            title={comparison.node1Title}
+                          >
+                            {comparison.node1Title}
+                            {descriptiveTexts.left && (
+                              <span className="block text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                ({descriptiveTexts.left})
+                              </span>
+                            )}
+                          </h3>
+                        </div>
                       </div>
                     </div>
 
@@ -408,17 +441,20 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
 
                     <div className="flex-1 min-w-0">
                       <div className="px-3 py-2 bg-green-50 dark:bg-green-950 rounded border border-green-200 dark:border-green-800">
-                        <h3
-                          className="font-medium text-sm text-green-700 dark:text-green-300 truncate text-right"
-                          title={comparison.node2Title}
-                        >
-                          {comparison.node2Title}
-                          {descriptiveTexts.right && (
-                            <span className="block text-xs text-green-600 dark:text-green-400 mt-1">
-                              ({descriptiveTexts.right})
-                            </span>
-                          )}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3
+                            className="font-medium text-sm text-green-700 dark:text-green-300 truncate flex-1 text-right"
+                            title={comparison.node2Title}
+                          >
+                            {comparison.node2Title}
+                            {descriptiveTexts.right && (
+                              <span className="block text-xs text-green-600 dark:text-green-400 mt-1">
+                                ({descriptiveTexts.right})
+                              </span>
+                            )}
+                          </h3>
+                          {nodo2 && <HelpButton onClick={() => handleHelpClick(nodo2.idnodo)} />}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -432,8 +468,12 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
 
                     <div className="relative px-4">
                       <div className="flex justify-between text-xs text-muted-foreground mb-4">
-                        <span className="text-blue-600 dark:text-blue-400">Más importante ←</span>
-                        <span className="text-green-600 dark:text-green-400">→ Más importante</span>
+                        <span className="text-blue-600 dark:text-blue-400">
+                          Más importante <span className="text-2xl font-bold">←</span>
+                        </span>
+                        <span className="text-green-600 dark:text-green-400">
+                          <span className="text-2xl font-bold">→</span> Más importante
+                        </span>
                       </div>
 
                       <div className="mb-6">
@@ -618,6 +658,16 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
           </div>
         </>
       )}
+
+      {/* Modal optimizado - solo renderiza el contenido cuando está abierto y hay un nodo seleccionado */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        title={selectedNodo ? `Información del Criterio: ${selectedNodo.titulo}` : "Información del Criterio"}
+        width="600px"
+      >
+        {modalOpen && selectedNodo && <NodoInfo nodo={selectedNodo} />}
+      </Modal>
     </div>
   )
 }
