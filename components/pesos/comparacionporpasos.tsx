@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import HelpButton from "../HelpButton"
 import Modal from "../Modal"
 import NodoInfo from "../NodoInfo"
+import Spinner from "./Spinner"
 
 interface ComparacionPorPasosProps {
   nodos: Nodo[]
@@ -61,10 +62,11 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
   const [inconsistentComparisons, setInconsistentComparisons] = useState<InconsistentComparison[]>([])
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedNodoId, setSelectedNodoId] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
 
   // Memoizar el nodo seleccionado para evitar re-renders innecesarios
   const selectedNodo = useMemo(() => {
-    return selectedNodoId ? nodos.find(n => n.idnodo === selectedNodoId) || null : null
+    return selectedNodoId ? nodos.find((n) => n.idnodo === selectedNodoId) || null : null
   }, [selectedNodoId, nodos])
 
   // Memoizar las comparaciones para evitar recálculos
@@ -129,33 +131,48 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     handleComparisonChange(nodeId1, nodeId2, saatyValue)
   }, [])
 
-  const getSliderPosition = useCallback((nodeId1: number, nodeId2: number): number => {
-    const currentValue = getMatrixValue(nodeId1, nodeId2)
-    const index = SAATY_OPTIONS.findIndex((option) => Math.abs(option.value - currentValue) < 0.001)
-    return index !== -1 ? index : 8
-  }, [matrix])
+  const getSliderPosition = useCallback(
+    (nodeId1: number, nodeId2: number): number => {
+      const currentValue = getMatrixValue(nodeId1, nodeId2)
+      const index = SAATY_OPTIONS.findIndex((option) => Math.abs(option.value - currentValue) < 0.001)
+      return index !== -1 ? index : 8
+    },
+    [matrix],
+  )
 
-  const getDescriptiveText = useCallback((
-    sliderValue: number,
-    nodeId1: number,
-    nodeId2: number,
-  ): { left: string; right: string } => {
-    const option = SAATY_OPTIONS[sliderValue]
-    if (!option.label) return { left: "", right: "" }
+  const getDescriptiveText = useCallback(
+    (sliderValue: number, nodeId1: number, nodeId2: number): { left: string; right: string } => {
+      const option = SAATY_OPTIONS[sliderValue]
+      if (!option.label) return { left: "", right: "" }
 
-    if (option.position < 0) {
-      return {
-        left: option.label,
-        right: option.label.replace("más importante", "menos importante"),
+      if (sliderValue < 8) {
+        // Left criterion is more important (values 9, 8, 7, 6, 5, 4, 3, 2)
+        const leftLabel = option.label
+        const rightLabel = option.label.replace("más importante", "menos importante")
+        return {
+          left: leftLabel,
+          right: rightLabel,
+        }
+      } else if (sliderValue === 8) {
+        // Equal importance (value 1)
+        return {
+          left: option.label,
+          right: option.label,
+        }
+      } else {
+        // Right criterion is more important (values 1/2, 1/3, 1/4, 1/5, 1/6, 1/7, 1/8, 1/9)
+        const rightLabel = option.label.replace("menos importante", "más importante")
+        const leftLabel = option.label
+          .replace("menos importante", "más importante")
+          .replace("más importante", "menos importante")
+        return {
+          left: leftLabel,
+          right: rightLabel,
+        }
       }
-    } else if (option.position > 0) {
-      return {
-        left: option.label.replace("menos importante", "más importante"),
-        right: option.label,
-      }
-    }
-    return { left: option.label, right: option.label }
-  }, [])
+    },
+    [],
+  )
 
   const getSliderDisplayValue = useCallback((sliderValue: number): string => {
     const option = SAATY_OPTIONS[sliderValue]
@@ -178,63 +195,69 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     }))
   }, [])
 
-  const getMatrixValue = useCallback((nodeId1: number, nodeId2: number): number => {
-    if (nodeId1 === nodeId2) return 1
+  const getMatrixValue = useCallback(
+    (nodeId1: number, nodeId2: number): number => {
+      if (nodeId1 === nodeId2) return 1
 
-    const key1 = `${nodeId1}-${nodeId2}`
-    const key2 = `${nodeId2}-${nodeId1}`
+      const key1 = `${nodeId1}-${nodeId2}`
+      const key2 = `${nodeId2}-${nodeId1}`
 
-    if (matrix[key1] !== undefined) {
-      return matrix[key1]
-    } else if (matrix[key2] !== undefined) {
-      return 1 / matrix[key2]
-    }
-
-    return 1
-  }, [matrix])
-
-  const detectInconsistentComparisons = useCallback((
-    matrizCompleta: number[][],
-    ahpWeights: number[],
-  ): InconsistentComparison[] => {
-    if (!comparisons || comparisons.length === 0 || !nodos || nodos.length === 0) {
-      return []
-    }
-
-    const inconsistent: InconsistentComparison[] = []
-
-    for (let i = 0; i < comparisons.length; i++) {
-      const comp = comparisons[i]
-      const nodeIndex1 = nodos.findIndex((n) => n.idnodo === comp.nodeId1)
-      const nodeIndex2 = nodos.findIndex((n) => n.idnodo === comp.nodeId2)
-
-      if (nodeIndex1 === -1 || nodeIndex2 === -1) continue
-
-      const currentValue = matrizCompleta[nodeIndex1][nodeIndex2]
-      const theoreticalValue = ahpWeights[nodeIndex1] / ahpWeights[nodeIndex2]
-      const deviation = Math.abs(Math.log(currentValue) - Math.log(theoreticalValue))
-
-      if (deviation > 0.5) {
-        const suggestedValue = theoreticalValue
-        const impactScore = deviation * (ahpWeights[nodeIndex1] + ahpWeights[nodeIndex2])
-        inconsistent.push({
-          comparison: comp,
-          index: i,
-          deviation,
-          suggestedValue,
-          impactScore,
-        })
+      if (matrix[key1] !== undefined) {
+        return matrix[key1]
+      } else if (matrix[key2] !== undefined) {
+        return 1 / matrix[key2]
       }
-    }
 
-    return inconsistent
-      .sort((a, b) => (b.impactScore || b.deviation) - (a.impactScore || a.deviation))
-      .slice(0, Math.min(3, Math.ceil(inconsistent.length * 0.3)))
-  }, [comparisons, nodos])
+      return 1
+    },
+    [matrix],
+  )
+
+  const detectInconsistentComparisons = useCallback(
+    (matrizCompleta: number[][], ahpWeights: number[]): InconsistentComparison[] => {
+      if (!comparisons || comparisons.length === 0 || !nodos || nodos.length === 0) {
+        return []
+      }
+
+      const inconsistent: InconsistentComparison[] = []
+
+      for (let i = 0; i < comparisons.length; i++) {
+        const comp = comparisons[i]
+        const nodeIndex1 = nodos.findIndex((n) => n.idnodo === comp.nodeId1)
+        const nodeIndex2 = nodos.findIndex((n) => n.idnodo === comp.nodeId2)
+
+        if (nodeIndex1 === -1 || nodeIndex2 === -1) continue
+
+        const currentValue = matrizCompleta[nodeIndex1][nodeIndex2]
+        const theoreticalValue = ahpWeights[nodeIndex1] / ahpWeights[nodeIndex2]
+        const deviation = Math.abs(Math.log(currentValue) - Math.log(theoreticalValue))
+
+        if (deviation > 0.5) {
+          const suggestedValue = theoreticalValue
+          const impactScore = deviation * (ahpWeights[nodeIndex1] + ahpWeights[nodeIndex2])
+          inconsistent.push({
+            comparison: comp,
+            index: i,
+            deviation,
+            suggestedValue,
+            impactScore,
+          })
+        }
+      }
+
+      return inconsistent
+        .sort((a, b) => (b.impactScore || b.deviation) - (a.impactScore || a.deviation))
+        .slice(0, Math.min(3, Math.ceil(inconsistent.length * 0.3)))
+    },
+    [comparisons, nodos],
+  )
 
   const calcularPesos = useCallback(async () => {
+    setLoading(true)
+
     if (!nodos || nodos.length === 0) {
       console.error("No hay nodos para calcular")
+      setLoading(false)
       return
     }
 
@@ -267,6 +290,8 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
       }
     } catch (error) {
       console.error("Error al calcular AHP:", error)
+    } finally {
+      setLoading(false)
     }
   }, [nodos, getMatrixValue, detectInconsistentComparisons])
 
@@ -302,9 +327,12 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     setMatrix(initialMatrix)
   }, [nodos])
 
-  const applySuggestedValue = useCallback((comparison: Comparison, suggestedValue: number) => {
-    handleComparisonChange(comparison.nodeId1, comparison.nodeId2, suggestedValue)
-  }, [handleComparisonChange])
+  const applySuggestedValue = useCallback(
+    (comparison: Comparison, suggestedValue: number) => {
+      handleComparisonChange(comparison.nodeId1, comparison.nodeId2, suggestedValue)
+    },
+    [handleComparisonChange],
+  )
 
   const handleSave = useCallback(() => {
     onSave(weights)
@@ -332,25 +360,28 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     return { value: closest, display }
   }, [])
 
-  const sliderMarks: any["marks"] = useMemo(() => ({
-    0: { label: "9", style: { fontSize: "11px", fontWeight: "bold" } },
-    1: { label: "8", style: { fontSize: "11px", fontWeight: "bold" } },
-    2: { label: "7", style: { fontSize: "11px", fontWeight: "bold" } },
-    3: { label: "6", style: { fontSize: "11px", fontWeight: "bold" } },
-    4: { label: "5", style: { fontSize: "12px", fontWeight: "bold", color: "#1890ff" } },
-    5: { label: "4", style: { fontSize: "11px", fontWeight: "bold" } },
-    6: { label: "3", style: { fontSize: "11px", fontWeight: "bold" } },
-    7: { label: "2", style: { fontSize: "11px", fontWeight: "bold" } },
-    8: { label: "1", style: { fontSize: "11px", fontWeight: "bold" } },
-    9: { label: "1/2", style: { fontSize: "11px", fontWeight: "bold" } },
-    10: { label: "1/3", style: { fontSize: "11px", fontWeight: "bold" } },
-    11: { label: "1/4", style: { fontSize: "11px", fontWeight: "bold" } },
-    12: { label: "1/5", style: { fontSize: "11px", fontWeight: "bold" } },
-    13: { label: "1/6", style: { fontSize: "11px", fontWeight: "bold" } },
-    14: { label: "1/7", style: { fontSize: "11px", fontWeight: "bold" } },
-    15: { label: "1/8", style: { fontSize: "11px", fontWeight: "bold" } },
-    16: { label: "1/9", style: { fontSize: "11px", fontWeight: "bold" } },
-  }), [])
+  const sliderMarks: any["marks"] = useMemo(
+    () => ({
+      0: { label: "9", style: { fontSize: "11px", fontWeight: "bold" } },
+      1: { label: "8", style: { fontSize: "11px", fontWeight: "bold" } },
+      2: { label: "7", style: { fontSize: "11px", fontWeight: "bold" } },
+      3: { label: "6", style: { fontSize: "11px", fontWeight: "bold" } },
+      4: { label: "5", style: { fontSize: "12px", fontWeight: "bold", color: "#1890ff" } },
+      5: { label: "4", style: { fontSize: "11px", fontWeight: "bold" } },
+      6: { label: "3", style: { fontSize: "11px", fontWeight: "bold" } },
+      7: { label: "2", style: { fontSize: "11px", fontWeight: "bold" } },
+      8: { label: "1", style: { fontSize: "11px", fontWeight: "bold" } },
+      9: { label: "1/2", style: { fontSize: "11px", fontWeight: "bold" } },
+      10: { label: "1/3", style: { fontSize: "11px", fontWeight: "bold" } },
+      11: { label: "1/4", style: { fontSize: "11px", fontWeight: "bold" } },
+      12: { label: "1/5", style: { fontSize: "11px", fontWeight: "bold" } },
+      13: { label: "1/6", style: { fontSize: "11px", fontWeight: "bold" } },
+      14: { label: "1/7", style: { fontSize: "11px", fontWeight: "bold" } },
+      15: { label: "1/8", style: { fontSize: "11px", fontWeight: "bold" } },
+      16: { label: "1/9", style: { fontSize: "11px", fontWeight: "bold" } },
+    }),
+    [],
+  )
 
   if (!nodos || nodos.length === 0) {
     return (
@@ -532,8 +563,8 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
         </div>
 
         <div className="mt-4 text-center">
-          <Button onClick={handleCalculate} className="min-w-[120px]">
-            Calcular
+          <Button onClick={handleCalculate} className="min-w-[120px]" disabled={loading}>
+            {loading ? "Calculando..." : "Calcular"}
           </Button>
         </div>
       </div>
@@ -658,7 +689,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
           </div>
         </>
       )}
-
+<Spinner visible={loading}/>
       {/* Modal optimizado - solo renderiza el contenido cuando está abierto y hay un nodo seleccionado */}
       <Modal
         isOpen={modalOpen}
