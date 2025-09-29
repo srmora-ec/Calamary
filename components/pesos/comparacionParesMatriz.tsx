@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import type { Nodo } from "@/types/modelo"
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,6 +11,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { calculateAHP } from "./metodos/pesosComPares"
 import { actualizarMatriz, cargarMatriz, guardarMatriz } from "./funciones/GuardarMatrizParams"
 import Spinner from "./Spinner"
+import * as XLSX from "xlsx"
+import { saveAs } from "file-saver"
+
 
 interface ComparacionPorParesProps {
   idmodelo: number//El modelo para guardar
@@ -87,7 +90,8 @@ const ComparacionPorPares: React.FC<ComparacionPorParesProps> = ({ nodos, idmode
   const [consistencyRatio, setConsistencyRatio] = useState<number>(0) // ratio de consistencia
   const [errors, setErrors] = useState<string[]>([]) // lista de errores
   const [isCalculated, setIsCalculated] = useState(false) // flag si se calcularon los pesos
-const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   // Al iniciar, construir una matriz identidad (1s en la diagonal)
   useEffect(() => {
     const initialMatrix: Record<string, number> = {}// Creamos un objeto vacío donde vamos a guardar los valores numéricos de la matriz
@@ -123,11 +127,11 @@ const [loading, setLoading] = useState(false)
           // Verificamos que la matriz guardada y la actual sean igual
           const nCurrent = nodos.length//sacamos la cantidad de los nodos de la actual
           const nSaved = Math.round(Math.sqrt(Object.keys(savedMatrix.matrix || {}).length * 2 + 0.25) - 0.5)
-//Arriba. Caclulamos la cantidad actual de la rescatada de supabase.
-//Sacamos la matriz savedMatrix.matrix de eso le sacamos eltamaño .length
-//a ese valor lo multiplicamos por dos y le sumanos 0.25
-//a eso le sacamos la raiz cuadrada
-//y a eso le restamos0.5 y asi sacamos la cantidad de nodos 
+          //Arriba. Caclulamos la cantidad actual de la rescatada de supabase.
+          //Sacamos la matriz savedMatrix.matrix de eso le sacamos eltamaño .length
+          //a ese valor lo multiplicamos por dos y le sumanos 0.25
+          //a eso le sacamos la raiz cuadrada
+          //y a eso le restamos0.5 y asi sacamos la cantidad de nodos 
           if (nSaved !== nCurrent) {//si no es compatible avisamos que no se puede
             setLoadMessage(
               `⚠️ La matriz guardada el ${new Date(savedMatrix.created_at).toLocaleDateString()} ya no es compatible con la estructura actual del modelo.`
@@ -192,19 +196,21 @@ const [loading, setLoading] = useState(false)
   // Verifica que los valores sean consistentes (valor * inverso ≈ 1)
   const verificarCoherencia = (): boolean => {
     const erroresCoherencia: string[] = []
+    let c = 0
 
     for (let i = 0; i < nodos.length; i++) {//Solo recorremos la matriz normal y comparamos por la inversa
       for (let j = i + 1; j < nodos.length; j++) {
         const valor = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
         const inverso = getMatrixValue(nodos[j].idnodo, nodos[i].idnodo)
-
         if (Math.abs(valor * inverso - 1) > 0.001) {
           erroresCoherencia.push(`Incoherencia entre ${nodos[i].titulo} y ${nodos[j].titulo}`)
         }
       }
     }
-
     setErrors(erroresCoherencia)
+    console.log(errors)
+console.log(erroresCoherencia.length)
+
     return erroresCoherencia.length === 0
   }
 
@@ -212,7 +218,6 @@ const [loading, setLoading] = useState(false)
   const calcularPesos = async () => {
     setLoading(true);
     if (!verificarCoherencia()) return
-
     const n = nodos.length
     const matrizCompleta: number[][] = []
 
@@ -235,11 +240,11 @@ const [loading, setLoading] = useState(false)
       setConsistencyRatio(result.CR)
       setIsCalculated(true)
       setErrors([])
-      
+
     } catch (err) {
       console.error("Error al calcular AHP:", err)
       setErrors(["No se pudo calcular los pesos desde el servidor."])
-    } finally{
+    } finally {
       setLoading(false);
     }
   }
@@ -297,9 +302,98 @@ const [loading, setLoading] = useState(false)
   const isConsistent = consistencyRatio < 0.1
   const consistencyPercentage = (consistencyRatio * 100).toFixed(1)
 
+  // Exportar la matriz a Excel
+  const exportarExcel = () => {
+    const n = nodos.length
+
+    // Construimos la matriz completa en formato bidimensional
+    const matrizExcel: (string | number)[][] = []
+
+    // Encabezado
+    matrizExcel.push(["Criterio", ...nodos.map((n) => n.titulo)])
+
+    // Filas
+    for (let i = 0; i < n; i++) {
+      const fila: (string | number)[] = [nodos[i].titulo]
+      for (let j = 0; j < n; j++) {
+        fila.push(getMatrixValue(nodos[i].idnodo, nodos[j].idnodo))
+      }
+      matrizExcel.push(fila)
+    }
+
+    // Crear hoja y libro
+    const worksheet = XLSX.utils.aoa_to_sheet(matrizExcel)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Matriz")
+
+    // Generar archivo y descargar
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" })
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" })
+    saveAs(data, `matriz_comparacion_modelo_${idmodelo}.xlsx`)
+  }
+
+  // Función para cargar matriz desde Excel
+  const cargarDesdeExcel = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target?.result as ArrayBuffer)
+      const workbook = XLSX.read(data, { type: "array" })
+      const sheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[sheetName]
+      const jsonData: (string | number)[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
+
+      // Verificación de encabezado
+      const encabezado = jsonData[0]?.slice(1) // Ignoramos la primera columna "Criterio"
+      if (!encabezado || encabezado.length !== nodos.length) {
+        setErrors(["El archivo no coincide con la cantidad de criterios actuales."])
+        return
+      }
+
+      // Opcional: verificar que los nombres coincidan exactamente
+      for (let i = 0; i < nodos.length; i++) {
+        if (encabezado[i] !== nodos[i].titulo) {
+          setErrors([`El criterio "${encabezado[i]}" no coincide con "${nodos[i].titulo}"`])
+          return
+        }
+      }
+
+      // Construir la matriz
+      const nuevaMatrix: Record<string, number> = {}
+      const nuevaDisplay: Record<string, string> = {}
+
+      for (let i = 0; i < nodos.length; i++) {
+        for (let j = 0; j < nodos.length; j++) {
+          const valor = jsonData[i + 1]?.[j + 1] // +1 porque la primera fila es encabezado
+          if (valor !== undefined) {
+            const key = `${nodos[i].idnodo}-${nodos[j].idnodo}`
+            const numValue = parseFraction(String(valor))
+            nuevaMatrix[key] = numValue
+            nuevaDisplay[key] = formatValue(numValue)
+          }
+        }
+      }
+
+      setMatrix(nuevaMatrix)
+      if (!verificarCoherencia()) {
+              alert("enserio? y mi error?")
+        resetearMatriz() // Usar tu método existente para resetear
+        setErrors(["El archivo de excel cargado no es coherente con la estructura de matriz de Saaty"])
+      } else {
+        // Si es coherente, todo OK
+        setDisplayValues(nuevaDisplay)
+        setIsCalculated(false)
+        setErrors([])
+        console.log("Matriz cargada exitosamente desde Excel")
+      }
+
+    }
+
+    reader.readAsArrayBuffer(file)
+  }
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
-      <Spinner visible={loading}/>
+      <Spinner visible={loading} />
       <CardHeader className="pb-3">
         <CardTitle className="text-sm">Escala de Saaty</CardTitle>
       </CardHeader>
@@ -390,17 +484,56 @@ const [loading, setLoading] = useState(false)
       )}
 
       {/* Botones de acción */}
-      <div className="flex justify-between items-center">
-        <Button variant="outline" onClick={resetearMatriz} className="flex items-center gap-2 bg-transparent">
+      <div className="flex flex-wrap justify-between items-center gap-2">
+        <Button
+          variant="outline"
+          onClick={resetearMatriz}
+          className="flex items-center gap-2 bg-transparent"
+        >
           <RotateCcw className="h-4 w-4" />
           Resetear Matriz
         </Button>
 
-        <Button onClick={calcularPesos} disabled={errors.length > 0} className="flex items-center gap-2">
+        {/* Botón para cargar Excel */}
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 bg-transparent"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          📂 Cargar desde Excel
+        </Button>
+
+        {/* Input oculto */}
+        <input
+          type="file"
+          accept=".xlsx"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) cargarDesdeExcel(file)
+            e.target.value = ""
+          }}
+        />
+
+        <Button
+          onClick={exportarExcel}
+          variant="outline"
+          className="flex items-center gap-2 bg-transparent"
+        >
+          📥 Exportar a Excel
+        </Button>
+
+        <Button
+          onClick={calcularPesos}
+          disabled={errors.length > 0}
+          className="flex items-center gap-2"
+        >
           <Calculator className="h-4 w-4" />
           Calcular Pesos
         </Button>
       </div>
+
 
       {/* Resultados */}
       {isCalculated && (

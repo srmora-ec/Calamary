@@ -1,12 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { Slider } from "antd"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import { Slider, Tour } from "antd"
+import type { TourProps } from "antd"
 import type { Nodo } from "@/types/modelo"
 import { calculateAHP } from "./metodos/pesosComPares"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, AlertCircle } from "lucide-react"
+import { CheckCircle2, AlertCircle, HelpCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import HelpButton from "../HelpButton"
 import Modal from "../Modal"
@@ -63,6 +64,17 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedNodoId, setSelectedNodoId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [tourOpen, setTourOpen] = useState<boolean>(false)
+
+  // Referencias para el tour
+  const ref1 = useRef(null) // Instrucciones
+  const ref2 = useRef(null) // Primera comparación
+  const ref3 = useRef(null) // Slider
+  const ref4 = useRef(null) // Botón calcular
+  const ref5 = useRef(null) // Resultados
+  const ref6 = useRef(null) // Botón guardar
+  const ref7= useRef(null)
+  const ref8=useRef(null)
 
   // Memoizar el nodo seleccionado para evitar re-renders innecesarios
   const selectedNodo = useMemo(() => {
@@ -111,6 +123,50 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     }
     setMatrix(initialMatrix)
   }, [memoizedComparisons, nodos])
+
+  // Configuración del tour
+  const tourSteps: TourProps['steps'] = [
+    {
+      title: 'Criterios a comparar',
+      description: 'En este panel se muestran los dos criterios a comparar. Estos criterios se deben evaluar uno con otro para determinar cual es más importante',
+      target: () => ref1.current,
+    },
+    {
+      title: 'Información del criterio',
+      description: 'En caso de no entender el significado de algún criterio, se puede presionar el botón de ayuda de cada criterio para obtener información del mismo.',
+      target: () => ref2.current,
+    },
+    {
+      title: 'Escala de Comparación',
+      description: 'Usa este deslizador para indicar qué tan importante es un criterio sobre el otro. Mueve hacia la izquierda si el criterio azul es más importante, o hacia la derecha si el verde lo es. El centro (1) significa igual importancia.',
+      target: () => ref3.current,
+    },
+    {
+      title: 'Aumentar importancia 1/2',
+      description: 'Si consideras que el primer criterio es más importante que el segundo debemos mover el selector hacía la izquierda',
+      target: () => ref4.current,
+    },
+    {
+      title: 'Aumentar importancia 2/2',
+      description: 'De igual manera si consideras que el segundo criterio es más importante que el primero debemos mover el selector hacía la derecha',
+      target: () => ref5.current,
+    },
+    {
+      title: 'Calcular Pesos',
+      description: 'Después de completar todas las comparaciones, haz clic aquí para calcular los pesos finales de cada criterio usando el método AHP.',
+      target: () => ref6.current,
+    },
+    {
+      title: 'Verificar Consistencia',
+      description: 'Los resultados mostrarán el ratio de consistencia. Si es menor al 10%, tus comparaciones son coherentes. Si es mayor, se sugerirán cambios para mejorar la consistencia.',
+      target: () => ref7.current,
+    },
+    {
+      title: 'Guardar Resultados',
+      description: 'Una vez que estés satisfecho con la consistencia de tus comparaciones, guarda los pesos calculados para usarlos en tu análisis.',
+      target: () => ref8.current,
+    },
+  ]
 
   // Optimizar el manejo del modal con useCallback
   const handleHelpClick = useCallback((nodoId: number) => {
@@ -407,19 +463,43 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
 
   return (
     <div className="w-full space-y-4">
+      {/* Botón para iniciar el tour */}
+      <div className="text-center mb-4">
+        <Button
+          type="default"
+          onClick={() => setTourOpen(true)}
+          className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
+        >
+          <HelpCircle className="w-4 h-4 mr-2" />
+          ¿Cómo usar esta herramienta?
+        </Button>
+      </div>
+
       <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-2">
-          ¿Qué es el Proceso de Análisis Jerárquico (AHP)?
+          ¿Cómo responder el cuestionario?
         </h3>
         <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
           <p>
-            El AHP es un método de toma de decisiones que permite comparar criterios de forma sistemática usando la
-            escala de Saaty (1-9).
+            Para cada pareja de criterios que aparece, debes decidir cuál es más importante y qué tan importante es en comparación con el otro.
           </p>
           <p>
-            <strong>Escala de valores:</strong> 1 = Igual importancia, 3 = Moderadamente más importante, 5 = Fuertemente
-            más importante, 7 = Muy fuertemente más importante, 9 = Extremadamente más importante. Los valores 2, 4, 6,
-            8 son intermedios. Para indicar que un criterio es menos importante, use fracciones: 1/3, 1/5, 1/7, 1/9.
+            1. Observa los dos criterios que se están comparando (ej: El primer criterio a la izquierda de color azul [{comparisons[0].node1Title}] y el segundo a la derecha de color verde [{comparisons[0].node2Title}])
+          </p>
+          <p>
+            2. Decide cuál prefieres o consideras más relevante para tu decisión
+          </p>
+          <p>
+            3. Por defecto todos los criterios están situados en igual importancia (1), cambia el selector a izquierda o derecha según consideres la importancia de cada criterio.
+          </p>
+          <p>
+            <strong>(Ej: Si consideras que {comparisons[0].node1Title} es moderadamente más importante que {comparisons[0].node2Title} deberás mover hacia la izquierda en la posición 3)</strong>
+          </p>
+          <p>
+            <strong>(Ej: Si consideras que {comparisons[0].node2Title} es extremadamente más importante que {comparisons[0].node1Title} deberás mover hacia la derecha en la posición 1/9)</strong>
+          </p>
+          <p>
+            <strong>(Ej: Si consideras que ambos criterios son igual de importantes se debe dejar en la posición 1)</strong>
           </p>
           <p>
             <strong>Consistencia:</strong> El método verifica que sus comparaciones sean lógicamente coherentes. Un
@@ -429,7 +509,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
       </div>
 
       <div className="bg-background border rounded-lg p-3 sm:p-4">
-        <h2 className="text-center text-base font-semibold mb-4">Comparación por Pares - Todas las Comparaciones</h2>
+        <h2 className="text-center text-base font-semibold mb-4">¿Cuál criterio te parece más importante?</h2>
 
         <div className="space-y-6">
           {comparisons.map((comparison, index) => {
@@ -445,12 +525,12 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                 key={`${comparison.nodeId1}-${comparison.nodeId2}`}
                 className={`border rounded-lg p-4 ${isInconsistent ? "border-red-300 bg-red-50 dark:bg-red-950 dark:border-red-700" : "border-border"}`}
               >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-2">
+                <div  className="space-y-4">
+                  <div ref={index === 0 ? ref1 : null} className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
                         <div className="flex items-center gap-2">
-                          {nodo1 && <HelpButton onClick={() => handleHelpClick(nodo1.idnodo)} />}
+                          {nodo1 && <div  ref={index === 0 ? ref2 : null}><HelpButton onClick={() => handleHelpClick(nodo1.idnodo)} /></div>}
                           <h3
                             className="font-medium text-sm text-blue-700 dark:text-blue-300 truncate flex-1"
                             title={comparison.node1Title}
@@ -497,12 +577,15 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                       </span>
                     </div>
 
-                    <div className="relative px-4">
+                    <div
+                      ref={index === 0 ? ref3 : null}
+                      className="relative px-4"
+                    >
                       <div className="flex justify-between text-xs text-muted-foreground mb-4">
-                        <span className="text-blue-600 dark:text-blue-400">
+                        <span ref={index === 0 ? ref4 : null} className="text-blue-600 dark:text-blue-400">
                           Más importante <span className="text-2xl font-bold">←</span>
                         </span>
-                        <span className="text-green-600 dark:text-green-400">
+                        <span ref={index === 0 ? ref5 : null} className="text-green-600 dark:text-green-400">
                           <span className="text-2xl font-bold">→</span> Más importante
                         </span>
                       </div>
@@ -563,7 +646,12 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
         </div>
 
         <div className="mt-4 text-center">
-          <Button onClick={handleCalculate} className="min-w-[120px]" disabled={loading}>
+          <Button
+            ref={ref6}
+            onClick={handleCalculate}
+            className="min-w-[120px]"
+            disabled={loading}
+          >
             {loading ? "Calculando..." : "Calcular"}
           </Button>
         </div>
@@ -611,7 +699,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
             </div>
           )}
 
-          <div className="bg-background border rounded-lg p-3 sm:p-4">
+          <div ref={ref7} className="bg-background border rounded-lg p-3 sm:p-4">
             <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               Resultados del Análisis
@@ -681,7 +769,13 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                   </Button>
                 </div>
 
-                <Button size="sm" onClick={handleSave} disabled={!isConsistent} className="min-w-[100px]">
+                <Button
+                  ref={ref8}
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={!isConsistent}
+                  className="min-w-[100px]"
+                >
                   Guardar Pesos
                 </Button>
               </div>
@@ -689,7 +783,21 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
           </div>
         </>
       )}
-<Spinner visible={loading}/>
+
+      <Spinner visible={loading} />
+
+      {/* Tour Component */}
+      <Tour
+        open={tourOpen}
+        onClose={() => setTourOpen(false)}
+        steps={tourSteps}
+        indicatorsRender={(current, total) => (
+          <span className="text-sm text-gray-500">
+            {current + 1} de {total}
+          </span>
+        )}
+      />
+
       {/* Modal optimizado - solo renderiza el contenido cuando está abierto y hay un nodo seleccionado */}
       <Modal
         isOpen={modalOpen}

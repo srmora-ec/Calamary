@@ -55,6 +55,7 @@ export default function ModeloPage() {
               posy: n.posy,
               titulo: n.titulo,
               idpadre: n.idpadre,
+              descripcion:n.descripcion,
               peso: n.peso,
               pesofinal: n.pesofinal,
               acortado: n.acortado,

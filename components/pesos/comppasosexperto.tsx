@@ -1,0 +1,253 @@
+"use client"
+
+import type React from "react"
+import { useState, useRef } from "react"
+import type { Nodo } from "@/types/modelo"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle, Info } from "lucide-react"
+import * as XLSX from "xlsx"
+import ExpertosModal from "../ExpertosModal"
+import { Col, Row } from "antd"
+
+interface SaatyExpertosProps {
+  idmodelo: number//El modelo para guardar
+  nodos: Nodo[]
+  onSave: (weights: Record<number, number>) => void
+}
+
+type ExpertMatrix = {
+  nombre: string
+  pesos: number[]
+}
+
+const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmodelo }) => {
+  const [expertos, setExpertos] = useState<ExpertMatrix[]>([])
+  const [finalWeights, setFinalWeights] = useState<number[] | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [errors, setErrors] = useState<string[]>([])
+  const [openModal, setOpenModal] = useState(false)
+
+  // Cargar Excel de un experto
+  const cargarExcelExperto = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target?.result as ArrayBuffer)
+      const workbook = XLSX.read(data, { type: "array" })
+      const sheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[sheetName]
+      const matriz = XLSX.utils.sheet_to_json<(string | number)[]>(
+        worksheet,
+        { header: 1 }
+      ) as (string | number)[][]
+
+      if (matriz.length - 1 !== nodos.length) {
+        setErrors(["⚠️ El archivo no coincide con la cantidad de criterios."])
+        return
+      }
+
+      const encabezados = matriz[0].slice(1)
+      for (let i = 0; i < nodos.length; i++) {
+        if (encabezados[i] !== nodos[i].titulo) {
+          setErrors([`El criterio "${encabezados[i]}" no coincide con "${nodos[i].titulo}"`])
+          return
+        }
+      }
+
+      const m: number[][] = []
+      for (let i = 1; i < matriz.length; i++) {
+        const fila = matriz[i].slice(1).map((v) => Number(v))
+        m.push(fila as number[])
+      }
+
+      const pesos = calcularPesos(m)
+
+      setExpertos((prev) => [
+        ...prev,
+        {
+          nombre: file.name,
+          pesos,
+        },
+      ])
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  // Calcular pesos de una matriz
+  const calcularPesos = (matrix: number[][]): number[] => {
+    const n = matrix.length
+    const colSums = Array(n).fill(0)
+
+    for (let j = 0; j < n; j++) {
+      for (let i = 0; i < n; i++) {
+        colSums[j] += matrix[i][j]
+      }
+    }
+
+    const pesos = Array(n).fill(0)
+    for (let i = 0; i < n; i++) {
+      let suma = 0
+      for (let j = 0; j < n; j++) {
+        suma += matrix[i][j] / colSums[j]
+      }
+      pesos[i] = suma / n
+    }
+    return pesos
+  }
+
+  const calcularFinal = () => {
+    if (expertos.length === 0) return
+
+    const n = nodos.length
+    const gmean = Array(n).fill(1)
+
+    for (let i = 0; i < n; i++) {
+      for (const exp of expertos) {
+        gmean[i] *= exp.pesos[i]
+      }
+      gmean[i] = Math.pow(gmean[i], 1 / expertos.length)
+    }
+
+    const total = gmean.reduce((a, b) => a + b, 0)
+    const normalizado = gmean.map((v) => v / total)
+
+    setFinalWeights(normalizado)
+  }
+
+  const handleSave = () => {
+    if (!finalWeights) return
+    const weightsObj: Record<number, number> = {}
+    nodos.forEach((nodo, i) => {
+      weightsObj[nodo.idnodo] = finalWeights[i]
+    })
+    onSave(weightsObj)
+  }
+
+  return (
+    <div className="w-full space-y-6">
+      {/* Input oculto para cargar Excel */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".xlsx,.xls"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) {
+            cargarExcelExperto(file)
+            e.target.value = "" // limpiar input
+          }
+        }}
+      />
+
+      {/* Sección informativa */}
+      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
+          <Info className="w-4 h-4" />
+          Rol de los Expertos en el Método de Saaty
+        </h3>
+        <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
+          <p>
+            En muchos problemas de decisión complejos, no basta con que un solo individuo asigne
+            los pesos de los criterios. Por ello, se recurre a <strong>expertos en la materia</strong>,
+            quienes aportan su conocimiento especializado para determinar la importancia relativa
+            de cada criterio mediante comparaciones por pares.
+          </p>
+        </div>
+      </div>
+
+      <Row gutter={[8, 8]}>
+        <Col xs={24} sm={8}>
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            style={{ width: "100%" }}
+          >
+            📂 Cargar Excel de experto
+          </Button>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Button
+            onClick={calcularFinal}
+            disabled={expertos.length === 0}
+            style={{ width: "100%" }}
+          >
+            ⚖️ Calcular Pesos Finales
+          </Button>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Button
+            onClick={() => setOpenModal(true)}
+            style={{ width: "100%" }}
+          >
+            Invitar expertos
+          </Button>
+        </Col>
+      </Row>
+
+      {expertos.length > 0 && (
+        <div className="border rounded-lg p-4 overflow-x-auto">
+          <table className="min-w-full border-collapse border text-sm">
+            <thead>
+              <tr>
+                <th className="border px-2 py-1">Criterio</th>
+                {expertos.map((exp, i) => (
+                  <th key={i} className="border px-2 py-1">{exp.nombre}</th>
+                ))}
+                {finalWeights && (
+                  <th className="border px-2 py-1 bg-blue-100">Final</th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {nodos.map((nodo, i) => (
+                <tr key={nodo.idnodo}>
+                  <td className="border px-2 py-1 font-medium">{nodo.titulo}</td>
+                  {expertos.map((exp, j) => (
+                    <td key={j} className="border px-2 py-1 text-center">
+                      {exp.pesos[i].toFixed(4)}
+                    </td>
+                  ))}
+                  {finalWeights && (
+                    <td className="border px-2 py-1 text-center font-semibold bg-blue-50">
+                      {finalWeights[i].toFixed(4)}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {errors.length > 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <ul className="list-disc list-inside space-y-1">
+              {errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <ExpertosModal
+      idModelo={idmodelo}
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        onSelect={() => console.log("holi")}
+        nodos={nodos}
+      />
+
+      {finalWeights && (
+        <div className="flex justify-end">
+          <Button onClick={handleSave}>💾 Guardar Pesos</Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default SaatyExpertos

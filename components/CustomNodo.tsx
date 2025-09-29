@@ -1,3 +1,4 @@
+
 import { Handle, Position } from "@xyflow/react"
 
 interface CustomNodoProps {
