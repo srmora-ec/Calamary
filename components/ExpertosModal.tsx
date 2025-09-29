@@ -383,7 +383,7 @@ export default function ExpertosModal({
                 {/* Mensaje editable */}
                 <div className="mt-4">
                     <label className="block mb-1 font-medium" style={{ marginBottom: 10 }}>
-                        Mensaje de invitación (máx. 400 letras)
+                        Mensaje de invitación (máx. 600 letras)
                     </label>
                      <label className="block mb-1" style={{ marginBottom: 10 }}>
                         Es importante incluir un contexto o explicación que explique el modelo de decisión que se está creando de tal manera que quede claro para los expertos
@@ -391,8 +391,7 @@ export default function ExpertosModal({
                     <textarea
                         className="form-input w-full h-40"
                         value={mensaje}
-                        maxLength={400}
-                        onChange={(e) => handleMensajeChange(e.target.value)}
+                        maxLength={600}
                     />
                 </div>
             </div>
