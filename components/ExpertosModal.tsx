@@ -101,7 +101,7 @@ export default function ExpertosModal({
 
     // Contador de caracteres para el mensaje
     const handleMensajeChange = (text: string) => {
-        if (text.length <= 400) {
+        if (text.length <= 600) {
             setMensaje(text)
         }
     }
@@ -392,6 +392,7 @@ export default function ExpertosModal({
                         className="form-input w-full h-40"
                         value={mensaje}
                         maxLength={600}
+                        onChange={(e) => handleMensajeChange(e.target.value)}
                     />
                 </div>
             </div>
