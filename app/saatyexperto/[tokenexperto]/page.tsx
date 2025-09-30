@@ -1,6 +1,7 @@
 "use client";
 
 import ComparacionPorPasos from "@/components/pesos/comparacionporpasos";
+import CuestionarioExpertos from "@/components/pesos/cuestionario-expertos";
 import { supabase } from "@/lib/supabase";
 import { Nodo } from "@/types/modelo";
 import { useParams, useRouter } from "next/navigation";
@@ -76,9 +77,10 @@ export default function ModeloPage() {
     );
   }
 
-  return(
-    <div style={{padding:10}}>
-      <ComparacionPorPasos nodos={nodos} onSave={(weights: any) => console.log("Pesos guardados:", weights)} />
+  return (
+    <div style={{ padding: 10 }}>
+      {/* <ComparacionPorPasos nodos={nodos} onSave={(weights: any) => console.log("Pesos guardados:", weights)} /> */}
+      <CuestionarioExpertos nodos={nodos} onSave={(weights: any) => console.log("Pesos guardados:", weights)} />
     </div>
   );
 }
