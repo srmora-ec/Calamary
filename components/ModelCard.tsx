@@ -72,7 +72,7 @@ SetLoading(true);
             className="focus:outline-none cursor-pointer"
           >
             <Image
-              src="/play.png"
+              src="/editar.png"
               alt="Botón de play"
               width={40}
               height={40}
