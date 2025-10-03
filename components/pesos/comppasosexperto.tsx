@@ -1,32 +1,75 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import type { Nodo } from "@/types/modelo"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, Info } from "lucide-react"
+import { AlertCircle, Info, Trash2 } from "lucide-react"
 import * as XLSX from "xlsx"
 import ExpertosModal from "../ExpertosModal"
 import { Col, Row } from "antd"
+import { supabase } from "@/lib/supabase"
 
 interface SaatyExpertosProps {
-  idmodelo: number//El modelo para guardar
+  idmodelo: number
   nodos: Nodo[]
   onSave: (weights: Record<number, number>) => void
 }
 
 type ExpertMatrix = {
+  id?: number
   nombre: string
   pesos: number[]
 }
 
-const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmodelo }) => {
+const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave, idmodelo }) => {
   const [expertos, setExpertos] = useState<ExpertMatrix[]>([])
   const [finalWeights, setFinalWeights] = useState<number[] | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [errors, setErrors] = useState<string[]>([])
   const [openModal, setOpenModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  // Cargar matrices de expertos al montar el componente
+  useEffect(() => {
+    cargarMatricesExpertos()
+  }, [idmodelo, nodos])
+
+  const cargarMatricesExpertos = async () => {
+    if (nodos.length === 0) return
+    
+    const idpadre = nodos[0].idpadre
+    if (idpadre === null) return
+
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.rpc('obtener_matrices_expertos', {
+        p_idmodelo: idmodelo,
+        p_nodopadre: idpadre
+      })
+
+      if (error) {
+        console.error('Error al cargar matrices:', error)
+        setErrors(['Error al cargar las matrices de expertos'])
+        return
+      }
+
+      if (data && data.length > 0) {
+        const matricesCargadas: ExpertMatrix[] = data.map((item: any) => ({
+          id: item.id,
+          nombre: item.nombreexperto,
+          pesos: Object.values(item.pesos) as number[]
+        }))
+        setExpertos(matricesCargadas)
+      }
+    } catch (err) {
+      console.error('Error inesperado:', err)
+      setErrors(['Error inesperado al cargar las matrices'])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Cargar Excel de un experto
   const cargarExcelExperto = (file: File) => {
@@ -95,6 +138,11 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmode
     return pesos
   }
 
+  const eliminarExperto = (index: number) => {
+    setExpertos((prev) => prev.filter((_, i) => i !== index))
+    setFinalWeights(null)
+  }
+
   const calcularFinal = () => {
     if (expertos.length === 0) return
 
@@ -125,7 +173,12 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmode
 
   return (
     <div className="w-full space-y-6">
-      {/* Input oculto para cargar Excel */}
+      {loading && (
+        <div className="text-center py-4">
+          <span>Cargando matrices de expertos...</span>
+        </div>
+      )}
+
       <input
         type="file"
         ref={fileInputRef}
@@ -135,12 +188,11 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmode
           const file = e.target.files?.[0]
           if (file) {
             cargarExcelExperto(file)
-            e.target.value = "" // limpiar input
+            e.target.value = ""
           }
         }}
       />
 
-      {/* Sección informativa */}
       <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
           <Info className="w-4 h-4" />
@@ -192,7 +244,18 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmode
               <tr>
                 <th className="border px-2 py-1">Criterio</th>
                 {expertos.map((exp, i) => (
-                  <th key={i} className="border px-2 py-1">{exp.nombre}</th>
+                  <th key={i} className="border px-2 py-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span>{exp.nombre}</span>
+                      <button
+                        onClick={() => eliminarExperto(i)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                        title="Eliminar experto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </th>
                 ))}
                 {finalWeights && (
                   <th className="border px-2 py-1 bg-blue-100">Final</th>
@@ -205,7 +268,7 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmode
                   <td className="border px-2 py-1 font-medium">{nodo.titulo}</td>
                   {expertos.map((exp, j) => (
                     <td key={j} className="border px-2 py-1 text-center">
-                      {exp.pesos[i].toFixed(4)}
+                      {exp.pesos[i]?.toFixed(4) || 'N/A'}
                     </td>
                   ))}
                   {finalWeights && (
@@ -234,10 +297,13 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave,idmode
       )}
 
       <ExpertosModal
-      idModelo={idmodelo}
+        idModelo={idmodelo}
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
-        onSelect={() => console.log("holi")}
+        onSelect={() => {
+          setOpenModal(false)
+          cargarMatricesExpertos() // Recargar matrices después de invitar
+        }}
         nodos={nodos}
       />
 

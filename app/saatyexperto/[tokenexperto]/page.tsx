@@ -80,7 +80,38 @@ export default function ModeloPage() {
   return (
     <div style={{ padding: 10 }}>
       {/* <ComparacionPorPasos nodos={nodos} onSave={(weights: any) => console.log("Pesos guardados:", weights)} /> */}
-      <CuestionarioExpertos nodos={nodos} onSave={(weights: any) => console.log("Pesos guardados:", weights)} />
+      <CuestionarioExpertos
+        nodos={nodos}
+        onSave={async (matrix, weights) => {
+          try {
+                  const token = Array.isArray(tokenexperto) ? tokenexperto[0] : tokenexperto;
+
+            console.log("token:",tokenexperto)
+                        console.log("matriz:",matrix)
+                                    console.log("pesos:",weights)
+
+
+            const { data, error } = await supabase.rpc("responder_invitacion_experto", {
+              p_tokenunico: token,
+              p_matrix: matrix,
+              p_pesos: weights,
+            });
+
+            if (error) {
+              console.error("Error al guardar matriz:", error);
+              alert("Hubo un problema al guardar tu respuesta. Intenta nuevamente.");
+              return;
+            }
+
+            console.log("Matriz guardada correctamente", data);
+            alert("¡Gracias! Tu respuesta ha sido registrada.");
+            router.push("/gracias");
+          } catch (err) {
+            console.error("Error inesperado:", err);
+            alert("Ocurrió un error inesperado.");
+          }
+        }}
+      />
     </div>
   );
 }

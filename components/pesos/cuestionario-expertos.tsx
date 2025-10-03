@@ -16,8 +16,9 @@ import { Tour } from "antd"
 
 interface CuestionarioExpertosProps {
   nodos: Nodo[]
-  onSave: (weights: Record<number, number>) => void
+  onSave: (matrix: Record<string, number>, weights: Record<number, number>) => void
 }
+
 
 const SAATY_OPTIONS = [
   { value: 9, label: "Extremadamente más importante", position: -8 },
@@ -363,9 +364,9 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
     setMatrix(initialMatrix)
   }, [nodos])
 
-  const handleSave = useCallback(() => {
-    onSave(weights)
-  }, [onSave, weights])
+const handleSave = useCallback(() => {
+  onSave(matrix, weights)
+}, [onSave, matrix, weights])
 
   // Memoizar valores calculados
   const isConsistent = useMemo(() => consistencyRatio < 0.1, [consistencyRatio])
@@ -535,19 +536,17 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
-                    className={`p-3 text-left rounded-lg border transition-all ${
-                      isSelected
+                    className={`p-3 text-left rounded-lg border transition-all ${isSelected
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-4 h-4 rounded-full border-2 ${
-                          isSelected ? "border-blue-500 bg-blue-500" : "border-gray-300"
-                        }`}
+                        className={`w-4 h-4 rounded-full border-2 ${isSelected ? "border-blue-500 bg-blue-500" : "border-gray-300"
+                          }`}
                       >
-                        {isSelected && <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>}
+                        {isSelected && <div className="w-3 h-3 bg-white rounded-full" style={{ margin: "auto" }}></div>}
                       </div>
                       <span className="text-sm">{displayText}</span>
                       <span className="text-xs text-muted-foreground ml-auto">
@@ -698,10 +697,27 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
                     Reiniciar
                   </Button>
                 </div>
-
-                <Button ref={ref7} size="sm" onClick={handleSave} disabled={!isConsistent} className="min-w-[100px]">
-                  Guardar Pesos
+                {!isConsistent && (
+                  <>
+                  <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                      Conseguiste un ratio de consistencia baja
+                    </h3>
+                    <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
+                      <p>
+                        Sí obtuviste un ratio de consistencia mejor al 10% podría significar que tus respuestas no fueron muy coherentes. Podría ser buena idea repetir el cuestionario si consideras que cometiste un error.
+                      </p>
+                    </div>
+                  </div>
+                  <Button ref={ref7} size="sm" onClick={handleRestart} className="min-w-[100px] bg-green-800 hover:bg-green-900 text-white">
+                  Repetir cuestionario
                 </Button>
+                  </>
+                )}
+                <Button ref={ref7} size="sm" onClick={handleSave} className="min-w-[100px]">
+                  {isConsistent?"Enviar pesos":"Enviar pesos igualmente"}
+                </Button>
+
               </div>
             </div>
           </div>
@@ -729,8 +745,8 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
         title={selectedNodo ? `Información del Criterio: ${selectedNodo.titulo}` : "Información del Criterio"}
         width="600px"
       >
-        {selectedNodo&&(
-        <NodoInfo nodo={selectedNodo} />
+        {selectedNodo && (
+          <NodoInfo nodo={selectedNodo} />
         )}
       </Modal>
     </div>
