@@ -1,11 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Modal from "./Modal"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
+
+interface Metodo {
+  id: number
+  nombre: string
+  descripcion: string
+}
 
 interface CreateModelModalProps {
   isOpen: boolean
@@ -20,17 +26,46 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
     orientacion: "h" as "h" | "v",
     linea: 1,
     publico: false,
+    metodoId: 1,
   })
-    const router = useRouter()
+
+  const [metodos, setMetodos] = useState<Metodo[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingMetodos, setLoadingMetodos] = useState(false)
   const [error, setError] = useState("")
+  const router = useRouter()
+
+  // 👇 Cargar métodos desde Supabase
+  useEffect(() => {
+    const fetchMetodos = async () => {
+      setLoadingMetodos(true)
+      const { data, error } = await supabase
+        .from("metodos")
+        .select("id, nombre, descripcion")
+        .order("id", { ascending: true })
+
+      if (error) {
+        console.error(error)
+      } else if (data) {
+        setMetodos(data)
+        // Si no hay método seleccionado aún, tomamos el primero como predeterminado
+        if (data.length > 0 && !formData.metodoId) {
+          setFormData((prev) => ({ ...prev, metodoId: data[0].id }))
+        }
+      }
+      setLoadingMetodos(false)
+    }
+
+    if (isOpen) {
+      fetchMetodos()
+    }
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
-    // Validaciones
     if (!formData.nombre.trim()) {
       setError("El nombre es obligatorio.")
       setLoading(false)
@@ -41,30 +76,22 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
       setLoading(false)
       return
     }
-    
-    if (!formData.orientacion) {
-      setError("Debe seleccionar una orientación.")
-      setLoading(false)
-      return
-    }
 
     try {
-     const { data, error } = await supabase.rpc("insert_modelo", {
+      const { data, error } = await supabase.rpc("insert_modelo", {
         p_nombre: formData.nombre,
         p_descripcion: formData.descripcion || null,
         p_orientacion: formData.orientacion,
         p_linea: formData.linea,
         p_publico: formData.publico,
+        p_metodo: formData.metodoId,
       })
 
       if (error) throw error
-
       if (!data || data.length === 0) throw new Error("No se devolvió el modelo creado")
 
-    const nuevoModelo = data[0] // porque insert_modelo retorna setof modelo
-    const modeloId = nuevoModelo.id
-    // Redirige al tablero recién creado
-    router.push(`/tablero/${modeloId}`)
+      const nuevoModelo = data[0]
+      router.push(`/tablero/${nuevoModelo.id}`)
     } catch (err: any) {
       setError(err.message || "Error al crear el modelo")
     } finally {
@@ -79,6 +106,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
       orientacion: "h",
       linea: 1,
       publico: false,
+      metodoId: 1,
     })
     setError("")
     onClose()
@@ -88,10 +116,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
     <Modal isOpen={isOpen} onClose={handleClose} title="Crear nuevo modelo">
       <form onSubmit={handleSubmit}>
         {error && (
-          <div
-            className="mb-4 p-4 rounded"
-            style={{ backgroundColor: "#fef2f2", color: "#dc2626" }}
-          >
+          <div className="mb-4 p-4 rounded bg-red-50 text-red-600">
             {error}
           </div>
         )}
@@ -110,13 +135,13 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
           <small className="text-gray-500">{formData.nombre.length}/20</small>
         </div>
 
-        {/* Descripción opcional */}
+        {/* Descripción */}
         <div className="form-group">
           <label className="form-label">Descripción</label>
           <textarea
             className="form-input"
             rows={3}
-             maxLength={100}
+            maxLength={100}
             value={formData.descripcion || ""}
             onChange={(e) => setFormData({ ...formData, descripcion: e.target.value || null })}
           />
@@ -160,7 +185,29 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
           </select>
         </div>
 
-        {/* Público con toggle */}
+        {/* Método */}
+        <div className="form-group">
+          <label className="form-label">Método *</label>
+          {loadingMetodos ? (
+            <div className="text-gray-500">Cargando métodos...</div>
+          ) : (
+            <select
+              className="form-select"
+              value={formData.metodoId}
+              onChange={(e) =>
+                setFormData({ ...formData, metodoId: Number.parseInt(e.target.value) })
+              }
+            >
+              {metodos.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {/* Visibilidad */}
         <div className="form-group">
           <label className="form-label block mb-2">Visibilidad</label>
           <button

@@ -124,7 +124,7 @@ export default function DashboardPage() {
             style={{ marginBottom: 0 }}
           >
             <div className="relative w-full md:w-10"> {/* 👈 buscador más corto en desktop */}
-              <span className="search-icon">🔍</span>
+              {/* <span className="search-icon">🔍</span> */}
               <input
                 type="text"
                 placeholder="Buscar modelos..."

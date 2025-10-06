@@ -5,6 +5,7 @@ import '@xyflow/react/dist/style.css';
 import Switch from "./Switch";
 import CustomNodo from "./CustomNodo";
 import ConfigureModalPeso from "./pesos/ConfiguredPeso";
+import ExportModelo from "./ExportModelo";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -252,7 +253,12 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           >
             Guardar cambios
           </button>
-
+          <ExportModelo
+            nodos={modelo.getNodos()}
+            orientacion={orientacion}
+            linea={linea}
+            nombreModelo={data.nombre}
+          />
           <Switch
             option1={{ label: "Horizontal", value: "h" }}
             option2={{ label: "Vertical", value: "v" }}
@@ -271,6 +277,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               <option value={4} className="text-xs">Bézier</option>
             </select>
           </div>
+
         </div>
 
         <ReactFlow
