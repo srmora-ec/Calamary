@@ -41,9 +41,9 @@ export class Modelo {
   }
 
   getId(): string {
-  return this.data.id
-}
-  
+    return this.data.id
+  }
+
   // Setter para actualizar los datos completos
   setData(newData: ModeloData): void {
     this.data = { ...newData }
@@ -311,6 +311,33 @@ export class Modelo {
       criterioFinal: !this.tieneHijos(nodo.idnodo)
     }))
     this.setNodos(nodosActualizados)
+  }
+
+  // Método para calcular los pesos finales de todos los nodos según AHP
+  calcularPesosFinales(): void {
+    const nodos = this.getNodos()
+
+    // Función recursiva para asignar pesofinal
+    const asignarPesoFinal = (nodo: Nodo, pesoAcumulado: number) => {
+      const hijos = this.getHijos(nodo.idnodo)
+      // Peso final del nodo = peso acumulado que recibe del padre
+      nodo.pesofinal = pesoAcumulado
+
+      if (hijos.length > 0) {
+        hijos.forEach(hijo => {
+          const pesoHijo = hijo.peso ?? (1 / hijos.length) // si no tiene peso definido, repartir equitativamente
+          asignarPesoFinal(hijo, pesoAcumulado * pesoHijo)
+        })
+      }
+    }
+
+    // Iniciar desde nodos raíz con peso acumulado = 1
+    this.getNodosRaiz().forEach(nodoRaiz => {
+      asignarPesoFinal(nodoRaiz, 1)
+    })
+
+    // Actualizar los nodos con los nuevos pesos finales
+    this.setNodos(nodos)
   }
 
 

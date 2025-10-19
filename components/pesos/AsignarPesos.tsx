@@ -99,7 +99,7 @@ const AsignarPesos: React.FC<AsignarPesosProps> = ({ nodos, onSave }) => {
 
   // Guardar pesos
   const handleSave = () => {
-    if (isValidSum && Object.keys(errors).length === 0) {
+    if ( Object.keys(errors).length === 0) {
       onSave(weights)//Enviamos los nuevos pesos
     }
   }
@@ -195,7 +195,6 @@ const AsignarPesos: React.FC<AsignarPesosProps> = ({ nodos, onSave }) => {
         <div className="flex justify-end pt-4">
           <Button
             onClick={handleSave}
-            disabled={!isValidSum || Object.keys(errors).length > 0}
             className="min-w-[120px]"
           >
             Guardar Pesos

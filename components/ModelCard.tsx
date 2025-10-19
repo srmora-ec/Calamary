@@ -36,11 +36,11 @@ const getLineaText = (linea: number) => {
 }
 
 export default function ModelCard({ modelo }: ModelCardProps) {
-  const [loading,SetLoading] = useState(false);
-    const router = useRouter()
+  const [loading, SetLoading] = useState(false);
+  const router = useRouter()
   return (
     <div className="card">
-      <Spinner visible={loading}/>
+      <Spinner visible={loading} />
       <div className="card-header">
         <div className="flex justify-between items-start">
           <div className="flex-1">
@@ -63,16 +63,30 @@ export default function ModelCard({ modelo }: ModelCardProps) {
         <div className="flex justify-between items-center">
           <span className="text-secondary">Línea: {getLineaText(modelo.linea)}</span>
 
-          <span className="text-secondary">{new Date(modelo.updated_at||modelo.created_at).toLocaleDateString()}</span>
+          <span className="text-secondary">{new Date(modelo.updated_at || modelo.created_at).toLocaleDateString()}</span>
           <button
             onClick={() => {
-SetLoading(true);
-               router.push("/tablero/"+modelo.id)
+              SetLoading(true);
+              router.push("/tablero/" + modelo.id)
             }}
             className="focus:outline-none cursor-pointer"
           >
             <Image
               src="/editar.png"
+              alt="Botón de editar"
+              width={40}
+              height={40}
+            />
+          </button>
+          <button
+            onClick={() => {
+              SetLoading(true);
+              router.push("/evaluacion/" + modelo.id)
+            }}
+            className="focus:outline-none cursor-pointer"
+          >
+            <Image
+              src="/play.png"
               alt="Botón de play"
               width={40}
               height={40}

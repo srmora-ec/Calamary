@@ -84,11 +84,11 @@ export default function ModeloPage() {
         nodos={nodos}
         onSave={async (matrix, weights) => {
           try {
-                  const token = Array.isArray(tokenexperto) ? tokenexperto[0] : tokenexperto;
+            const token = Array.isArray(tokenexperto) ? tokenexperto[0] : tokenexperto;
 
-            console.log("token:",tokenexperto)
-                        console.log("matriz:",matrix)
-                                    console.log("pesos:",weights)
+            console.log("token:", tokenexperto)
+            console.log("matriz:", matrix)
+            console.log("pesos:", weights)
 
 
             const { data, error } = await supabase.rpc("responder_invitacion_experto", {
