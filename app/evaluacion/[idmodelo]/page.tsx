@@ -75,6 +75,7 @@ export default function AlternativasPage() {
           orientacion: data.modelo.orientacion,
           linea: data.modelo.linea,
           publico: data.modelo.publico,
+          metodo: data.modelo.metodo,
           nodos: {
             nodes: (data.modelo.nodos?.nodes ?? []).map((n: any) => ({
               idnodo: n.idnodo,
@@ -124,7 +125,7 @@ export default function AlternativasPage() {
       const tipos = criteriosFinales.map((crit) => (crit.beneficio ? "max" : "min"))
 
       // Normalización
-      const resNormalizacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/SAW/normalizar`, {
+      const resNormalizacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/normalizar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matrix, tipos }),
@@ -135,14 +136,14 @@ export default function AlternativasPage() {
       const weights = criteriosFinales.map((crit) => crit.pesofinal || 0)
 
       // Agregación
-      const resAgregacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/SAW/agregar`, {
+      const resAgregacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/agregar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ matrix: matrizNormalizada, weights }),
       })
       if (!resAgregacion.ok) throw new Error(await resAgregacion.text())
-      const dataAgregacion: { result: { scores: number[] } } = await resAgregacion.json()
-      const { scores } = dataAgregacion.result
+      const dataAgregacion: { result: number[] } = await resAgregacion.json()
+      const scores = dataAgregacion.result
 
       // Create array of objects with score, index, and alternative data
       const combinedData = scores.map((score, idx) => ({
@@ -360,61 +361,61 @@ export default function AlternativasPage() {
   const columnasValores =
     modoValor === "unico"
       ? criteriosFinales.map((criterio: Nodo) => ({
-          title: criterio.titulo,
+        title: criterio.titulo,
+        dataIndex: ["valores", criterio.idnodo],
+        key: `criterio-${criterio.idnodo}`,
+        width: 150,
+        render: (valorCriterio: ValorCriterio, record: Alternativa) => {
+          const valor = valorCriterio?.tipo === "unico" ? valorCriterio.valor : criterio.min || 0
+          return (
+            <InputNumber
+              value={valor}
+              onChange={(val) => actualizarValorUnico(record.key, criterio.idnodo, val || 0)}
+              min={criterio.min || 0}
+              max={criterio.max || 100}
+              className="w-full"
+            />
+          )
+        },
+      }))
+      : criteriosFinales.flatMap((criterio: Nodo) => [
+        {
+          title: `${criterio.titulo} (Min)`,
           dataIndex: ["valores", criterio.idnodo],
-          key: `criterio-${criterio.idnodo}`,
+          key: `criterio-${criterio.idnodo}-min`,
           width: 150,
           render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-            const valor = valorCriterio?.tipo === "unico" ? valorCriterio.valor : criterio.min || 0
+            const valor = valorCriterio?.tipo === "rango" ? valorCriterio.min : criterio.min || 0
             return (
               <InputNumber
                 value={valor}
-                onChange={(val) => actualizarValorUnico(record.key, criterio.idnodo, val || 0)}
+                onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "min", val || 0)}
                 min={criterio.min || 0}
                 max={criterio.max || 100}
                 className="w-full"
               />
             )
           },
-        }))
-      : criteriosFinales.flatMap((criterio: Nodo) => [
-          {
-            title: `${criterio.titulo} (Min)`,
-            dataIndex: ["valores", criterio.idnodo],
-            key: `criterio-${criterio.idnodo}-min`,
-            width: 150,
-            render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-              const valor = valorCriterio?.tipo === "rango" ? valorCriterio.min : criterio.min || 0
-              return (
-                <InputNumber
-                  value={valor}
-                  onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "min", val || 0)}
-                  min={criterio.min || 0}
-                  max={criterio.max || 100}
-                  className="w-full"
-                />
-              )
-            },
+        },
+        {
+          title: `${criterio.titulo} (Max)`,
+          dataIndex: ["valores", criterio.idnodo],
+          key: `criterio-${criterio.idnodo}-max`,
+          width: 150,
+          render: (valorCriterio: ValorCriterio, record: Alternativa) => {
+            const valor = valorCriterio?.tipo === "rango" ? valorCriterio.max : criterio.max || 100
+            return (
+              <InputNumber
+                value={valor}
+                onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "max", val || 0)}
+                min={criterio.min || 0}
+                max={criterio.max || 100}
+                className="w-full"
+              />
+            )
           },
-          {
-            title: `${criterio.titulo} (Max)`,
-            dataIndex: ["valores", criterio.idnodo],
-            key: `criterio-${criterio.idnodo}-max`,
-            width: 150,
-            render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-              const valor = valorCriterio?.tipo === "rango" ? valorCriterio.max : criterio.max || 100
-              return (
-                <InputNumber
-                  value={valor}
-                  onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "max", val || 0)}
-                  min={criterio.min || 0}
-                  max={criterio.max || 100}
-                  className="w-full"
-                />
-              )
-            },
-          },
-        ])
+        },
+      ])
 
   const columns = [
     {
@@ -462,16 +463,16 @@ export default function AlternativasPage() {
 
   const datosNormalizados = resultadoSAW
     ? alternativas.map((alt, idx) => ({
-        key: alt.key,
-        nombre: alt.nombre,
-        ...criteriosFinales.reduce(
-          (acc, _, criterioIdx) => {
-            acc[`criterio_${criterioIdx}`] = resultadoSAW.matriz_normalizada[idx]?.[criterioIdx] || 0
-            return acc
-          },
-          {} as Record<string, number>,
-        ),
-      }))
+      key: alt.key,
+      nombre: alt.nombre,
+      ...criteriosFinales.reduce(
+        (acc, _, criterioIdx) => {
+          acc[`criterio_${criterioIdx}`] = resultadoSAW.matriz_normalizada[idx]?.[criterioIdx] || 0
+          return acc
+        },
+        {} as Record<string, number>,
+      ),
+    }))
     : []
 
   const columnasResultados = [
@@ -519,12 +520,12 @@ export default function AlternativasPage() {
 
   const datosResultados = resultadoSAW
     ? resultadoSAW.ranking.map((rank, idx) => ({
-        key: alternativas[idx].key,
-        nombre: alternativas[idx].nombre,
-        puntuacion: resultadoSAW.puntuaciones[idx],
-        ranking: rank,
-        porcentaje: (resultadoSAW.puntuaciones[idx] / Math.max(...resultadoSAW.puntuaciones)) * 100,
-      }))
+      key: alternativas[idx].key,
+      nombre: alternativas[idx].nombre,
+      puntuacion: resultadoSAW.puntuaciones[idx],
+      ranking: rank,
+      porcentaje: (resultadoSAW.puntuaciones[idx] / Math.max(...resultadoSAW.puntuaciones)) * 100,
+    }))
     : []
 
   const tabItems = [
@@ -713,14 +714,13 @@ export default function AlternativasPage() {
   return (
     <div className="flex h-screen">
       <div
-        className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out ${
-          sidebarCollapsed ? "w-12" : "w-1/3"
-        }`}
+        className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out ${sidebarCollapsed ? "w-12" : "w-1/3"
+          }`}
       >
         <div className="flex items-center justify-between p-2 border-b">
           {!sidebarCollapsed && (
             <div className="flex-1 px-2">
-              <h2 className="text-lg font-bold truncate">{modelo?.getData().nombre}</h2>
+              <h2 className="text-lg font-bold truncate">{modelo?.getData().nombre} <span>({modelo?.getData().metodo})</span></h2>
               <p className="text-xs text-gray-500 truncate">{modelo?.getData().descripcion}</p>
             </div>
           )}

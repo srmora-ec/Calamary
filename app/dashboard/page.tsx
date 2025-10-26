@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
@@ -9,6 +8,8 @@ import Header from "@/components/Header"
 import ModelCard from "@/components/ModelCard"
 import CreateModelModal from "@/components/CreateModelModal"
 import { useAuthContext } from "@/context/AuthProvider"
+import { Row, Col, Input, Button, Space } from "antd"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 
 interface Modelo {
   id: string
@@ -17,12 +18,12 @@ interface Modelo {
   orientacion: "h" | "v"
   linea: number
   publico: boolean
-  created_at: string,
-  updated_at:string
+  created_at: string
+  updated_at: string
 }
 
 export default function DashboardPage() {
-    const { user, loading } = useAuthContext();
+  const { user, loading } = useAuthContext()
   const router = useRouter()
   const [modelos, setModelos] = useState<Modelo[]>([])
   const [totalModelos, setTotalModelos] = useState(0)
@@ -30,19 +31,38 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
- useEffect(() => {
+  useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      router.push("/login")
     }
-  }, [loading, user, router]);
+  }, [loading, user, router])
 
   useEffect(() => {
     if (user) {
+      verificarAdmin()
       loadModelos()
       loadTotalModelos()
     }
   }, [user, currentPage, searchTerm])
+
+  // Verificar si el usuario es administrador
+  const verificarAdmin = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("administradores")
+        .select("id")
+        .eq("usuario", user?.id)
+        .maybeSingle()
+
+      if (error) throw error
+      setIsAdmin(!!data) // si existe registro, es admin
+    } catch (error) {
+      console.error("Error al verificar administrador:", error)
+      setIsAdmin(false)
+    }
+  }
 
   const loadTotalModelos = async () => {
     if (!user) return
@@ -60,18 +80,14 @@ export default function DashboardPage() {
 
   const loadModelos = async () => {
     if (!user) return
-
     setLoading(true)
     try {
-      console.log(user.id)
       const { data, error } = await supabase.rpc("get_modelos_paginados", {
         p_idusuario: user.id,
         p_pagina: currentPage,
         p_tamano: 10,
         p_busqueda: searchTerm,
-
       })
-
       if (error) throw error
       setModelos(data || [])
     } catch (error) {
@@ -117,31 +133,44 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center">
-          <form
-            onSubmit={handleSearch}
-            className="w-full md:w-auto"
-            style={{ marginBottom: 0 }}
-          >
-            <div className="relative w-full md:w-10"> {/* 👈 buscador más corto en desktop */}
-              {/* <span className="search-icon">🔍</span> */}
-              <input
-                type="text"
+        {/* Botones y buscador */}
+        <Row gutter={[16, 16]} align="middle" className="mb-6">
+          {/* Buscador */}
+          <Col xs={24} md={12} lg={8}>
+            <form onSubmit={handleSearch}>
+              <Input
                 placeholder="Buscar modelos..."
-                className="search-input w-10"
+                prefix={<SearchOutlined />}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                allowClear
               />
-            </div>
-          </form>
+            </form>
+          </Col>
 
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="btn btn-primary"
-          >
-            + Crear Modelo
-          </button>
-        </div>
+          {/* Botones */}
+          <Col xs={24} md={12} lg={16}>
+            <Space wrap>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                Crear Modelo
+              </Button>
+
+              {isAdmin && (
+                <Button
+                  type="default"
+                  onClick={() => router.push("/metodos")}
+                >
+                  Métodos
+                </Button>
+              )}
+            </Space>
+          </Col>
+        </Row>
+
         {/* Models Grid */}
         {loadingLocal ? (
           <div className="flex justify-center py-8">
@@ -150,7 +179,9 @@ export default function DashboardPage() {
         ) : modelos.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-secondary">
-              {searchTerm ? "No se encontraron modelos con ese término de búsqueda." : "No tienes modelos creados aún."}
+              {searchTerm
+                ? "No se encontraron modelos con ese término de búsqueda."
+                : "No tienes modelos creados aún."}
             </p>
           </div>
         ) : (

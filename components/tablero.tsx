@@ -6,6 +6,7 @@ import Switch from "./Switch";
 import CustomNodo from "./CustomNodo";
 import ConfigureModalPeso from "./pesos/ConfiguredPeso";
 import ExportModelo from "./ExportModelo";
+import { supabase } from "@/lib/supabase";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -15,6 +16,13 @@ interface TableroProps {
   onActualizarNodo?: (nodoSeleccionado: Nodo) => void//Para solicitar cambios en un nodo
   nodoCambios: Nodo | null//Para recibir cambios de nodo
 }
+
+interface Metodo {
+  id: number
+  nombre: string
+  descripcion: string
+}
+
 
 const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios }) => {//recuperamos elmodelo de desición que vamos a diseñar
 
@@ -26,6 +34,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges
   const [nodosSeleccionados, setNodosSeleccionados] = useState<Nodo[] | null>(null)
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [metodos, setMetodos] = useState<Metodo[]>([]);
+  const [metodo, setMetodo] = useState<string>("");
 
   const nodeTypes = {
     custom: CustomNodo,
@@ -35,10 +45,30 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
     modelo.setOrientacion(orientacion);
     modelo.setLinea(linea);
-
+    setMetodo(data.metodo)
     setNodes(modelo.getNodosReactFlow());//volvemos a cargar los nodos
     setEdges(modelo.getEdgesReactFlow());//volvewmos a cargar los edges
   }, [orientacion, modelo, linea]);
+
+
+  useEffect(() => {
+    const fetchMetodos = async () => {
+      const { data, error } = await supabase
+        .from("metodos")
+        .select("id, nombre, descripcion")
+        .eq("estado",true)
+        .order("id", { ascending: true })
+
+      if (error) {
+        console.error(error)
+      } else if (data) {
+
+        console.log("metodos:", data)
+        setMetodos(data)
+      }
+    }
+    fetchMetodos()
+  }, [])
 
   useEffect(() => {// Por si se actualizan los datos de orientación
     if (nodoCambios) {
@@ -277,6 +307,27 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               <option value={4} className="text-xs">Bézier</option>
             </select>
           </div>
+          {modelo.getMetodo() != "" && (
+            <div>
+              <select
+                className="form-select text-xs border rounded px-2 py-1"
+                value={metodo}
+                onChange={(e) => {
+                  setMetodo(e.target.value);
+                  modelo.setMetodo(e.target.value)
+                  console.log(e.target.value)
+                }}
+              >
+                <option value="">Selecciona un método</option>
+                {metodos.map((metodo) => (
+                  <option key={metodo.id} value={metodo.nombre}>
+                    {metodo.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
 
         </div>
 

@@ -23,6 +23,7 @@ export interface ModeloData {
   orientacion: "h" | "v"
   linea: number
   publico: boolean
+  metodo: string
   nodos: {
     nodes: Nodo[]
   }
@@ -61,9 +62,16 @@ export class Modelo {
   setLinea(linea: number) {
     this.data.linea = linea;
   }
+  //Para cambiar le metodo
+  setMetodo(metodo: string) {
+    this.data.metodo = metodo;
+  }
 
   getLinea(): number {
     return this.data.linea;
+  }
+  getMetodo(): string {
+    return this.data.metodo;
   }
 
   // Obtener todos los nodos

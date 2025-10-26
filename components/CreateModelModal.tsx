@@ -47,6 +47,8 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
       if (error) {
         console.error(error)
       } else if (data) {
+        
+        console.log("metodos:",data)
         setMetodos(data)
         // Si no hay método seleccionado aún, tomamos el primero como predeterminado
         if (data.length > 0 && !formData.metodoId) {

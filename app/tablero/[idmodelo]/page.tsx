@@ -48,6 +48,7 @@ export default function ModeloPage() {
           orientacion: data.modelo.orientacion,
           linea: data.modelo.linea,
           publico: data.modelo.publico,
+          metodo:data.modelo.metodo,
           nodos: {
             nodes: (data.modelo.nodos?.nodes ?? []).map((n: any) => ({
               idnodo: n.idnodo,
@@ -91,7 +92,8 @@ export default function ModeloPage() {
         p_orientacion: datamodelo.orientacion,
         p_linea: datamodelo.linea,
         p_publico: datamodelo.publico,
-        p_nodos: { nodes: datamodelo.nodos.nodes }
+        p_nodos: { nodes: datamodelo.nodos.nodes },
+        p_metodo_nombre: datamodelo.metodo
       });
 
     if (error) {
