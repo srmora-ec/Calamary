@@ -1,6 +1,7 @@
 // app/modelos/[idmodelo]/page.tsx  (Next.js 13+ con App Router)
 "use client";
 
+import ConfigureMautNodo from "@/components/ConfiguredCriterioMaut";
 import ConfigureModalNodo from "@/components/ConfiguredNodo";//Configurar la información del nodo
 import ConfigureModalPeso from "@/components/pesos/ConfiguredPeso";//Modal para confugurar el peso
 import Spinner from "@/components/pesos/Spinner";
@@ -19,6 +20,7 @@ export default function ModeloPage() {
   const [linea, setLinea] = useState<number>(1); //Para la linea
   const { user, loading } = useAuthContext(); //Verficamos que inicie sesión
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
+  const [IsMautConfigured, setIsMautConfigured] = useState(false);
   const [isPesoOpen, setIsPesoOpen] = useState(false); //Para abrir 
   const [nodoActual, setNodoActual] = useState<Nodo | null>(null); //Para actualizar un nodo
 
@@ -48,7 +50,7 @@ export default function ModeloPage() {
           orientacion: data.modelo.orientacion,
           linea: data.modelo.linea,
           publico: data.modelo.publico,
-          metodo:data.modelo.metodo,
+          metodo: data.modelo.metodo,
           nodos: {
             nodes: (data.modelo.nodos?.nodes ?? []).map((n: any) => ({
               idnodo: n.idnodo,
@@ -56,11 +58,13 @@ export default function ModeloPage() {
               posy: n.posy,
               titulo: n.titulo,
               idpadre: n.idpadre,
-              descripcion:n.descripcion,
+              descripcion: n.descripcion,
               peso: n.peso,
               pesofinal: n.pesofinal,
               acortado: n.acortado,
               beneficio: n.beneficio,
+              unidadmedida: n.unidadmedida,
+              MAUT:n.MAUT,
               min: n.min,
               max: n.max
             }))
@@ -80,6 +84,11 @@ export default function ModeloPage() {
   const handleNodoActualizado = (nodo: Nodo) => {
     setNodoActual(nodo);
     setIsConfigureOpen(true);
+  }
+
+  const handleCriterioMaut = (nodo: Nodo) => {
+    setNodoActual(nodo);
+    setIsMautConfigured(true);
   }
 
   const handleModeloActualizado = async (modeloActual: Modelo) => {//Para actualizar elmodelo en la base de datos
@@ -106,19 +115,28 @@ export default function ModeloPage() {
 
   if (loading || !user) {
     return (
-      <Spinner visible={true}/>
+      <Spinner visible={true} />
     )
   }
 
   return (
     <div className="flex items-center justify-center h-screen">
       {nodoActual && (
-        <ConfigureModalNodo
-          isOpen={isConfigureOpen}
-          onClose={() => { setIsConfigureOpen(false) }}
-          nodo={nodoActual}
-          onNodoUpdated={setNodoActual}
-        />
+        <>
+          <ConfigureModalNodo
+            isOpen={isConfigureOpen}
+            onClose={() => { setIsConfigureOpen(false) }}
+            nodo={nodoActual}
+            onNodoUpdated={setNodoActual}
+          />
+
+          <ConfigureMautNodo
+            isOpen={IsMautConfigured}
+            onClose={() => { setIsMautConfigured(false) }}
+            nodo={nodoActual}
+            onNodoUpdated={setNodoActual}
+          />
+        </>
       )}
 
       {modelo && (
@@ -129,10 +147,11 @@ export default function ModeloPage() {
             linea={linea}
             onActualizarModelo={handleModeloActualizado}
             onActualizarNodo={handleNodoActualizado}
+            onCriterioMaut={handleCriterioMaut}
             nodoCambios={nodoActual}
           />
         </>
-      ) }
+      )}
     </div>
   );
 }

@@ -14,6 +14,7 @@ interface TableroProps {
   linea: number // Para actualizar lineas
   onActualizarModelo?: (modeloActual: Modelo) => void // Para devolver el modelo creado
   onActualizarNodo?: (nodoSeleccionado: Nodo) => void//Para solicitar cambios en un nodo
+  onCriterioMaut?:(nodoSeleccionado:Nodo)=> void //Para solicitar cambios de la utilidad para elmetodo MAUT
   nodoCambios: Nodo | null//Para recibir cambios de nodo
 }
 
@@ -24,7 +25,7 @@ interface Metodo {
 }
 
 
-const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios }) => {//recuperamos elmodelo de desición que vamos a diseñar
+const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios,onCriterioMaut }) => {//recuperamos elmodelo de desición que vamos a diseñar
 
   const data = modelo.getData()
 
@@ -213,6 +214,17 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     setEdges(modelo.getEdgesReactFlow())
     closeContextMenu()
   }
+
+  const configurarUtilidad = (idnodo: number) => {
+    guardarpos()
+    const nodo = modelo.getNodoById(idnodo)
+    if (nodo && onCriterioMaut) {
+      onCriterioMaut(nodo)
+    }
+    setNodes(modelo.getNodosReactFlow())
+    setEdges(modelo.getEdgesReactFlow())
+    closeContextMenu()
+  }
   const configurarPesos = (idnodo: number) => {
     guardarpos()
     const nodos = modelo.getHijos(idnodo)
@@ -392,6 +404,14 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
             >
               Configuración de criterio
             </button>
+            {modelo.getMetodo()=="MAUT" &&  !modelo.tieneHijos(Number(contextMenu.nodoId)) && ( 
+              <button
+              onClick={() => contextMenu.nodoId !== null && configurarUtilidad(contextMenu.nodoId)}
+              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+            >
+              Configuración de utilidad
+            </button>
+            )}
             {contextMenu.nodoId !== null &&
               modelo.getNodos().some(n => n.idpadre === contextMenu.nodoId) && (
                 <button

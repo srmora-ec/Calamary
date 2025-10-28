@@ -93,6 +93,17 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                         rows={4} // opcional, para definir alto inicial
                     />
                 </div>
+                <div className="form-group">
+                    <label className="form-label">Unidad de medida *</label>
+                    <input
+                        type="text"
+                        className="form-input"
+                        value={formData.unidadmedida}
+                        onChange={(e) => setFormData({ ...formData, unidadmedida: e.target.value})}
+                        maxLength={10}
+                        required
+                    />
+                </div>
 
                 {formData.criterioFinal && (
 

@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
-import { Tabs, Button, Table, Input, InputNumber, message, Switch, Spin, Upload } from "antd"
+import { Tabs, Button, Table, Input, InputNumber, message, Switch, Spin, Upload, Select } from "antd" // Importar Select
 import { UploadOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons"
-import { Modelo, type ModeloData, type Nodo } from "@/types/modelo"
+import { Modelo, type ModeloData, type Nodo, type ValorDiscretoMAUT } from "@/types/modelo" // Importar ValorDiscretoMAUT
 import ModeloSvgViewer from "@/components/modelo-svg-viewer"
 import { supabase } from "@/lib/supabase"
 import * as XLSX from "xlsx"
@@ -13,7 +13,7 @@ type ModoValor = "unico" | "rango"
 
 interface ValorUnico {
   tipo: "unico"
-  valor: number
+  valor: number | string // Valor puede ser número (continuo) o string (opción discreta)
 }
 
 interface ValorRango {
@@ -51,6 +51,23 @@ export default function AlternativasPage() {
   const [evaluando, setEvaluando] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [validacionMAUT, setValidacionMAUT] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (modelo && modelo.getData().metodo === "MAUT") {
+      // Nota: obtenerResumenValidacionMAUT ya verifica la configuración para tipos discretos.
+      const resumen = modelo.obtenerResumenValidacionMAUT()
+      const validacion = modelo.verificarFuncionesUtilidad()
+
+      if (!validacion.valido) {
+        setValidacionMAUT(resumen)
+      } else {
+        setValidacionMAUT(null)
+      }
+    } else {
+      setValidacionMAUT(null)
+    }
+  }, [modelo])
 
   useEffect(() => {
     const fetchModelo = async () => {
@@ -91,6 +108,7 @@ export default function AlternativasPage() {
               min: n.min,
               max: n.max,
               criterioFinal: n.criterioFinal,
+              MAUT: n.MAUT,
             })),
           },
         }
@@ -111,6 +129,126 @@ export default function AlternativasPage() {
     }
     setEvaluando(true)
 
+    if (modelo?.getMetodo() == "MAUT") {
+      try {
+        if (validacionMAUT) {
+          message.error("No se puede evaluar. Faltan funciones de utilidad en los criterios finales (MAUT)")
+          setEvaluando(false)
+          return
+        }
+
+        modelo?.calcularPesosFinales()
+        const criteriosFinales = modelo?.getCriteriosFinales() || []
+
+        // Construir la matriz de valores de alternativas
+        const matrix = alternativas.map((alt) =>
+          criteriosFinales.map((crit) => {
+            const val = alt.valores[crit.idnodo]
+
+            // Manejo de Criterios Discretos
+            if (crit.MAUT?.tipoFuncion === "discreta" && val.tipo === "unico" && typeof val.valor === "string") {
+              const valorDiscreto = crit.MAUT.funcionDiscreta?.valores.find((v) => v.nombre === val.valor)
+              if (valorDiscreto) {
+                // Para la matriz, usamos el valor promedio de utilidad del rango discreto
+                return (valorDiscreto.utilidadMin + valorDiscreto.utilidadMax) / 2
+              }
+              // Si no encuentra el nombre, usar un valor por defecto (ej. 0 o lanzar error)
+              return 0
+            }
+
+            // Manejo de Criterios Continuos (Único o Rango)
+            return val.tipo === "unico"
+              ? (val.valor as number) // Forzar como number ya que no es discreto
+              : (val.min + val.max) / 2
+          }),
+        )
+
+        // Construir el array de criterios con su configuración MAUT
+        const criterios = criteriosFinales.map((crit) => ({
+          idnodo: crit.idnodo,
+          titulo: crit.titulo,
+          criterioFinal: crit.criterioFinal,
+          MAUT: crit.MAUT,
+        }))
+
+        // Llamar a la API de normalización MAUT
+        // NOTA: Para MAUT discreto, la matriz de entrada ya contiene utilidades (promedio),
+        // pero se manda a este endpoint para que aplique la normalización a los valores continuos
+        // según las funciones de utilidad configuradas.
+        const resNormalizacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/maut/normalizar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matrix, criterios }),
+        })
+
+        if (!resNormalizacion.ok) {
+          const errorText = await resNormalizacion.text()
+          throw new Error(errorText)
+        }
+
+        const dataNormalizacion = await resNormalizacion.json()
+        const matrizNormalizada = dataNormalizacion.result
+
+        // Obtener los pesos finales
+        const weights = criteriosFinales.map((crit) => crit.pesofinal || 0)
+
+        // Agregación (usar el mismo endpoint que SAW)
+        const resAgregacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/SAW/agregar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matrix: matrizNormalizada, weights }),
+        })
+
+        if (!resAgregacion.ok) {
+          const errorText = await resAgregacion.text()
+          throw new Error(errorText)
+        }
+
+        const dataAgregacion: { result: number[] } = await resAgregacion.json()
+        const scores = dataAgregacion.result
+
+        // Crear array combinado con score, índice y datos de alternativa
+        const combinedData = scores.map((score, idx) => ({
+          score,
+          idx,
+          alternativa: alternativas[idx],
+          matrizNormalizada: matrizNormalizada[idx],
+        }))
+
+        // Ordenar por score descendente (mayor score primero)
+        combinedData.sort((a, b) => b.score - a.score)
+
+        // Extraer datos ordenados
+        const alternativasOrdenadas = combinedData.map((item) => item.alternativa)
+        const puntuacionesOrdenadas = combinedData.map((item) => item.score)
+        const matrizNormalizadaOrdenada = combinedData.map((item) => item.matrizNormalizada)
+
+        const matrizPonderada: number[][] = matrizNormalizadaOrdenada.map((fila: number[]) =>
+          fila.map((valor, idx) => valor * weights[idx]),
+        )
+
+        // Actualizar estado con alternativas ordenadas
+        setAlternativas(alternativasOrdenadas)
+
+        setResultadoSAW({
+          matriz_normalizada: matrizNormalizadaOrdenada,
+          matriz_ponderada: matrizPonderada,
+          puntuaciones: puntuacionesOrdenadas,
+          ranking: combinedData.map((_, i) => i + 1), // 1 = mejor
+        })
+
+        message.success("Evaluación MAUT completada exitosamente")
+      } catch (error) {
+        console.error("[v0] Error ejecutando evaluación MAUT:", error)
+        message.error(
+          `Error al ejecutar la evaluación MAUT: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        )
+      } finally {
+        setEvaluando(false)
+      }
+      return
+    }
+
     try {
       modelo?.calcularPesosFinales()
       const criteriosFinales = modelo?.getCriteriosFinales() || []
@@ -118,29 +256,36 @@ export default function AlternativasPage() {
       const matrix = alternativas.map((alt) =>
         criteriosFinales.map((crit) => {
           const val = alt.valores[crit.idnodo]
-          return val.tipo === "unico" ? val.valor : (val.min + val.max) / 2
+          // Para SAW/otro método que no es MAUT, el valor siempre es numérico (continuo).
+          return val.tipo === "unico" ? (val.valor as number) : (val.min + val.max) / 2
         }),
       )
 
       const tipos = criteriosFinales.map((crit) => (crit.beneficio ? "max" : "min"))
 
       // Normalización
-      const resNormalizacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/normalizar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matrix, tipos }),
-      })
+      const resNormalizacion = await fetch(
+        `${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/normalizar`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matrix, tipos }),
+        },
+      )
       if (!resNormalizacion.ok) throw new Error(await resNormalizacion.text())
       const dataNormalizacion = await resNormalizacion.json()
       const matrizNormalizada = dataNormalizacion.result
       const weights = criteriosFinales.map((crit) => crit.pesofinal || 0)
 
       // Agregación
-      const resAgregacion = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/agregar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matrix: matrizNormalizada, weights }),
-      })
+      const resAgregacion = await fetch(
+        `${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/agregar`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matrix: matrizNormalizada, weights }),
+        },
+      )
       if (!resAgregacion.ok) throw new Error(await resAgregacion.text())
       const dataAgregacion: { result: number[] } = await resAgregacion.json()
       const scores = dataAgregacion.result
@@ -184,6 +329,34 @@ export default function AlternativasPage() {
     }
   }
 
+  const getValorInicialParaCriterio = (criterio: Nodo, modo: ModoValor): ValorCriterio => {
+    // Si es un criterio final MAUT discreto, forzamos un valor único con el nombre de la primera opción
+    if (
+      modelo?.getMetodo() === "MAUT" &&
+      criterio.MAUT?.tipoFuncion === "discreta" &&
+      criterio.MAUT.funcionDiscreta?.valores.length
+    ) {
+      return {
+        tipo: "unico",
+        valor: criterio.MAUT.funcionDiscreta.valores[0].nombre, // Usa el nombre de la primera opción
+      }
+    }
+
+    // Lógica para modo continuo (único/rango)
+    if (modo === "unico") {
+      return {
+        tipo: "unico",
+        valor: criterio.min || 0,
+      }
+    } else {
+      return {
+        tipo: "rango",
+        min: criterio.min || 0,
+        max: criterio.max || 100,
+      }
+    }
+  }
+
   const agregarAlternativa = () => {
     const criteriosFinales = modelo?.getCriteriosFinales() || []
     const nuevaAlternativa: Alternativa = {
@@ -193,18 +366,7 @@ export default function AlternativasPage() {
     }
 
     criteriosFinales.forEach((criterio) => {
-      if (modoValor === "unico") {
-        nuevaAlternativa.valores[criterio.idnodo] = {
-          tipo: "unico",
-          valor: criterio.min || 0,
-        }
-      } else {
-        nuevaAlternativa.valores[criterio.idnodo] = {
-          tipo: "rango",
-          min: criterio.min || 0,
-          max: criterio.max || 100,
-        }
-      }
+      nuevaAlternativa.valores[criterio.idnodo] = getValorInicialParaCriterio(criterio, modoValor)
     })
 
     setAlternativas([...alternativas, nuevaAlternativa])
@@ -218,7 +380,8 @@ export default function AlternativasPage() {
     message.success("Alternativa eliminada")
   }
 
-  const actualizarValorUnico = (keyAlternativa: string, idCriterio: number, valor: number) => {
+  // Actualizada para manejar number (continuo) o string (discreto)
+  const actualizarValorUnico = (keyAlternativa: string, idCriterio: number, valor: number | string) => {
     setAlternativas(
       alternativas.map((alt) => {
         if (alt.key === keyAlternativa) {
@@ -318,24 +481,50 @@ export default function AlternativasPage() {
             const excelColIdx = criterioIdx + 1 // +1 because first column is alternative name
             const valor = row[excelColIdx]
 
-            if (valor !== undefined && valor !== null && valor !== "") {
-              const numValor = typeof valor === "number" ? valor : Number.parseFloat(valor.toString())
+            // Si el criterio es MAUT Discreto, buscamos una coincidencia de string
+            if (modelo?.getMetodo() === "MAUT" && criterio.MAUT?.tipoFuncion === "discreta") {
+              const valorStr = valor?.toString().trim() || ""
+              const opcionesDiscretas = criterio.MAUT.funcionDiscreta?.valores || []
+              const opcionEncontrada = opcionesDiscretas.find((op) => op.nombre.toLowerCase() === valorStr.toLowerCase())
 
-              if (!isNaN(numValor)) {
+              if (opcionEncontrada) {
                 nuevaAlternativa.valores[criterio.idnodo] = {
                   tipo: "unico",
-                  valor: numValor,
+                  valor: opcionEncontrada.nombre, // Almacenar el nombre de la opción
+                }
+              } else {
+                // Si no se encuentra, usar el valor por defecto (la primera opción)
+                nuevaAlternativa.valores[criterio.idnodo] = {
+                  tipo: "unico",
+                  valor: opcionesDiscretas[0]?.nombre || "",
+                }
+                if (valorStr) {
+                  message.warning(
+                    `El valor '${valorStr}' en el criterio discreto '${criterio.titulo}' de la alternativa '${nombreAlternativa}' no coincide con ninguna opción.`,
+                  )
+                }
+              }
+            } else {
+              // Lógica para criterios continuos
+              if (valor !== undefined && valor !== null && valor !== "") {
+                const numValor = typeof valor === "number" ? valor : Number.parseFloat(valor.toString())
+
+                if (!isNaN(numValor)) {
+                  nuevaAlternativa.valores[criterio.idnodo] = {
+                    tipo: "unico",
+                    valor: numValor,
+                  }
+                } else {
+                  nuevaAlternativa.valores[criterio.idnodo] = {
+                    tipo: "unico",
+                    valor: criterio.min || 0,
+                  }
                 }
               } else {
                 nuevaAlternativa.valores[criterio.idnodo] = {
                   tipo: "unico",
                   valor: criterio.min || 0,
                 }
-              }
-            } else {
-              nuevaAlternativa.valores[criterio.idnodo] = {
-                tipo: "unico",
-                valor: criterio.min || 0,
               }
             }
           })
@@ -358,64 +547,88 @@ export default function AlternativasPage() {
 
   const criteriosFinales = modelo?.getCriteriosFinales() || []
 
+  // Componente para renderizar la celda de valor único (continuo o discreto)
+  const renderValorUnicoCell = (criterio: Nodo, valorCriterio: ValorCriterio, record: Alternativa) => {
+    // 1. Criterio MAUT Discreto
+    if (modelo?.getMetodo() === "MAUT" && criterio.MAUT?.tipoFuncion === "discreta") {
+      const opcionesDiscretas = criterio.MAUT.funcionDiscreta?.valores || []
+      const valorSeleccionado = valorCriterio?.tipo === "unico" && typeof valorCriterio.valor === "string" ? valorCriterio.valor : opcionesDiscretas[0]?.nombre || ""
+
+      return (
+        <Select
+          value={valorSeleccionado}
+          onChange={(val) => actualizarValorUnico(record.key, criterio.idnodo, val)}
+          className="w-full"
+          options={opcionesDiscretas.map((op) => ({
+            label: op.nombre,
+            value: op.nombre,
+          }))}
+        />
+      )
+    }
+
+    // 2. Criterio Continuo (Numérico)
+    const valor = valorCriterio?.tipo === "unico" && typeof valorCriterio.valor === "number" ? valorCriterio.valor : criterio.min || 0
+
+    return (
+      <InputNumber
+        value={valor}
+        onChange={(val) => actualizarValorUnico(record.key, criterio.idnodo, val || 0)}
+        min={criterio.min || 0}
+        max={criterio.max || 100}
+        className="w-full"
+      />
+    )
+  }
+
   const columnasValores =
     modoValor === "unico"
       ? criteriosFinales.map((criterio: Nodo) => ({
-        title: criterio.titulo,
-        dataIndex: ["valores", criterio.idnodo],
-        key: `criterio-${criterio.idnodo}`,
-        width: 150,
-        render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-          const valor = valorCriterio?.tipo === "unico" ? valorCriterio.valor : criterio.min || 0
-          return (
-            <InputNumber
-              value={valor}
-              onChange={(val) => actualizarValorUnico(record.key, criterio.idnodo, val || 0)}
-              min={criterio.min || 0}
-              max={criterio.max || 100}
-              className="w-full"
-            />
-          )
-        },
-      }))
+          title: criterio.titulo,
+          dataIndex: ["valores", criterio.idnodo],
+          key: `criterio-${criterio.idnodo}`,
+          width: 150,
+          render: (valorCriterio: ValorCriterio, record: Alternativa) =>
+            renderValorUnicoCell(criterio, valorCriterio, record),
+        }))
       : criteriosFinales.flatMap((criterio: Nodo) => [
-        {
-          title: `${criterio.titulo} (Min)`,
-          dataIndex: ["valores", criterio.idnodo],
-          key: `criterio-${criterio.idnodo}-min`,
-          width: 150,
-          render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-            const valor = valorCriterio?.tipo === "rango" ? valorCriterio.min : criterio.min || 0
-            return (
-              <InputNumber
-                value={valor}
-                onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "min", val || 0)}
-                min={criterio.min || 0}
-                max={criterio.max || 100}
-                className="w-full"
-              />
-            )
+          {
+            title: `${criterio.titulo} (Min)`,
+            dataIndex: ["valores", criterio.idnodo],
+            key: `criterio-${criterio.idnodo}-min`,
+            width: 150,
+            render: (valorCriterio: ValorCriterio, record: Alternativa) => {
+              const valor = valorCriterio?.tipo === "rango" ? valorCriterio.min : criterio.min || 0
+              return (
+                <InputNumber
+                  value={valor}
+                  onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "min", val || 0)}
+                  min={criterio.min || 0}
+                  max={criterio.max || 100}
+                  className="w-full"
+                />
+              )
+            },
           },
-        },
-        {
-          title: `${criterio.titulo} (Max)`,
-          dataIndex: ["valores", criterio.idnodo],
-          key: `criterio-${criterio.idnodo}-max`,
-          width: 150,
-          render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-            const valor = valorCriterio?.tipo === "rango" ? valorCriterio.max : criterio.max || 100
-            return (
-              <InputNumber
-                value={valor}
-                onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "max", val || 0)}
-                min={criterio.min || 0}
-                max={criterio.max || 100}
-                className="w-full"
-              />
-            )
+          {
+            title: `${criterio.titulo} (Max)`,
+            dataIndex: ["valores", criterio.idnodo],
+            key: `criterio-${criterio.idnodo}-max`,
+            width: 150,
+            render: (valorCriterio: ValorCriterio, record: Alternativa) => {
+              const valor = valorCriterio?.tipo === "rango" ? valorCriterio.max : criterio.max || 100
+              return (
+                <InputNumber
+                  value={valor}
+                  onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "max", val || 0)}
+                  min={criterio.min || 0}
+                  max={criterio.max || 100}
+                  className="w-full"
+                />
+              )
+            },
           },
-        },
-      ])
+        ])
 
   const columns = [
     {
@@ -463,16 +676,16 @@ export default function AlternativasPage() {
 
   const datosNormalizados = resultadoSAW
     ? alternativas.map((alt, idx) => ({
-      key: alt.key,
-      nombre: alt.nombre,
-      ...criteriosFinales.reduce(
-        (acc, _, criterioIdx) => {
-          acc[`criterio_${criterioIdx}`] = resultadoSAW.matriz_normalizada[idx]?.[criterioIdx] || 0
-          return acc
-        },
-        {} as Record<string, number>,
-      ),
-    }))
+        key: alt.key,
+        nombre: alt.nombre,
+        ...criteriosFinales.reduce(
+          (acc, _, criterioIdx) => {
+            acc[`criterio_${criterioIdx}`] = resultadoSAW.matriz_normalizada[idx]?.[criterioIdx] || 0
+            return acc
+          },
+          {} as Record<string, number>,
+        ),
+      }))
     : []
 
   const columnasResultados = [
@@ -520,12 +733,12 @@ export default function AlternativasPage() {
 
   const datosResultados = resultadoSAW
     ? resultadoSAW.ranking.map((rank, idx) => ({
-      key: alternativas[idx].key,
-      nombre: alternativas[idx].nombre,
-      puntuacion: resultadoSAW.puntuaciones[idx],
-      ranking: rank,
-      porcentaje: (resultadoSAW.puntuaciones[idx] / Math.max(...resultadoSAW.puntuaciones)) * 100,
-    }))
+        key: alternativas[idx].key,
+        nombre: alternativas[idx].nombre,
+        puntuacion: resultadoSAW.puntuaciones[idx],
+        ranking: rank,
+        porcentaje: (resultadoSAW.puntuaciones[idx] / Math.max(...resultadoSAW.puntuaciones)) * 100,
+      }))
     : []
 
   const tabItems = [
@@ -545,6 +758,10 @@ export default function AlternativasPage() {
                 <Switch
                   checked={modoValor === "rango"}
                   onChange={(checked) => setModoValor(checked ? "rango" : "unico")}
+                  // Nota: Deshabilitar el cambio si hay algún criterio discreto activo para evitar conflictos de UX.
+                  disabled={criteriosFinales.some(
+                    (c) => modelo?.getMetodo() === "MAUT" && c.MAUT?.tipoFuncion === "discreta",
+                  )}
                 />
                 <span className={`text-sm font-medium ${modoValor === "rango" ? "text-blue-600" : "text-gray-400"}`}>
                   Rango (Min-Max)
@@ -561,7 +778,7 @@ export default function AlternativasPage() {
               <Button
                 type="primary"
                 onClick={ejecutarMetodo}
-                disabled={alternativas.length < 2}
+                disabled={alternativas.length < 2 || !!validacionMAUT}
                 loading={evaluando}
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -569,7 +786,18 @@ export default function AlternativasPage() {
               </Button>
             </div>
           </div>
-
+          {validacionMAUT && (
+            <div className="space-y-2 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <p className="font-medium">
+                ⚠️ **No se puede evaluar** porque faltan funciones de utilidad (Método **MAUT**):
+              </p>
+              <div className="whitespace-pre-line text-sm">{validacionMAUT}</div>
+              <p className="text-sm mt-2 text-red-600">
+                Por favor, configura las funciones de utilidad para todos los criterios finales en el tablero del modelo
+                antes de evaluar.
+              </p>
+            </div>
+          )}
           <div className="bg-white rounded-lg border">
             <Table columns={columns} dataSource={alternativas} pagination={false} scroll={{ x: "max-content" }} />
           </div>
@@ -587,7 +815,8 @@ export default function AlternativasPage() {
             </p>
             <p className="mt-2 text-xs text-gray-400">
               <strong>Formato Excel:</strong> Primera columna = nombres de alternativas, siguientes columnas = valores
-              para cada criterio (en el mismo orden que aparecen en el modelo)
+              para cada criterio. **Nota para MAUT discreto:** El valor en la celda debe coincidir con el **nombre** de
+              la opción discreta configurada.
             </p>
           </div>
         </div>
@@ -714,13 +943,16 @@ export default function AlternativasPage() {
   return (
     <div className="flex h-screen">
       <div
-        className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out ${sidebarCollapsed ? "w-12" : "w-1/3"
-          }`}
+        className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? "w-12" : "w-1/3"
+        }`}
       >
         <div className="flex items-center justify-between p-2 border-b">
           {!sidebarCollapsed && (
             <div className="flex-1 px-2">
-              <h2 className="text-lg font-bold truncate">{modelo?.getData().nombre} <span>({modelo?.getData().metodo})</span></h2>
+              <h2 className="text-lg font-bold truncate">
+                {modelo?.getData().nombre} <span>({modelo?.getData().metodo})</span>
+              </h2>
               <p className="text-xs text-gray-500 truncate">{modelo?.getData().descripcion}</p>
             </div>
           )}

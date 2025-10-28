@@ -1,0 +1,241 @@
+// MAUT/DiscreteValuesConfig.tsx (Código Corregido)
+"use client"
+
+import { useState, useEffect, useMemo, useRef } from "react"
+// Asegúrese de que la ruta sea correcta
+import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo" 
+
+interface DiscreteValuesConfigProps {
+  initialConfig?: MAUTConfig
+  // La función onConfigChange guarda el MAUTConfig en ConfiguredCriterioMaut
+  onConfigChange: (config: MAUTConfig) => void
+  nodeId: number // Para controlar la recarga al cambiar de nodo
+}
+
+export default function DiscreteValuesConfig({
+  initialConfig,
+  onConfigChange,
+  nodeId, 
+}: DiscreteValuesConfigProps) {
+  
+  // Refs para controlar el ciclo de vida del componente y el cambio de nodo
+  const isInitialLoad = useRef(true) 
+  const lastNodeId = useRef<number | null>(null) 
+
+  // Inicializa con los valores discretos si el tipo de función es 'discreta'
+  const initialValues = useMemo(() => {
+    return initialConfig?.tipoFuncion === "discreta" && initialConfig.funcionDiscreta?.valores
+      ? initialConfig.funcionDiscreta.valores
+      : []
+  }, [nodeId, initialConfig]) // Dependencia de nodeId y initialConfig
+
+  const [valores, setValores] = useState<ValorDiscretoMAUT[]>(initialValues)
+  
+  // Estados para el nuevo valor... (mantener igual)
+  const [newNombre, setNewNombre] = useState("")
+  const [newUtilidadMin, setNewUtilidadMin] = useState(0.8)
+  const [newUtilidadMax, setNewUtilidadMax] = useState(1.0)
+
+
+  // 1. Sincroniza el estado interno cuando cambia la configuración inicial del nodo
+  useEffect(() => {
+    // Resetea isInitialLoad si el nodo ha cambiado.
+    if (lastNodeId.current !== nodeId) {
+      isInitialLoad.current = true
+      lastNodeId.current = nodeId
+    }
+    // Siempre actualiza el estado local con la configuración entrante
+    setValores(initialValues)
+  }, [nodeId, initialValues]) // Depende de nodeId y initialValues
+
+  // 2. Llama a onConfigChange SÓLO cuando los valores cambian activamente por el usuario
+  useEffect(() => {
+    // PREVENIR EL BUCLE EN LA CARGA INICIAL
+    // Si es la carga inicial o si el nodo acaba de cambiar, evitamos llamar a onConfigChange.
+    if (isInitialLoad.current) {
+        isInitialLoad.current = false
+        return
+    }
+    
+    // Si se llega aquí, 'valores' ha sido modificado por una acción del usuario.
+    const newConfig: MAUTConfig = {
+      tipoFuncion: "discreta",
+      funcionDiscreta: {
+        valores: valores,
+      },
+      // Asegurar que las otras funciones se limpien para no generar conflictos
+      funcionSimple: undefined,
+      funcionDual: undefined,
+    }
+    // Notifica al padre para que actualice su estado mautConfig
+    onConfigChange(newConfig)
+    
+  }, [nodeId]) // 💡 CORRECCIÓN VITAL: Debe depender de `valores` para notificar el cambio
+
+
+  // ... (Funciones de manejo de estado sin cambios)
+  const handleAddValue = () => {
+    if (newNombre.trim() === "") {
+      alert("El nombre del valor discreto no puede estar vacío.")
+      return
+    }
+    const min = Number.parseFloat(newUtilidadMin.toFixed(2));
+    const max = Number.parseFloat(newUtilidadMax.toFixed(2));
+
+    if (min < 0 || min > 1 || max < 0 || max > 1 || min > max) {
+      alert("Las utilidades deben estar entre 0 y 1, y la Mínima no puede ser mayor que la Máxima.")
+      return
+    }
+
+    const nuevoValor: ValorDiscretoMAUT = {
+      id: Date.now().toString(), // Usar un ID simple para la clave
+      nombre: newNombre.trim(),
+      utilidadMin: min,
+      utilidadMax: max,
+    }
+
+    setValores([...valores, nuevoValor])
+    setNewNombre("")
+    setNewUtilidadMin(0.8)
+    setNewUtilidadMax(1.0)
+  }
+
+  const handleUpdateValue = (index: number, field: keyof ValorDiscretoMAUT, value: string | number) => {
+    const updatedValores = [...valores]
+    const updatedValue = updatedValores[index]
+
+    if (field === 'utilidadMin' || field === 'utilidadMax') {
+      const numValue = typeof value === 'string' ? Number.parseFloat(value) : value
+      if (numValue < 0 || numValue > 1) return
+
+      // Lógica de validación cruzada para Min/Max
+      if (field === 'utilidadMin' && numValue > updatedValue.utilidadMax) return
+      if (field === 'utilidadMax' && numValue < updatedValue.utilidadMin) return
+      
+      updatedValue[field] = numValue
+    } else if (field === 'nombre') {
+      updatedValue[field] = value as string
+    }
+
+    setValores(updatedValores)
+  }
+
+  const handleDeleteValue = (id: string) => {
+    setValores(valores.filter((v) => v.id !== id))
+  }
+
+
+  return (
+    // Se mantiene tu estructura de retorno
+    <div className="space-y-6 border rounded-lg bg-white shadow"> 
+      <h3 className="text-lg font-semibold text-gray-700 p-4">Definir Valores Discretos de Utilidad</h3>
+      <p className="text-sm text-gray-500 px-4">
+        Defina los posibles **valores categóricos** del criterio y el **rango de utilidad** (Min/Max) asociado a cada uno.
+      </p>
+
+      {/* Formulario para añadir nuevo valor */}
+      <div className="p-4 border rounded-md bg-gray-50 space-y-3 mx-4">
+        <h4 className="text-md font-medium">Añadir Nuevo Valor</h4>
+        <div className="flex flex-wrap items-end gap-4">
+          <label className="flex flex-col text-sm font-medium">
+            Nombre del Valor
+            <input
+              type="text"
+              value={newNombre}
+              onChange={(e) => setNewNombre(e.target.value)}
+              className="mt-1 p-2 border rounded-md w-48"
+              placeholder="Ej: Excelente, Regular..."
+            />
+          </label>
+          <label className="flex flex-col text-sm font-medium">
+            U. Mínima (0-1)
+            <input
+              type="number"
+              value={newUtilidadMin}
+              onChange={(e) => setNewUtilidadMin(Number.parseFloat(e.target.value))}
+              step="0.01"
+              min="0"
+              max="1"
+              className="mt-1 p-2 border rounded-md w-28"
+            />
+          </label>
+          <label className="flex flex-col text-sm font-medium">
+            U. Máxima (0-1)
+            <input
+              type="number"
+              value={newUtilidadMax}
+              onChange={(e) => setNewUtilidadMax(Number.parseFloat(e.target.value))}
+              step="0.01"
+              min="0"
+              max="1"
+              className="mt-1 p-2 border rounded-md w-28"
+            />
+          </label>
+          <button
+            onClick={handleAddValue}
+            className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 self-end"
+          >
+            Añadir
+          </button>
+        </div>
+      </div>
+
+      {/* Lista de Valores Discretos */}
+      <div className="space-y-3 px-4 pb-4">
+        <h4 className="text-md font-medium">Valores Definidos ({valores.length})</h4>
+        {valores.length === 0 ? (
+          <p className="text-sm text-gray-500 italic">No se han definido valores discretos.</p>
+        ) : (
+          <ul className="space-y-2">
+            {valores.map((valor, index) => (
+              <li key={valor.id} className="flex flex-wrap items-center justify-between p-3 bg-white border rounded-md shadow-sm">
+                <div className="flex items-center gap-4">
+                  <label className="flex flex-col text-sm font-medium">
+                    Nombre:
+                    <input
+                      type="text"
+                      value={valor.nombre}
+                      onChange={(e) => handleUpdateValue(index, 'nombre', e.target.value)}
+                      className="mt-1 p-1 border rounded-md text-sm w-36"
+                    />
+                  </label>
+                  <label className="flex flex-col text-sm font-medium">
+                    U. Min:
+                    <input
+                      type="number"
+                      value={valor.utilidadMin.toFixed(2)}
+                      onChange={(e) => handleUpdateValue(index, 'utilidadMin', e.target.value)}
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      className="mt-1 p-1 border rounded-md text-sm w-20"
+                    />
+                  </label>
+                  <label className="flex flex-col text-sm font-medium">
+                    U. Max:
+                    <input
+                      type="number"
+                      value={valor.utilidadMax.toFixed(2)}
+                      onChange={(e) => handleUpdateValue(index, 'utilidadMax', e.target.value)}
+                      step="0.01"
+                      min="0"
+                      max="1"
+                      className="mt-1 p-1 border rounded-md text-sm w-20"
+                    />
+                  </label>
+                </div>
+                <button
+                  onClick={() => handleDeleteValue(valor.id)}
+                  className="px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Eliminar
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+    </div>
+  )
+}
