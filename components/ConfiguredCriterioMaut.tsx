@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Modal from "./Modal"
 import type { Nodo, MAUTConfig } from "@/types/modelo"
 import { Tabs } from "antd"
@@ -31,8 +31,12 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
     }
   }, [nodo])
 
+  const configRef = useRef<any>(null)
+
+
   const handleConfigChange = (config: MAUTConfig) => {
     // Esta función actualiza el estado mautConfig del componente padre
+    console.log("Esto funciona?", config)
     setMautConfig(config)
   }
 
@@ -42,12 +46,14 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
     setError("")
 
     try {
+      configRef.current?.guardar()
+
       const nodoActualizado = {
         ...formData,
         MAUT: mautConfig,
       }
 
-      // Llama a la función de actualización (aquí va tu lógica de API)
+      // Llama a la función de actualización
       onNodoUpdated(nodoActualizado)
       onClose()
     } catch (err: any) {
@@ -121,6 +127,7 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
           <DiscreteValuesConfig
             initialConfig={mautConfig}
             onConfigChange={handleConfigChange}
+              ref={configRef}
             nodeId={formData.idnodo}
           />
           

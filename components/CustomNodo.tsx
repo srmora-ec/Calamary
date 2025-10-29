@@ -8,6 +8,10 @@ interface CustomNodoProps {
     max?: number
     criterioFinal?: boolean
     beneficio?: boolean
+    MAUT?: {
+      tipoFuncion: "simple" | "dual" | "discreta"
+      funcionDiscreta?: { valores: { nombre: string }[] }
+    }
   }
   selected?: boolean
   sourcePosition?: Position
@@ -17,16 +21,15 @@ interface CustomNodoProps {
 export default function CustomNodo({ data, selected, sourcePosition = Position.Bottom, targetPosition = Position.Top }: CustomNodoProps) {
   return (
     <div
-      className={`bg-white border-2 ${
-        selected ? "border-blue-500 bg-blue-50" : "border-black bg-white"
-      } rounded-md px-4 py-4 min-w-[200px] text-left relative`}
+      className={`bg-white border-2 ${selected ? "border-blue-500 bg-blue-50" : "border-black bg-white"
+        } rounded-md px-4 py-4 min-w-[200px] text-left relative`}
     >
       {/* Contenedor Título + Imagen */}
       <div className="flex justify-between items-start mb-2">
         <div className="font-semibold text-sm text-gray-800 pr-2 break-words w-0 flex-1">
           {data.label}
         </div>
-        {data.criterioFinal && (
+        {data.criterioFinal && data.MAUT?.tipoFuncion !== "discreta" && (
           <div className="ml-2 flex-shrink-0">
             <div
               className="bg-white rounded-full p-1.5 shadow-md"
@@ -40,13 +43,22 @@ export default function CustomNodo({ data, selected, sourcePosition = Position.B
             </div>
           </div>
         )}
+
       </div>
 
-      {/* Min y Max */}
+      {/* Min y Max o Discreto */}
       {data.criterioFinal && (
         <div className="flex justify-between text-[11px] text-gray-700 mt-1">
-          <span>{data.min ?? ""}</span>
-          <span>{data.max ?? ""}</span>
+          {data.MAUT?.tipoFuncion === "discreta" && data.MAUT.funcionDiscreta ? (
+            <span className="w-full text-center">
+              Discreto({data.MAUT.funcionDiscreta.valores.length} opciones)
+            </span>
+          ) : (
+            <>
+              <span>{data.min ?? ""}</span>
+              <span>{data.max ?? ""}</span>
+            </>
+          )}
         </div>
       )}
 

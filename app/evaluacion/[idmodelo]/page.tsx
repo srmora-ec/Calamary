@@ -145,22 +145,16 @@ export default function AlternativasPage() {
           criteriosFinales.map((crit) => {
             const val = alt.valores[crit.idnodo]
 
-            // Manejo de Criterios Discretos
-            if (crit.MAUT?.tipoFuncion === "discreta" && val.tipo === "unico" && typeof val.valor === "string") {
-              const valorDiscreto = crit.MAUT.funcionDiscreta?.valores.find((v) => v.nombre === val.valor)
-              if (valorDiscreto) {
-                // Para la matriz, usamos el valor promedio de utilidad del rango discreto
-                return (valorDiscreto.utilidadMin + valorDiscreto.utilidadMax) / 2
-              }
-              // Si no encuentra el nombre, usar un valor por defecto (ej. 0 o lanzar error)
-              return 0
+            // 🔹 Si el criterio es MAUT discreto, se envía el nombre del valor seleccionado
+            if (crit.MAUT?.tipoFuncion === "discreta") {
+              return val.tipo === "unico" ? (val.valor as string) : ""
             }
 
-            // Manejo de Criterios Continuos (Único o Rango)
-            return val.tipo === "unico"
-              ? (val.valor as number) // Forzar como number ya que no es discreto
-              : (val.min + val.max) / 2
-          }),
+            // 🔹 Si el criterio es continuo (numérico)
+            if (val.tipo === "unico") {
+              return Number(val.valor)
+            } 
+          })
         )
 
         // Construir el array de criterios con su configuración MAUT
@@ -584,51 +578,51 @@ export default function AlternativasPage() {
   const columnasValores =
     modoValor === "unico"
       ? criteriosFinales.map((criterio: Nodo) => ({
-          title: criterio.titulo,
-          dataIndex: ["valores", criterio.idnodo],
-          key: `criterio-${criterio.idnodo}`,
-          width: 150,
-          render: (valorCriterio: ValorCriterio, record: Alternativa) =>
-            renderValorUnicoCell(criterio, valorCriterio, record),
-        }))
+        title: criterio.titulo,
+        dataIndex: ["valores", criterio.idnodo],
+        key: `criterio-${criterio.idnodo}`,
+        width: 150,
+        render: (valorCriterio: ValorCriterio, record: Alternativa) =>
+          renderValorUnicoCell(criterio, valorCriterio, record),
+      }))
       : criteriosFinales.flatMap((criterio: Nodo) => [
-          {
-            title: `${criterio.titulo} (Min)`,
-            dataIndex: ["valores", criterio.idnodo],
-            key: `criterio-${criterio.idnodo}-min`,
-            width: 150,
-            render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-              const valor = valorCriterio?.tipo === "rango" ? valorCriterio.min : criterio.min || 0
-              return (
-                <InputNumber
-                  value={valor}
-                  onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "min", val || 0)}
-                  min={criterio.min || 0}
-                  max={criterio.max || 100}
-                  className="w-full"
-                />
-              )
-            },
+        {
+          title: `${criterio.titulo} (Min)`,
+          dataIndex: ["valores", criterio.idnodo],
+          key: `criterio-${criterio.idnodo}-min`,
+          width: 150,
+          render: (valorCriterio: ValorCriterio, record: Alternativa) => {
+            const valor = valorCriterio?.tipo === "rango" ? valorCriterio.min : criterio.min || 0
+            return (
+              <InputNumber
+                value={valor}
+                onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "min", val || 0)}
+                min={criterio.min || 0}
+                max={criterio.max || 100}
+                className="w-full"
+              />
+            )
           },
-          {
-            title: `${criterio.titulo} (Max)`,
-            dataIndex: ["valores", criterio.idnodo],
-            key: `criterio-${criterio.idnodo}-max`,
-            width: 150,
-            render: (valorCriterio: ValorCriterio, record: Alternativa) => {
-              const valor = valorCriterio?.tipo === "rango" ? valorCriterio.max : criterio.max || 100
-              return (
-                <InputNumber
-                  value={valor}
-                  onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "max", val || 0)}
-                  min={criterio.min || 0}
-                  max={criterio.max || 100}
-                  className="w-full"
-                />
-              )
-            },
+        },
+        {
+          title: `${criterio.titulo} (Max)`,
+          dataIndex: ["valores", criterio.idnodo],
+          key: `criterio-${criterio.idnodo}-max`,
+          width: 150,
+          render: (valorCriterio: ValorCriterio, record: Alternativa) => {
+            const valor = valorCriterio?.tipo === "rango" ? valorCriterio.max : criterio.max || 100
+            return (
+              <InputNumber
+                value={valor}
+                onChange={(val) => actualizarValorRango(record.key, criterio.idnodo, "max", val || 0)}
+                min={criterio.min || 0}
+                max={criterio.max || 100}
+                className="w-full"
+              />
+            )
           },
-        ])
+        },
+      ])
 
   const columns = [
     {
@@ -676,16 +670,16 @@ export default function AlternativasPage() {
 
   const datosNormalizados = resultadoSAW
     ? alternativas.map((alt, idx) => ({
-        key: alt.key,
-        nombre: alt.nombre,
-        ...criteriosFinales.reduce(
-          (acc, _, criterioIdx) => {
-            acc[`criterio_${criterioIdx}`] = resultadoSAW.matriz_normalizada[idx]?.[criterioIdx] || 0
-            return acc
-          },
-          {} as Record<string, number>,
-        ),
-      }))
+      key: alt.key,
+      nombre: alt.nombre,
+      ...criteriosFinales.reduce(
+        (acc, _, criterioIdx) => {
+          acc[`criterio_${criterioIdx}`] = resultadoSAW.matriz_normalizada[idx]?.[criterioIdx] || 0
+          return acc
+        },
+        {} as Record<string, number>,
+      ),
+    }))
     : []
 
   const columnasResultados = [
@@ -733,12 +727,12 @@ export default function AlternativasPage() {
 
   const datosResultados = resultadoSAW
     ? resultadoSAW.ranking.map((rank, idx) => ({
-        key: alternativas[idx].key,
-        nombre: alternativas[idx].nombre,
-        puntuacion: resultadoSAW.puntuaciones[idx],
-        ranking: rank,
-        porcentaje: (resultadoSAW.puntuaciones[idx] / Math.max(...resultadoSAW.puntuaciones)) * 100,
-      }))
+      key: alternativas[idx].key,
+      nombre: alternativas[idx].nombre,
+      puntuacion: resultadoSAW.puntuaciones[idx],
+      ranking: rank,
+      porcentaje: (resultadoSAW.puntuaciones[idx] / Math.max(...resultadoSAW.puntuaciones)) * 100,
+    }))
     : []
 
   const tabItems = [
@@ -943,9 +937,8 @@ export default function AlternativasPage() {
   return (
     <div className="flex h-screen">
       <div
-        className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out ${
-          sidebarCollapsed ? "w-12" : "w-1/3"
-        }`}
+        className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out ${sidebarCollapsed ? "w-12" : "w-1/3"
+          }`}
       >
         <div className="flex items-center justify-between p-2 border-b">
           {!sidebarCollapsed && (

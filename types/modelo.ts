@@ -127,6 +127,7 @@ export class Modelo {
         criterioFinal: nodo.criterioFinal ?? false,
         beneficio: nodo.beneficio ?? true,
         unidadmedida: nodo.unidadmedida ?? "Unidad",
+        MAUT:nodo.MAUT ??null
       } as Record<string, unknown>,
       parentNode: nodo.idpadre != null ? nodo.idpadre.toString() : undefined,
       sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
@@ -450,6 +451,11 @@ export class Modelo {
           !nodo.MAUT.funcionDual ||
           nodo.MAUT.funcionDual.min.puntos.length < 2 ||
           nodo.MAUT.funcionDual.max.puntos.length < 2
+        )
+      } else if (nodo.MAUT.tipoFuncion === "discreta") {
+        return (
+          !nodo.MAUT.funcionDiscreta ||
+          nodo.MAUT.funcionDiscreta.valores.length < 2 
         )
       }
 

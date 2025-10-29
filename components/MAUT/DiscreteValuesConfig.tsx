@@ -1,9 +1,9 @@
 // MAUT/DiscreteValuesConfig.tsx (Código Corregido)
 "use client"
 
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo, useRef, useImperativeHandle, forwardRef } from "react"
 // Asegúrese de que la ruta sea correcta
-import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo" 
+import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo"
 
 interface DiscreteValuesConfigProps {
   initialConfig?: MAUTConfig
@@ -12,15 +12,15 @@ interface DiscreteValuesConfigProps {
   nodeId: number // Para controlar la recarga al cambiar de nodo
 }
 
-export default function DiscreteValuesConfig({
+export default forwardRef(function DiscreteValuesConfig({
   initialConfig,
   onConfigChange,
-  nodeId, 
-}: DiscreteValuesConfigProps) {
-  
+  nodeId,
+}: DiscreteValuesConfigProps, ref) {
+
   // Refs para controlar el ciclo de vida del componente y el cambio de nodo
-  const isInitialLoad = useRef(true) 
-  const lastNodeId = useRef<number | null>(null) 
+  const isInitialLoad = useRef(true)
+  const lastNodeId = useRef<number | null>(null)
 
   // Inicializa con los valores discretos si el tipo de función es 'discreta'
   const initialValues = useMemo(() => {
@@ -30,7 +30,7 @@ export default function DiscreteValuesConfig({
   }, [nodeId, initialConfig]) // Dependencia de nodeId y initialConfig
 
   const [valores, setValores] = useState<ValorDiscretoMAUT[]>(initialValues)
-  
+
   // Estados para el nuevo valor... (mantener igual)
   const [newNombre, setNewNombre] = useState("")
   const [newUtilidadMin, setNewUtilidadMin] = useState(0.8)
@@ -53,10 +53,10 @@ export default function DiscreteValuesConfig({
     // PREVENIR EL BUCLE EN LA CARGA INICIAL
     // Si es la carga inicial o si el nodo acaba de cambiar, evitamos llamar a onConfigChange.
     if (isInitialLoad.current) {
-        isInitialLoad.current = false
-        return
+      isInitialLoad.current = false
+      return
     }
-    
+
     // Si se llega aquí, 'valores' ha sido modificado por una acción del usuario.
     const newConfig: MAUTConfig = {
       tipoFuncion: "discreta",
@@ -69,9 +69,26 @@ export default function DiscreteValuesConfig({
     }
     // Notifica al padre para que actualice su estado mautConfig
     onConfigChange(newConfig)
-    
-  }, [nodeId]) // 💡 CORRECCIÓN VITAL: Debe depender de `valores` para notificar el cambio
 
+  }, [valores]) // 💡 CORRECCIÓN VITAL: Debe depender de `valores` para notificar el cambio
+
+  const guardar = () => {
+    // Si se llega aquí, 'valores' ha sido modificado por una acción del usuario.
+    const newConfig: MAUTConfig = {
+      tipoFuncion: "discreta",
+      funcionDiscreta: {
+        valores: valores,
+      },
+      // Asegurar que las otras funciones se limpien para no generar conflictos
+      funcionSimple: undefined,
+      funcionDual: undefined,
+    }
+    // Notifica al padre para que actualice su estado mautConfig
+    onConfigChange(newConfig)
+  }
+  useImperativeHandle(ref, () => ({
+    guardar,
+  }))
 
   // ... (Funciones de manejo de estado sin cambios)
   const handleAddValue = () => {
@@ -111,7 +128,7 @@ export default function DiscreteValuesConfig({
       // Lógica de validación cruzada para Min/Max
       if (field === 'utilidadMin' && numValue > updatedValue.utilidadMax) return
       if (field === 'utilidadMax' && numValue < updatedValue.utilidadMin) return
-      
+
       updatedValue[field] = numValue
     } else if (field === 'nombre') {
       updatedValue[field] = value as string
@@ -127,7 +144,7 @@ export default function DiscreteValuesConfig({
 
   return (
     // Se mantiene tu estructura de retorno
-    <div className="space-y-6 border rounded-lg bg-white shadow"> 
+    <div className="space-y-6 border rounded-lg bg-white shadow">
       <h3 className="text-lg font-semibold text-gray-700 p-4">Definir Valores Discretos de Utilidad</h3>
       <p className="text-sm text-gray-500 px-4">
         Defina los posibles **valores categóricos** del criterio y el **rango de utilidad** (Min/Max) asociado a cada uno.
@@ -238,4 +255,6 @@ export default function DiscreteValuesConfig({
 
     </div>
   )
+
 }
+)

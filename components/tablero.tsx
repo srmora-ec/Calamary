@@ -7,6 +7,7 @@ import CustomNodo from "./CustomNodo";
 import ConfigureModalPeso from "./pesos/ConfiguredPeso";
 import ExportModelo from "./ExportModelo";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -14,7 +15,7 @@ interface TableroProps {
   linea: number // Para actualizar lineas
   onActualizarModelo?: (modeloActual: Modelo) => void // Para devolver el modelo creado
   onActualizarNodo?: (nodoSeleccionado: Nodo) => void//Para solicitar cambios en un nodo
-  onCriterioMaut?:(nodoSeleccionado:Nodo)=> void //Para solicitar cambios de la utilidad para elmetodo MAUT
+  onCriterioMaut?: (nodoSeleccionado: Nodo) => void //Para solicitar cambios de la utilidad para elmetodo MAUT
   nodoCambios: Nodo | null//Para recibir cambios de nodo
 }
 
@@ -25,7 +26,7 @@ interface Metodo {
 }
 
 
-const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios,onCriterioMaut }) => {//recuperamos elmodelo de desición que vamos a diseñar
+const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios, onCriterioMaut }) => {//recuperamos elmodelo de desición que vamos a diseñar
 
   const data = modelo.getData()
 
@@ -36,7 +37,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [nodosSeleccionados, setNodosSeleccionados] = useState<Nodo[] | null>(null)
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [metodos, setMetodos] = useState<Metodo[]>([]);
-  const [metodo, setMetodo] = useState<string>("");
+  const [metodo, setMetodo] = useState<string>("");  
 
   const nodeTypes = {
     custom: CustomNodo,
@@ -57,7 +58,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
       const { data, error } = await supabase
         .from("metodos")
         .select("id, nombre, descripcion")
-        .eq("estado",true)
+        .eq("estado", true)
         .order("id", { ascending: true })
 
       if (error) {
@@ -340,94 +341,108 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
             </div>
           )}
 
-
-        </div>
-
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          // onConnect={onConnect}
-          onNodeContextMenu={handleNodeContextMenu as any}
-          onClick={closeContextMenu}
-          multiSelectionKeyCode="Control"
-          fitView
-        >
-          <Controls />
-          {/* <MiniMap /> */}
-          <Background color="#ccc" variant={BackgroundVariant.Cross} />
-        </ReactFlow>
-        {nodosSeleccionados && (
-          <ConfigureModalPeso
-            idmodelo={Number(modelo.getId())}
-            isOpen={isOpenModal}
-            onClose={() => setIsOpenModal(false)}
-            nodos={nodosSeleccionados}
-            onNodosUpdated={handleNodosUpdated}
-          >
-          </ConfigureModalPeso>
-        )}
-
-        {contextMenu.visible && (
-          <div
-            ref={menuRef}
-            style={{
-              position: "fixed",
-              top: contextMenu.y,
-              left: contextMenu.x,
-              backgroundColor: "white",
-              border: "1px solid #ccc",
-              borderRadius: 6,
-              padding: 6,
-              zIndex: 9999,
-              minWidth: 160,
-              boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+          <button
+            onClick={() => {
+    window.open("/evaluacion/" + data.id, "_blank")
             }}
+          className="focus:outline-none cursor-pointer"
           >
+          <Image
+            src="/play.png"
+            alt="Botón de play"
+            width={40}
+            height={40}
+          />
+        </button>
+
+
+      </div>
+
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        // onConnect={onConnect}
+        onNodeContextMenu={handleNodeContextMenu as any}
+        onClick={closeContextMenu}
+        multiSelectionKeyCode="Control"
+        fitView
+      >
+        <Controls />
+        {/* <MiniMap /> */}
+        <Background color="#ccc" variant={BackgroundVariant.Cross} />
+      </ReactFlow>
+      {nodosSeleccionados && (
+        <ConfigureModalPeso
+          idmodelo={Number(modelo.getId())}
+          isOpen={isOpenModal}
+          onClose={() => setIsOpenModal(false)}
+          nodos={nodosSeleccionados}
+          onNodosUpdated={handleNodosUpdated}
+        >
+        </ConfigureModalPeso>
+      )}
+
+      {contextMenu.visible && (
+        <div
+          ref={menuRef}
+          style={{
+            position: "fixed",
+            top: contextMenu.y,
+            left: contextMenu.x,
+            backgroundColor: "white",
+            border: "1px solid #ccc",
+            borderRadius: 6,
+            padding: 6,
+            zIndex: 9999,
+            minWidth: 160,
+            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+          }}
+        >
+          <button
+            onClick={() => contextMenu.nodoId !== null && crearHijo(contextMenu.nodoId)}
+            className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+          >
+            Crear hijo
+          </button>
+          <button
+            onClick={() => contextMenu.nodoId !== null && eliminarRama(contextMenu.nodoId)}
+            className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+          >
+            Eliminar rama
+          </button>
+          <button
+            onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
+            className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+          >
+            Configuración de criterio
+          </button>
+          {modelo.getMetodo() == "MAUT" && !modelo.tieneHijos(Number(contextMenu.nodoId)) && (
             <button
-              onClick={() => contextMenu.nodoId !== null && crearHijo(contextMenu.nodoId)}
-              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-            >
-              Crear hijo
-            </button>
-            <button
-              onClick={() => contextMenu.nodoId !== null && eliminarRama(contextMenu.nodoId)}
-              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-            >
-              Eliminar rama
-            </button>
-            <button
-              onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
-              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-            >
-              Configuración de criterio
-            </button>
-            {modelo.getMetodo()=="MAUT" &&  !modelo.tieneHijos(Number(contextMenu.nodoId)) && ( 
-              <button
               onClick={() => contextMenu.nodoId !== null && configurarUtilidad(contextMenu.nodoId)}
               className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
             >
               Configuración de utilidad
             </button>
+          )}
+          {contextMenu.nodoId !== null &&
+            modelo.getNodos().some(n => n.idpadre === contextMenu.nodoId) && (
+              <button
+                onClick={() => configurarPesos(contextMenu.nodoId!)}
+                className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+              >
+                Pesos
+              </button>
             )}
-            {contextMenu.nodoId !== null &&
-              modelo.getNodos().some(n => n.idpadre === contextMenu.nodoId) && (
-                <button
-                  onClick={() => configurarPesos(contextMenu.nodoId!)}
-                  className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-                >
-                  Pesos
-                </button>
-              )}
-            <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
-              Cancelar
-            </button>
-          </div>
-        )}
-      </div>
-      {/* <div className="p-4 border rounded-lg shadow-md bg-white">
+          <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
+            Cancelar
+          </button>
+        </div>
+      )}
+    </div >
+    {/* <div className="p-4 border rounded-lg shadow-md bg-white">
         <h2 className="text-xl font-bold mb-2">{data.nombre}</h2>
         <p className="text-gray-600 mb-4">{data.descripcion ?? "Sin descripción"}</p>
 
