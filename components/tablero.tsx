@@ -8,6 +8,9 @@ import ConfigureModalPeso from "./pesos/ConfiguredPeso";
 import ExportModelo from "./ExportModelo";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import { Button, Drawer, Space } from "antd"; // Importar Button y Drawer
+import { MenuOutlined } from '@ant-design/icons'; // Importar un ícono para el botón de menú
+import CitasModelo from "./citas/CitasModelo";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -37,7 +40,10 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [nodosSeleccionados, setNodosSeleccionados] = useState<Nodo[] | null>(null)
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [metodos, setMetodos] = useState<Metodo[]>([]);
-  const [metodo, setMetodo] = useState<string>("");  
+  const [metodo, setMetodo] = useState<string>("");
+
+  // Estado para el Drawer
+  const [openDrawer, setOpenDrawer] = useState(false);
 
   const nodeTypes = {
     custom: CustomNodo,
@@ -118,7 +124,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     [],
   );
 
-  const estadisticas = modelo.getEstadisticas()
+  // const estadisticas = modelo.getEstadisticas()
 
   const handleActualizar = () => {//Para devolver elmodelo actualizado
     if (onActualizarModelo) {
@@ -146,36 +152,6 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
     setContextMenu({ visible: true, x, y, nodoId: Number(nodo.id) })
   }
-
-  // crear hijo (usa tu lógica del modelo)
-  // const crearHijo = (idPadre: number) => {
-  //   console.log("modelos orientacion");
-  //   console.log("1:" + modelo.getOrientacion())
-  //   modelo.setOrientacion(orientacion);
-  //   console.log("2:" + modelo.getOrientacion())
-
-  //   const nodosActuales = [...modelo.getNodos()]
-  //   const nuevoId = nodosActuales.length ? Math.max(...nodosActuales.map(n => n.idnodo)) + 1 : 1
-  //   const nodoPadre = modelo.getNodos().find(n => n.idnodo === idPadre)!
-  //   const hijo = {
-  //     idnodo: nuevoId,
-  //     posx: (nodoPadre?.posx ?? 0) + 150,
-  //     posy: (nodoPadre?.posy ?? 0) + 50,
-  //     titulo: `Nuevo nodo ${nuevoId}`,
-  //     idpadre: idPadre
-  //   }
-  //   modelo.setNodos(convertirNodos(nodes))
-  //   console.log("3:" + modelo.getOrientacion())
-
-  //   modelo.agregarNodo(hijo)
-  //   setNodes(modelo.getNodosReactFlow())
-  //   setEdges(modelo.getEdgesReactFlow())
-  //   console.log("4:" + modelo.getOrientacion())
-
-  //   closeContextMenu()
-  //   console.log("5:" + modelo.getOrientacion())
-
-  // }
 
   const guardarpos = () => {
     modelo.setPosicionesNodos(convertirNodos(nodes))//Guardamos el previo
@@ -285,187 +261,267 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     setIsOpenModal(false)
   }
 
+  // Componente que contiene todas las opciones de configuración
+  const ConfigOptions = () => (
+    <Space direction="horizontal" wrap size="small" className="w-full flex">
+      <button
+        onClick={handleActualizar}
+        className="text-xs px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
+      >
+        Guardar cambios
+      </button>
+      <ExportModelo
+        nodos={modelo.getNodos()}
+        orientacion={orientacion}
+        linea={linea}
+        nombreModelo={data.nombre}
+      />
+      <Switch
+        option1={{ label: "Horizontal", value: "h" }}
+        option2={{ label: "Vertical", value: "v" }}
+        defaultValue={orientacion}
+        onChange={(val) => { cambiarOrientacion(val as "h" | "v") }}
+      />
+      <div>
+        <select
+          className="form-select text-xs"
+          defaultValue={linea}
+          onChange={(e) => cambiarLinea(Number(e.target.value))}
+        >
+          <option value={1} className="text-xs">Directa</option>
+          <option value={2} className="text-xs">Escalonada</option>
+          <option value={3} className="text-xs">Escalonada Suave</option>
+          <option value={4} className="text-xs">Bézier</option>
+        </select>
+      </div>
+      {modelo.getMetodo() != "" && (
+        <div>
+          <select
+            className="form-select text-xs border rounded px-2 py-1"
+            value={metodo}
+            onChange={(e) => {
+              setMetodo(e.target.value);
+              modelo.setMetodo(e.target.value)
+              console.log(e.target.value)
+            }}
+          >
+            <option value="">Selecciona un método</option>
+            {metodos.map((metodo) => (
+              <option key={metodo.id} value={metodo.nombre}>
+                {metodo.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      <button
+        onClick={() => {
+          window.open("/evaluacion/" + data.id, "_blank")
+        }}
+        className="focus:outline-none cursor-pointer"
+      >
+        <Image
+          src="/play.png"
+          alt="Botón de play"
+          width={40}
+          height={40}
+        />
+      </button>
+    </Space>
+  );
+
 
   return (
     <>
       <div style={{ width: '100vw', height: '100vh' }}>
         <div className="fixed top-4 left-4 z-50 flex items-center space-x-4">
-          <button
-            onClick={handleActualizar}
-            className="text-xs px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-          >
-            Guardar cambios
-          </button>
-          <ExportModelo
-            nodos={modelo.getNodos()}
-            orientacion={orientacion}
-            linea={linea}
-            nombreModelo={data.nombre}
-          />
-          <Switch
-            option1={{ label: "Horizontal", value: "h" }}
-            option2={{ label: "Vertical", value: "v" }}
-            defaultValue={orientacion}
-            onChange={(val) => { cambiarOrientacion(val as "h" | "v") }}
-          />
-          <div>
-            <select
-              className="form-select text-xs"
-              defaultValue={linea}
-              onChange={(e) => cambiarLinea(Number(e.target.value))}
-            >
-              <option value={1} className="text-xs">Directa</option>
-              <option value={2} className="text-xs">Escalonada</option>
-              <option value={3} className="text-xs">Escalonada Suave</option>
-              <option value={4} className="text-xs">Bézier</option>
-            </select>
-          </div>
-          {modelo.getMetodo() != "" && (
-            <div>
-              <select
-                className="form-select text-xs border rounded px-2 py-1"
-                value={metodo}
-                onChange={(e) => {
-                  setMetodo(e.target.value);
-                  modelo.setMetodo(e.target.value)
-                  console.log(e.target.value)
-                }}
-              >
-                <option value="">Selecciona un método</option>
-                {metodos.map((metodo) => (
-                  <option key={metodo.id} value={metodo.nombre}>
-                    {metodo.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
+          {/* Botón para abrir el Drawer (Solo visible en móviles/pantallas pequeñas) */}
+          <Button
+            type="primary"
+            icon={<MenuOutlined />}
+            onClick={() => setOpenDrawer(true)}
+            className="lg:hidden" // Ocultar en pantallas grandes
+          >
+            Opciones
+          </Button>
+
+          {/* Opciones de configuración (Solo visible en pantallas grandes) */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <ConfigOptions />
+          </div>
+
+        </div>
+        <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
           <button
             onClick={() => {
-    window.open("/evaluacion/" + data.id, "_blank")
+              window.open("/evaluacion/" + data.id, "_blank")
             }}
-          className="focus:outline-none cursor-pointer"
+            className="focus:outline-none cursor-pointer"
           >
-          <Image
-            src="/play.png"
-            alt="Botón de play"
-            width={40}
-            height={40}
-          />
-        </button>
-
-
-      </div>
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        // onConnect={onConnect}
-        onNodeContextMenu={handleNodeContextMenu as any}
-        onClick={closeContextMenu}
-        multiSelectionKeyCode="Control"
-        fitView
-      >
-        <Controls />
-        {/* <MiniMap /> */}
-        <Background color="#ccc" variant={BackgroundVariant.Cross} />
-      </ReactFlow>
-      {nodosSeleccionados && (
-        <ConfigureModalPeso
-          idmodelo={Number(modelo.getId())}
-          isOpen={isOpenModal}
-          onClose={() => setIsOpenModal(false)}
-          nodos={nodosSeleccionados}
-          onNodosUpdated={handleNodosUpdated}
-        >
-        </ConfigureModalPeso>
-      )}
-
-      {contextMenu.visible && (
-        <div
-          ref={menuRef}
-          style={{
-            position: "fixed",
-            top: contextMenu.y,
-            left: contextMenu.x,
-            backgroundColor: "white",
-            border: "1px solid #ccc",
-            borderRadius: 6,
-            padding: 6,
-            zIndex: 9999,
-            minWidth: 160,
-            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-          }}
-        >
-          <button
-            onClick={() => contextMenu.nodoId !== null && crearHijo(contextMenu.nodoId)}
-            className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-          >
-            Crear hijo
-          </button>
-          <button
-            onClick={() => contextMenu.nodoId !== null && eliminarRama(contextMenu.nodoId)}
-            className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-          >
-            Eliminar rama
-          </button>
-          <button
-            onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
-            className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-          >
-            Configuración de criterio
-          </button>
-          {modelo.getMetodo() == "MAUT" && !modelo.tieneHijos(Number(contextMenu.nodoId)) && (
-            <button
-              onClick={() => contextMenu.nodoId !== null && configurarUtilidad(contextMenu.nodoId)}
-              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-            >
-              Configuración de utilidad
-            </button>
-          )}
-          {contextMenu.nodoId !== null &&
-            modelo.getNodos().some(n => n.idpadre === contextMenu.nodoId) && (
-              <button
-                onClick={() => configurarPesos(contextMenu.nodoId!)}
-                className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
-              >
-                Pesos
-              </button>
-            )}
-          <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
-            Cancelar
+            <Image
+              src="/play.png"
+              alt="Botón de play"
+              width={40}
+              height={40}
+            />
           </button>
         </div>
-      )}
-    </div >
-    {/* <div className="p-4 border rounded-lg shadow-md bg-white">
-        <h2 className="text-xl font-bold mb-2">{data.nombre}</h2>
-        <p className="text-gray-600 mb-4">{data.descripcion ?? "Sin descripción"}</p>
 
-        <h3 className="font-semibold">Estadísticas:</h3>
-        <ul className="list-disc list-inside">
-          <li>Total de nodos: {estadisticas.totalNodos}</li>
-          <li>Criterios finales: {estadisticas.criteriosFinales}</li>
-          <li>Nivel máximo: {estadisticas.nivelMaximo}</li>
-          <li>Nodos raíz: {estadisticas.nodosRaiz}</li>
-        </ul>
+        {/* Drawer de Ant Design para móviles */}
+        <Drawer
+          title="Opciones del Modelo"
+          placement="left"
+          onClose={() => setOpenDrawer(false)}
+          open={openDrawer}
+          width={typeof window !== 'undefined' && window.innerWidth >= 1024 ? 500 : '90%'} styles={{
+            body: { padding: '10px' } // Ajustar padding del contenido
+          }}
+        >
+          {/* El contenido del Drawer en móviles debe ser en dirección vertical */}
+          <Space direction="vertical" size="middle" className="w-full">
+            <button
+              onClick={() => { handleActualizar(); setOpenDrawer(false); }} // Cerrar al guardar
+              className="text-xs px-4 py-2 bg-blue-500 text-white rounded cursor-pointer w-full"
+            >
+              Guardar cambios
+            </button>
 
-        <h3 className="font-semibold mt-4">Nodos:</h3>
-        <ul className="list-disc list-inside">
-          {modelo.getNodos().map((nodo) => (
-            <li key={nodo.idnodo}>
-              <strong>{nodo.titulo}</strong> (id: {nodo.idnodo}, padre:{" "}
-              {nodo.idpadre ?? "ninguno"})
-            </li>
-          ))}
-        </ul>
-      </div>
- */}
+            <Switch
+              option1={{ label: "Horizontal", value: "h" }}
+              option2={{ label: "Vertical", value: "v" }}
+              defaultValue={orientacion}
+              onChange={(val) => { cambiarOrientacion(val as "h" | "v") }}
+            />
+            <div className="w-full">
+              <label className="block text-xs mb-1">Tipo de Línea</label>
+              <select
+                className="form-select text-xs w-full p-2 border rounded"
+                defaultValue={linea}
+                onChange={(e) => cambiarLinea(Number(e.target.value))}
+              >
+                <option value={1} className="text-xs">Directa</option>
+                <option value={2} className="text-xs">Escalonada</option>
+                <option value={3} className="text-xs">Escalonada Suave</option>
+                <option value={4} className="text-xs">Bézier</option>
+              </select>
+            </div>
+            {modelo.getMetodo() != "" && (
+              <div className="w-full">
+                <label className="block text-xs mb-1">Método</label>
+                <select
+                  className="form-select text-xs border rounded px-2 py-1 w-full"
+                  value={metodo}
+                  onChange={(e) => {
+                    setMetodo(e.target.value);
+                    modelo.setMetodo(e.target.value)
+                  }}
+                >
+                  <option value="">Selecciona un método</option>
+                  {metodos.map((metodo) => (
+                    <option key={metodo.id} value={metodo.nombre}>
+                      {metodo.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <ExportModelo
+              nodos={modelo.getNodos()}
+              orientacion={orientacion}
+              linea={linea}
+              nombreModelo={data.nombre}
+            />
 
+            <CitasModelo modeloId={Number(data.id)} />
+          </Space>
+        </Drawer>
+
+
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          // onConnect={onConnect}
+          onNodeContextMenu={handleNodeContextMenu as any}
+          onClick={closeContextMenu}
+          multiSelectionKeyCode="Control"
+          fitView
+        >
+          <Controls />
+          {/* <MiniMap /> */}
+          <Background color="#ccc" variant={BackgroundVariant.Cross} />
+        </ReactFlow>
+        {nodosSeleccionados && (
+          <ConfigureModalPeso
+            idmodelo={Number(modelo.getId())}
+            isOpen={isOpenModal}
+            onClose={() => setIsOpenModal(false)}
+            nodos={nodosSeleccionados}
+            onNodosUpdated={handleNodosUpdated}
+          >
+          </ConfigureModalPeso>
+        )}
+
+        {contextMenu.visible && (
+          <div
+            ref={menuRef}
+            style={{
+              position: "fixed",
+              top: contextMenu.y,
+              left: contextMenu.x,
+              backgroundColor: "white",
+              border: "1px solid #ccc",
+              borderRadius: 6,
+              padding: 6,
+              zIndex: 9999,
+              minWidth: 160,
+              boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+            }}
+          >
+            <button
+              onClick={() => contextMenu.nodoId !== null && crearHijo(contextMenu.nodoId)}
+              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+            >
+              Crear hijo
+            </button>
+            <button
+              onClick={() => contextMenu.nodoId !== null && eliminarRama(contextMenu.nodoId)}
+              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+            >
+              Eliminar rama
+            </button>
+            <button
+              onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
+              className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+            >
+              Configuración de criterio
+            </button>
+            {modelo.getMetodo() == "MAUT" && !modelo.tieneHijos(Number(contextMenu.nodoId)) && (
+              <button
+                onClick={() => contextMenu.nodoId !== null && configurarUtilidad(contextMenu.nodoId)}
+                className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+              >
+                Configuración de utilidad
+              </button>
+            )}
+            {contextMenu.nodoId !== null &&
+              modelo.getNodos().some(n => n.idpadre === contextMenu.nodoId) && (
+                <button
+                  onClick={() => configurarPesos(contextMenu.nodoId!)}
+                  className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
+                >
+                  Pesos
+                </button>
+              )}
+            <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
+              Cancelar
+            </button>
+          </div>
+        )}
+      </div >
     </>
 
   )
