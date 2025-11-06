@@ -2,10 +2,12 @@
 
 import { useParams } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
-import { Tabs, Button, Table, Input, InputNumber, message, Switch, Spin, Upload, Select } from "antd"
+import { Tabs, Button, Table, Input, InputNumber, message, Switch, Spin, Upload, Select, Card } from "antd"
 import { UploadOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons"
 import { Modelo, type ModeloData, type Nodo } from "@/types/modelo"
 import ModeloSvgViewer from "@/components/modelo-svg-viewer"
+import UnidimensionalSensitivityAnalysis from "@/components/AnalisisDeSensibilidad/unidimensional-sensitivity-analysis"
+import Modal from "@/components/Modal"
 import { supabase } from "@/lib/supabase"
 import * as XLSX from "xlsx"
 
@@ -57,6 +59,8 @@ export default function AlternativasPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [validacionMAUT, setValidacionMAUT] = useState<string | null>(null)
+  const [sensitivityModalOpen, setOpenSensitivityModal] = useState(false)
+  const [selectedAnalysisType, setSelectedAnalysisType] = useState<"unidimensional" | null>(null)
 
   const criteriosFinales = modelo?.getCriteriosFinales() || []
 
@@ -127,6 +131,29 @@ export default function AlternativasPage() {
 
     fetchModelo()
   }, [idmodelo])
+
+  const prepareAPIData = () => {
+    if (!modelo) return null
+
+    modelo.calcularPesosFinales()
+    const criteriosFinales = modelo.getCriteriosFinales()
+
+    const matrix = alternativas.map((alt) =>
+      criteriosFinales.map((crit) => {
+        const val = alt.valores[crit.idnodo]
+        return val.tipo === "unico" ? (val.valor as number) : (val.min + val.max) / 2
+      }),
+    )
+
+    const tipos = criteriosFinales.map((crit) => (crit.beneficio ? "max" : "min"))
+
+    return { matrix, tipos }
+  }
+
+  const openSensitivityAnalysis = (type: "unidimensional" | "multidimensional") => {
+    setSelectedAnalysisType(type)
+    setOpenSensitivityModal(true)
+  }
 
   const ejecutarMetodo = async () => {
     if (alternativas.length < 2) {
@@ -373,26 +400,26 @@ export default function AlternativasPage() {
       )
 
       const tipos = criteriosFinales.map((crit) => (crit.beneficio ? "max" : "min"))
+      const weights = criteriosFinales.map((crit) => crit.pesofinal || 0)
 
       const resNormalizacion = await fetch(
         `${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/normalizar`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ matrix, tipos }),
+          body: JSON.stringify({ matrix, weights, tipos }),
         },
       )
       if (!resNormalizacion.ok) throw new Error(await resNormalizacion.text())
       const dataNormalizacion = await resNormalizacion.json()
       const matrizNormalizada = dataNormalizacion.result
-      const weights = criteriosFinales.map((crit) => crit.pesofinal || 0)
 
       const resAgregacion = await fetch(
         `${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-method/${modelo?.getData().metodo}/agregar`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ matrix: matrizNormalizada, weights }),
+          body: JSON.stringify({ matrix: matrizNormalizada, weights, tipos }),
         },
       )
       if (!resAgregacion.ok) throw new Error(await resAgregacion.text())
@@ -1096,7 +1123,7 @@ export default function AlternativasPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 />
               </svg>
               <p className="text-lg">No hay resultados disponibles</p>
@@ -1178,6 +1205,63 @@ export default function AlternativasPage() {
         </div>
       ),
     },
+    {
+      key: "4",
+      label: "Análisis de Sensibilidad",
+      disabled: alternativas.length < 2,
+      children: (
+        <div className="space-y-6">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-2">Análisis de Sensibilidad</h3>
+            <p className="text-sm text-gray-600">
+              Analiza cómo cambios en los pesos de los criterios afectan la clasificación de alternativas
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <Card hoverable onClick={() => openSensitivityAnalysis("unidimensional")} style={{ cursor: "pointer" }}>
+              <div className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="text-lg font-semibold">Análisis de Sensibilidad de Peso Unidimensional</h4>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Evalúa cómo cambia la mejor alternativa cuando varía el peso de un criterio específico mientras
+                      los demás permanecen constantes.
+                    </p>
+                  </div>
+                  <span className="text-2xl">📊</span>
+                </div>
+                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs w-fit">Análisis 1D</div>
+                <p className="text-xs text-gray-500">Haz clic para analizar la estabilidad de un criterio individual</p>
+              </div>
+            </Card>
+
+            <Card
+              hoverable
+              onClick={() => openSensitivityAnalysis("multidimensional")}
+              style={{ cursor: "pointer", opacity: 0.6 }}
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="text-lg font-semibold">Análisis de Sensibilidad de Peso de Alta Dimensión</h4>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Evalúa cómo cambia la clasificación cuando múltiples pesos varían simultáneamente, permitiendo
+                      análisis más complejos.
+                    </p>
+                  </div>
+                  <span className="text-2xl">🔮</span>
+                </div>
+                <div className="bg-gray-100 text-gray-800 px-3 py-1 rounded text-xs w-fit">
+                  Análisis Multidimensional (Próximamente)
+                </div>
+                <p className="text-xs text-gray-500">Funcionalidad en desarrollo</p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      ),
+    },
   ]
 
   return (
@@ -1220,6 +1304,36 @@ export default function AlternativasPage() {
       <div className="flex-1 p-6 overflow-auto">
         <Tabs items={tabItems} defaultActiveKey="1" />
       </div>
+
+      <Modal
+        isOpen={sensitivityModalOpen}
+        onClose={() => {
+          setOpenSensitivityModal(false)
+          setSelectedAnalysisType(null)
+        }}
+        title={
+          selectedAnalysisType === "unidimensional"
+            ? "Análisis de Sensibilidad de Peso Unidimensional"
+            : "Análisis de Sensibilidad Multidimensional"
+        }
+        width="900px"
+      >
+        {selectedAnalysisType === "unidimensional" && modelo && (
+          <UnidimensionalSensitivityAnalysis
+            alternativas={alternativas}
+            criterios={modelo.getNodos()}
+            tipos={modelo.getCriteriosFinales().map((c) => (c.beneficio ? "max" : "min"))}
+            metodoNombre={modelo.getMetodo()}
+            hierarchy={modelo.getData().nodos.nodes}
+            matrix={prepareAPIData()?.matrix || []}
+          />
+        )}
+        {selectedAnalysisType === "multidimensional" && (
+          <div className="p-4 text-center text-gray-500">
+            <p>Funcionalidad en desarrollo</p>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

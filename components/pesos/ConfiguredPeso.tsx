@@ -8,6 +8,7 @@ import ComparacionPorPares from "./comparacionParesMatriz"
 import ComparacionPorPasos from "./comparacionporpasos"
 import { Tabs } from "antd"
 import SaatyExpertos from "./comppasosexperto"
+import AsignarIgual from "./AsignarIgual"
 
 interface ConfigureModalPesoProps {
   isOpen: boolean
@@ -55,8 +56,18 @@ export default function ConfigureModalPeso({
             ),
           },
           {
-            label: "Método Saaty (Matriz)",
+            label: "SA",
             key: "2",
+            children: (
+              <AsignarIgual
+                nodos={nodos}
+                onSave={handleGuardarPesos}
+              />
+            ),
+          },
+          {
+            label: "Método Saaty (Matriz)",
+            key: "3",
             children: (
               <ComparacionPorPares
                 idmodelo={idmodelo}
@@ -67,7 +78,7 @@ export default function ConfigureModalPeso({
           },
           {
             label: "Método Saaty (Por pasos)",
-            key: "3",
+            key: "4",
             children: (
               <ComparacionPorPasos
                 nodos={nodos}
@@ -77,7 +88,7 @@ export default function ConfigureModalPeso({
           },
           {
             label: "Método Saaty (Expertos)",
-            key: "4",
+            key: "5",
             children: (
               <SaatyExpertos
               idmodelo={idmodelo}
