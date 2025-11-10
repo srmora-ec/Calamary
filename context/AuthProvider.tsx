@@ -15,7 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = useAuthHook(); // 👈 tu hook actual
+  const auth = useAuthHook(); //hook actual
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 

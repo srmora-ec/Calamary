@@ -39,7 +39,7 @@ export default function ModelosPublicosPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [total, setTotal] = useState(0)
 
-  const pageSize = 10
+  const pageSize = 12
 
   useEffect(() => {
     loadMetodos()

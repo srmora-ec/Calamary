@@ -67,7 +67,9 @@ export default function ModelCard({ modelo }: ModelCardProps) {
           <button
             onClick={() => {
               SetLoading(true);
-              router.push("/tablero/" + modelo.id)
+              // router.push("/tablero/" + modelo.id)
+                            window.location.href = "/tablero/" + modelo.id
+
             }}
             className="focus:outline-none cursor-pointer"
           >
@@ -81,7 +83,9 @@ export default function ModelCard({ modelo }: ModelCardProps) {
           <button
             onClick={() => {
               SetLoading(true);
-              router.push("/evaluacion/" + modelo.id)
+              // router.push("/evaluacion/" + modelo.id)
+              window.location.href = "/evaluacion/" + modelo.id
+
             }}
             className="focus:outline-none cursor-pointer"
           >
