@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Select, Button, message, Spin, Card } from "antd"
 import type { Nodo } from "@/types/modelo"
+import SensitivityChart from "./sensitivychart"
 
 interface SensitivityResponse {
     criterion_id: string
@@ -168,7 +169,7 @@ export default function UnidimensionalSensitivityAnalysis({
                                 <p className="text-xl font-bold">
                                     {(() => {
                                         const bestIndex = result.initial_best_alternative
-                                        const bestAlt = alternativas?.[bestIndex-1]
+                                        const bestAlt = alternativas?.[bestIndex - 1]
                                         return bestAlt ? bestAlt.nombre : `Alternativa ${bestIndex}`
                                     })()}
                                 </p>
@@ -241,6 +242,18 @@ export default function UnidimensionalSensitivityAnalysis({
                                 actual es <span className="font-bold">{(result.initial_local_weight * 100).toFixed(2)}%</span>.
                             </p>
                         </div>
+                        {/* <div className="mt-6">
+                            <SensitivityChart
+                                alternativas={alternativas}
+                                matrix={matrix}
+                                hierarchy={buildNestedHierarchy(hierarchy)}
+                                tipos={tipos}
+                                metodoNombre={metodoNombre}
+                                criterionId={selectedCriterion!}
+                                criterionName={result.criterion_name}
+                                maxRange={result.stability_local_interval} 
+                            />
+                        </div> */}
                     </div>
                 </Card>
             )}

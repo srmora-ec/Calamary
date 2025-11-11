@@ -1240,7 +1240,7 @@ export default function AlternativasPage() {
     {
       key: "4",
       label: "Análisis de Sensibilidad",
-      disabled: alternativas.length < 2,
+      disabled: (alternativas.length < 2 || !resultado ),
       children: (
         <div className="space-y-6">
           <div className="bg-blue-50 p-4 rounded-lg">
