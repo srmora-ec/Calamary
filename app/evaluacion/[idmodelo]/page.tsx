@@ -1028,7 +1028,7 @@ export default function AlternativasPage() {
               {/* Título */}
               <Col xs={24} md={8} lg={6}>
                 <h3 className="text-lg font-semibold text-center md:text-left">
-                  Gestión de Alternativas
+                  Gestión de alternativas
                 </h3>
               </Col>
 
@@ -1230,7 +1230,7 @@ export default function AlternativasPage() {
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 />
               </svg>
-              <p className="text-lg">No hay resultados disponibles</p>
+              <p className="text-lg">No hay resultados disponibles.</p>
               <p className="text-sm">Agrega al menos 2 alternativas y haz clic en "Evaluar Alternativas"</p>
             </div>
           )}
