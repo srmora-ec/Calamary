@@ -104,7 +104,7 @@ export default function RegisterPage() {
 
         <div className="card-footer text-center mt-4">
           <p className="text-secondary text-sm">
-            ¿Ya tienes una cuenta?{" "}
+            ¿Ya tienes una cuenta? {"  "}
             <button
               onClick={() => router.push("/")}
               className="font-medium text-primary hover:text-primary-dark cursor-pointer p-0 m-0 border-none bg-transparent underline"

@@ -29,7 +29,7 @@ export default function CheckEmailPage() {
         <p className="text-gray-600 leading-relaxed mb-6">
           Te hemos enviado un <span className="font-medium text-blue-600">código</span> o{" "}
           <span className="font-medium text-blue-600">enlace de verificación</span> a tu bandeja de entrada.  
-          Si no lo ves, revisa la carpeta de <strong>spam</strong> o <strong>correo no deseado</strong>.
+          Si no lo ves, revisa la carpeta de <strong>spam</strong> o <strong>correo no deseado.</strong>
         </p>
 
         <button

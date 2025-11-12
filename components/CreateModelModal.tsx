@@ -227,7 +227,6 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
           </button>
           <span className="ml-3">{formData.publico ? "Público" : "Privado"}</span>
         </div>
-
         {/* Botones */}
         <div className="modal-footer">
           <button type="button" onClick={handleClose} className="btn btn-secondary" disabled={loading}>

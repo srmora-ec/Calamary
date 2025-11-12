@@ -68,18 +68,17 @@ export class Modelo {
   }
 
   setNombre(nombre: string) {
-    this.data.nombre = nombre
-  }
+    this.data.nombre = nombre
+  }
+  // 🆕 Setter para la descripción del modelo
+  setDescripcion(descripcion: string) {
+    this.data.descripcion = descripcion || null
+  }
 
-  // 🆕 Setter para la descripción del modelo
-  setDescripcion(descripcion: string) {
-    this.data.descripcion = descripcion || null
-  }
-
-  // 🆕 Setter para la visibilidad del modelo
-  setPublico(publico: boolean) {
-    this.data.publico = publico
-  }
+  // 🆕 Setter para la visibilidad del modelo
+  setPublico(publico: boolean) {
+    this.data.publico = publico
+  }
   // Getter para acceder a los datos completos
   getData(): ModeloData {
     return { ...this.data }
@@ -140,7 +139,7 @@ export class Modelo {
         criterioFinal: nodo.criterioFinal ?? false,
         beneficio: nodo.beneficio ?? true,
         unidadmedida: nodo.unidadmedida ?? "Unidad",
-        MAUT:nodo.MAUT ??null
+        MAUT: nodo.MAUT ?? null
       } as Record<string, unknown>,
       parentNode: nodo.idpadre != null ? nodo.idpadre.toString() : undefined,
       sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
@@ -468,7 +467,7 @@ export class Modelo {
       } else if (nodo.MAUT.tipoFuncion === "discreta") {
         return (
           !nodo.MAUT.funcionDiscreta ||
-          nodo.MAUT.funcionDiscreta.valores.length < 2 
+          nodo.MAUT.funcionDiscreta.valores.length < 2
         )
       }
 

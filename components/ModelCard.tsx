@@ -42,7 +42,6 @@ export default function ModelCard({ modelo }: ModelCardProps) {
   return (
     <div className="card h-[240px] flex flex-col justify-between">
       <Spinner visible={loading} />
-
       {/* Contenido principal */}
       <div className="card-header flex-1">
         <div className="flex justify-between items-start">

@@ -89,6 +89,7 @@ export default function ModeloPage() {
   const handleCriterioMaut = (nodo: Nodo) => {
     setNodoActual(nodo);
     setIsMautConfigured(true);
+    
   }
 
   const handleModeloActualizado = async (modeloActual: Modelo) => {//Para actualizar elmodelo en la base de datos

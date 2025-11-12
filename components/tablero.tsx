@@ -35,7 +35,6 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
   const data = modelo.getData()
 
-
   //1. Carga de datos
   const [nodes, setNodes] = useState(modelo.getNodosReactFlow()); // 1.1 Carga inicial de los nodos
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges

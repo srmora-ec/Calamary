@@ -129,7 +129,6 @@ export default function LoginPage() {
             </button>
           </p>
         </div>
-        {/* ------------------------------------- */}
       </div>
     </div>
   )
