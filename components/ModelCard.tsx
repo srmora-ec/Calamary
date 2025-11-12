@@ -36,66 +36,92 @@ const getLineaText = (linea: number) => {
 }
 
 export default function ModelCard({ modelo }: ModelCardProps) {
-  const [loading, SetLoading] = useState(false);
+  const [loading, SetLoading] = useState(false)
   const router = useRouter()
+
   return (
-    <div className="card">
+    <div className="card h-[240px] flex flex-col justify-between">
       <Spinner visible={loading} />
-      <div className="card-header">
+
+      {/* Contenido principal */}
+      <div className="card-header flex-1">
         <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold mb-2">{modelo.nombre}</h3>
-            <p className="text-secondary mb-4">{modelo.descripcion}</p>
+          <div className="flex-1 min-w-0">
+            {/* Título con truncamiento */}
+            <h3
+              className="text-xl font-bold mb-2 truncate"
+              title={modelo.nombre}
+            >
+              {modelo.nombre}
+            </h3>
+
+            {/* Descripción truncada a 2 líneas */}
+            <p
+              className="text-secondary mb-4 overflow-hidden text-ellipsis line-clamp-4"
+              title={modelo.descripcion}
+            >
+              {modelo.descripcion}
+            </p>
           </div>
+
           <div className="flex items-center gap-2">
-            <span title={modelo.publico ? "Público" : "Privado"}>{modelo.publico ? "🔓" : "🔒"}</span>
+            <span title={modelo.publico ? "Público" : "Privado"}>
+              {modelo.publico ? "🔓" : "🔒"}
+            </span>
             <Image
               src={modelo.orientacion === "h" ? "/horizontal.png" : "/vertical.png"}
               alt={modelo.orientacion === "h" ? "Horizontal" : "Vertical"}
-              width={100}
-              height={100}
+              width={60}
+              height={60}
             />
           </div>
         </div>
       </div>
 
-      <div className="card-footer">
+      {/* Pie fijo abajo */}
+      <div className="card-footer mt-auto pt-2 border-t border-gray-200">
         <div className="flex justify-between items-center">
-          <span className="text-secondary">Línea: {getLineaText(modelo.linea)}</span>
+          <div>
+            <span className="text-secondary block">
+              Línea: {getLineaText(modelo.linea)}
+            </span>
+            <span className="text-secondary text-sm">
+              {new Date(modelo.updated_at || modelo.created_at).toLocaleDateString()}
+            </span>
+          </div>
 
-          <span className="text-secondary">{new Date(modelo.updated_at || modelo.created_at).toLocaleDateString()}</span>
-          <button
-            onClick={() => {
-              SetLoading(true);
-              // router.push("/tablero/" + modelo.id)
-                            window.location.href = "/tablero/" + modelo.id
-
-            }}
-            className="focus:outline-none cursor-pointer"
-          >
-            <Image
-              src="/editar.png"
-              alt="Botón de editar"
-              width={40}
-              height={40}
-            />
-          </button>
-          <button
-            onClick={() => {
-              SetLoading(true);
-              // router.push("/evaluacion/" + modelo.id)
-              window.location.href = "/evaluacion/" + modelo.id
-
-            }}
-            className="focus:outline-none cursor-pointer"
-          >
-            <Image
-              src="/play.png"
-              alt="Botón de play"
-              width={40}
-              height={40}
-            />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                SetLoading(true)
+                window.location.href = "/tablero/" + modelo.id
+              }}
+              className="focus:outline-none cursor-pointer"
+              title="Editar"
+            >
+              <Image
+                src="/editar.png"
+                alt="Editar modelo"
+                width={35}
+                height={35}
+              />
+            </button>
+            <button
+              onClick={() => {
+                SetLoading(true)
+                window.location.href = "/evaluacion/" + modelo.id
+              }}
+              className="focus:outline-none cursor-pointer"
+              title="Evaluar"
+            >
+              <Image
+                src="/play.png"
+                alt="Ejecutar modelo"
+                width={35}
+                height={35}
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>

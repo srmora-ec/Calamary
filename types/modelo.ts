@@ -67,6 +67,19 @@ export class Modelo {
     this.data = data
   }
 
+  setNombre(nombre: string) {
+    this.data.nombre = nombre
+  }
+
+  // 🆕 Setter para la descripción del modelo
+  setDescripcion(descripcion: string) {
+    this.data.descripcion = descripcion || null
+  }
+
+  // 🆕 Setter para la visibilidad del modelo
+  setPublico(publico: boolean) {
+    this.data.publico = publico
+  }
   // Getter para acceder a los datos completos
   getData(): ModeloData {
     return { ...this.data }

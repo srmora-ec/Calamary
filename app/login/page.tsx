@@ -17,6 +17,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
+      // Redirigir al dashboard si ya hay un usuario logueado
       router.push("/dashboard")
     }
   }, [user, router])
@@ -26,19 +27,27 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
 
+    // Asegúrate de que tu función signIn maneje la autenticación de Supabase correctamente.
     const { error } = await signIn(email, password)
 
     if (error) {
       setError(error.message)
     } else {
+      // Si el inicio de sesión es exitoso, redirigir
       router.push("/dashboard")
     }
 
     setLoading(false)
   }
 
+  // Si ya hay un usuario, no renderizar nada mientras se redirige
   if (user) {
-    return null // Will redirect
+    return null
+  }
+
+  const handleGoToRegister = () => {
+    // Redirigir a la página de registro
+    router.push("/register")
   }
 
   return (
@@ -51,6 +60,8 @@ export default function LoginPage() {
               alt="Calamary Logo"
               width={60}
               height={60}
+              // Agregar priority para mejor rendimiento en imágenes importantes como logos
+              priority
             />
           </div>
           <h1 className="text-2xl font-bold text-primary">Calamary</h1>
@@ -92,7 +103,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
+            <button type="submit" className="btn btn-primary w-full mt-4" disabled={loading}>
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="spinner"></div>
@@ -104,6 +115,21 @@ export default function LoginPage() {
             </button>
           </form>
         </div>
+
+        {/* --- Nuevo Bloque para Registrarse --- */}
+        <div className="card-footer text-center mt-4">
+          <p className="text-secondary text-sm">
+            ¿No tienes una cuenta?{" "}
+            <button
+              onClick={handleGoToRegister}
+              className="font-medium text-primary hover:text-primary-dark cursor-pointer p-0 m-0 border-none bg-transparent underline"
+              disabled={loading}
+            >
+              Regístrate aquí
+            </button>
+          </p>
+        </div>
+        {/* ------------------------------------- */}
       </div>
     </div>
   )

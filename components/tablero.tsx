@@ -8,9 +8,11 @@ import ConfigureModalPeso from "./pesos/ConfiguredPeso";
 import ExportModelo from "./ExportModelo";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
-import { Button, Drawer, Space } from "antd"; // Importar Button y Drawer
+import { Button, Checkbox, Drawer, Space } from "antd"; // Importar Button y Drawer
 import { MenuOutlined } from '@ant-design/icons'; // Importar un ícono para el botón de menú
 import CitasModelo from "./citas/CitasModelo";
+import Input from "antd/es/input/Input";
+import TextArea from "antd/es/input/TextArea";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -41,6 +43,9 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [metodos, setMetodos] = useState<Metodo[]>([]);
   const [metodo, setMetodo] = useState<string>("");
+  const [nombreModelo, setNombreModelo] = useState(data.nombre);
+  const [descripcionModelo, setDescripcionModelo] = useState(data.descripcion || "");
+  const [esPublico, setEsPublico] = useState(data.publico);
 
   // Estado para el Drawer
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -53,7 +58,10 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
     modelo.setOrientacion(orientacion);
     modelo.setLinea(linea);
-    setMetodo(data.metodo)
+    setMetodo(data.metodo);
+    setNombreModelo(data.nombre);
+    setDescripcionModelo(data.descripcion || "");
+    setEsPublico(data.publico);
     setNodes(modelo.getNodosReactFlow());//volvemos a cargar los nodos
     setEdges(modelo.getEdgesReactFlow());//volvewmos a cargar los edges
   }, [orientacion, modelo, linea]);
@@ -129,6 +137,9 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const handleActualizar = () => {//Para devolver elmodelo actualizado
     if (onActualizarModelo) {
       guardarpos()
+      modelo.setNombre(nombreModelo);
+      modelo.setDescripcion(descripcionModelo);
+      modelo.setPublico(esPublico);
       onActualizarModelo(modelo);
     }
   };
@@ -270,6 +281,31 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
       >
         Guardar cambios
       </button>
+
+      <label className="block text-xs font-semibold mb-1">Nombre</label>
+      <Input
+        value={nombreModelo}
+        onChange={(e) => setNombreModelo(e.target.value)}
+        maxLength={150}
+        placeholder="Nombre del modelo"
+        className="text-xs"
+      />
+      <label className="block text-xs font-semibold mb-1">Descripción</label>
+      <TextArea
+        value={descripcionModelo}
+        onChange={(e) => setDescripcionModelo(e.target.value)}
+        rows={2}
+        maxLength={500}
+        placeholder="Descripción del modelo"
+        className="text-xs"
+      />
+      <Checkbox
+        checked={esPublico}
+        onChange={(e) => setEsPublico(e.target.checked)}
+      >
+        <span className="text-xs font-semibold">Modelo Público</span>
+      </Checkbox>
+
       <ExportModelo
         nodos={modelo.getNodos()}
         orientacion={orientacion}
@@ -386,6 +422,38 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
             >
               Guardar cambios
             </button>
+
+            <Input
+              value={nombreModelo}
+              onChange={(e) => setNombreModelo(e.target.value)}
+              maxLength={150}
+              placeholder="Nombre del modelo"
+              className="text-xs"
+            />
+            <label className="block text-xs font-semibold mb-1">Descripción</label>
+            <TextArea
+              value={descripcionModelo}
+              onChange={(e) => setDescripcionModelo(e.target.value)}
+              rows={2}
+              maxLength={500}
+              placeholder="Descripción del modelo"
+              className="text-xs"
+            />
+            <label className="form-label block mb-2">Visibilidad</label>
+          <button
+            type="button"
+            onClick={() => setEsPublico( !esPublico )}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              esPublico ? "bg-blue-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                esPublico ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+          <span className="ml-3">{esPublico ? "Público" : "Privado"}</span>
 
             <Switch
               option1={{ label: "Horizontal", value: "h" }}

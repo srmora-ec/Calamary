@@ -73,8 +73,8 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
       setLoading(false)
       return
     }
-    if (formData.nombre.length > 20) {
-      setError("El nombre no puede superar los 20 caracteres.")
+    if (formData.nombre.length > 150) {
+      setError("El nombre no puede superar los 150 caracteres.")
       setLoading(false)
       return
     }
@@ -131,10 +131,10 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
             className="form-input"
             value={formData.nombre}
             onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            maxLength={20}
+            maxLength={150}
             required
           />
-          <small className="text-gray-500">{formData.nombre.length}/20</small>
+          <small className="text-gray-500">{formData.nombre.length}/150</small>
         </div>
 
         {/* Descripción */}
@@ -143,7 +143,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
           <textarea
             className="form-input"
             rows={3}
-            maxLength={100}
+            maxLength={500}
             value={formData.descripcion || ""}
             onChange={(e) => setFormData({ ...formData, descripcion: e.target.value || null })}
           />
