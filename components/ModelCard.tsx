@@ -56,7 +56,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
 
             {/* Descripción truncada a 2 líneas */}
             <p
-              className="text-secondary mb-4 overflow-hidden text-ellipsis line-clamp-4"
+              className="text-secondary mb-4 overflow-hidden text-ellipsis line-clamp-3"
               title={modelo.descripcion}
             >
               {modelo.descripcion}
