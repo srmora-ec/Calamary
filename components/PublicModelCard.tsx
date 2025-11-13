@@ -1,15 +1,13 @@
 "use client"
 
-import { Card, Button, Collapse, theme } from "antd"
-import { CopyOutlined } from "@ant-design/icons"
-import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { message } from "antd"
+import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link" // Se mantiene Link para abrir en nueva pestaña
+import { Button, Collapse, message } from "antd"
+import { CopyOutlined } from "@ant-design/icons"
+import { supabase } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
 
 const { Panel } = Collapse
-const { useToken } = theme
 
 interface PublicModelCardProps {
   modelo: {
@@ -17,8 +15,7 @@ interface PublicModelCardProps {
     nombre: string
     descripcion: string
     fecha: string
-    // Asumiendo que el modelo tiene un campo 'publico' para la coherencia visual con la otra tarjeta
-    publico?: boolean 
+    publico?: boolean
     citas: Array<{
       autor: string
       año: number | null
@@ -32,139 +29,132 @@ interface PublicModelCardProps {
 }
 
 export default function PublicModelCard({ modelo }: PublicModelCardProps) {
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { token } = useToken()
 
   const handleCopy = async () => {
     try {
-      // Nota: Aquí se asume que el ID es un número, ajusta si es necesario.
       const { data, error } = await supabase.rpc("copiar_modelo", { modelo_id: modelo.id })
       if (error) throw error
       message.success("Modelo copiado exitosamente")
       router.push(`/modelos/${data.id}`)
     } catch (err: any) {
-      message.error("Error al copiar el modelo")
       console.error(err)
+      message.error("Error al copiar el modelo")
     }
   }
 
-  // Estilo de la cabecera (sin color de fondo)
-  const customHeaderStyle = {
-    padding: token.padding,
-    borderBottom: `1px solid ${token.colorBorderSecondary}`,
-  }
-
-  // Estilo para simular el "footer" de la otra tarjeta
-  const customFooterStyle = {
-    borderTop: `1px solid ${token.colorBorderSecondary}`,
-  }
-
   return (
-    <Card
-      // Quitamos 'bordered' para un estilo más limpio y similar al ejemplo
-      // Usamos el prop 'styles' para estilizar la cabecera
-      styles={{
-        header: customHeaderStyle,
-        body: { padding: token.padding, paddingTop: 0 }, // Reducimos padding top para compensar el título
-        actions: customFooterStyle, // Aplicamos estilo de separador al footer (actions)
-      }}
-      // El título ahora solo contiene el nombre y la información de estado/orientación (simulada)
-      title={
+    <div className="card flex flex-col justify-between transition-all duration-200 hover:shadow-md">
+      {/* Contenido principal */}
+      <div className="card-header flex-1">
         <div className="flex justify-between items-start">
-          <div className="flex-1">
-            {/* Título: manteniendo el estilo de fuente sin el fondo azul */}
-            <h3 className="text-xl font-bold mb-2">{modelo.nombre}</h3>
+          {/* Nombre y descripción */}
+          <div className="flex-1 min-w-0">
+            <h3
+              className="text-xl font-bold mb-2 truncate"
+              title={modelo.nombre}
+            >
+              {modelo.nombre}
+            </h3>
+
+            <p
+              className="text-secondary mb-3 overflow-hidden text-ellipsis line-clamp-2"
+              title={modelo.descripcion || "Sin descripción"}
+            >
+              {modelo.descripcion || "Sin descripción"}
+            </p>
           </div>
-          {/* Espacio para iconos, simulando la estructura del otro card */}
+
+          {/* Íconos */}
           <div className="flex items-center gap-2">
-             {/* Simulación del icono público/privado (si el modelo lo soporta) */}
             {modelo.publico !== undefined && (
-              <span title={modelo.publico ? "Público" : "Privado"}>{modelo.publico ? "🔓" : "🔒"}</span>
+              <span title={modelo.publico ? "Público" : "Privado"}>
+                {modelo.publico ? "🔓" : "🔒"}
+              </span>
             )}
-            {/* Si necesitas un icono de orientación, lo pondrías aquí */}
           </div>
         </div>
-      }
-      
-      // La descripción ahora se muestra inmediatamente debajo del título en el cuerpo de la tarjeta
-    >
-      <p className="text-gray-600 text-sm mb-4">{modelo.descripcion || "Sin descripción"}</p>
-      
-      {/* Citas y Fecha */}
-      <div className="mb-4">
-        <p className="text-xs text-gray-400 mb-2">
-          Creado: **{new Date(modelo.fecha).toLocaleDateString()}**
-        </p>
 
+        {/* Fecha */}
+        <span className="text-secondary text-sm block mb-2">
+          Creado: {new Date(modelo.fecha).toLocaleDateString()}
+        </span>
+
+        {/* Citas */}
         {modelo.citas && modelo.citas.length > 0 && (
-          <Collapse bordered={false} size="small" className="bg-white mt-4">
-            <Panel header={`Citas (${modelo.citas.length})`} key="1" className="p-0">
-              {modelo.citas.map((cita, idx) => {
-                // Formato de la cita
-                const citationText = `${cita.autor}${cita.año ? `, ${cita.año}` : ""}. *${cita.titulo}*. ${cita.fuente ? cita.fuente + "." : ""} ${cita.doi ? `doi: ${cita.doi}.` : ""}`
-                // Determinar URL clicable
-                const url = cita.url || (cita.doi ? `https://doi.org/${cita.doi}` : null)
-
-                return (
-                  <div key={idx} className="mb-2 p-0">
-                    <p className="text-xs text-gray-600">
-                      {url ? (
-                        <a
-                          href={url}
-                          target="_blank" // Abrir en nueva pestaña
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-700 underline" // Estilo de enlace
-                        >
-                          {citationText}
-                        </a>
-                      ) : (
-                        citationText
-                      )}
-                    </p>
-                  </div>
-                )
-              })}
+          <Collapse
+            bordered={false}
+            size="small"
+            className="bg-transparent mt-2"
+          >
+            <Panel
+              header={`Citas (${modelo.citas.length})`}
+              key="1"
+              className="p-0"
+            >
+              {/* Contenedor con scroll si hay muchas citas */}
+              <div className="max-h-40 overflow-y-auto pr-1">
+                {modelo.citas.map((cita, idx) => {
+                  const citationText = `${cita.autor}${cita.año ? `, ${cita.año}` : ""}. *${cita.titulo}*. ${cita.fuente ? cita.fuente + "." : ""} ${cita.doi ? `doi: ${cita.doi}.` : ""}`
+                  const url = cita.url || (cita.doi ? `https://doi.org/${cita.doi}` : null)
+                  return (
+                    <div key={idx} className="mb-1">
+                      <p className="text-xs text-gray-600">
+                        {url ? (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-700 underline"
+                          >
+                            {citationText}
+                          </a>
+                        ) : (
+                          citationText
+                        )}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
             </Panel>
           </Collapse>
         )}
       </div>
 
-      {/* Acciones movidas al footer para simular el "card-footer" de la otra tarjeta */}
-      <div className="flex justify-between items-center w-full">
-        {/* Usamos un div para alinear el botón de copiar a la izquierda si no hay más texto */}
-        <div>
-           <Button
-            key="copiar"
+      {/* Pie inferior */}
+      <div className="card-footer mt-auto pt-2 border-t border-gray-200 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Button
             type="link"
             icon={<CopyOutlined />}
             onClick={handleCopy}
-            className="text-gray-600 hover:text-blue-500" // Ajustamos el color del enlace
+            className="text-gray-600 hover:text-blue-500 p-0"
           >
-            Copiar Modelo
+            Copiar modelo
           </Button>
         </div>
-       
 
-        {/* Botón de Play con imagen, similar a la otra tarjeta */}
-        <button
-          onClick={() => {
-            // Nota: Aquí no usamos el estado 'loading' pero puedes reintroducirlo si lo necesitas.
-            window.open(`/evaluacion/${modelo.id}`, "_blank")
-          }}
-          className="focus:outline-none cursor-pointer"
-          title="Usar Modelo"
-        >
-          {/* Se simula la imagen /play.png de 40x40px */}
-          <Image
-            src="/play.png"
-            alt="Botón de play"
-            width={40}
-            height={40}
-            // Tailwind classes para asegurar que se vea como un botón de imagen
-            className="transition transform hover:scale-105"
-          />
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setLoading(true)
+              window.open(`/evaluacion/${modelo.id}`, "_blank")
+            }}
+            className="focus:outline-none cursor-pointer"
+            title="Usar Modelo"
+          >
+            <Image
+              src="/play.png"
+              alt="Evaluar modelo"
+              width={35}
+              height={35}
+              className="transition-transform transform hover:scale-105"
+            />
+          </button>
+        </div>
       </div>
-    </Card>
+    </div>
   )
 }
