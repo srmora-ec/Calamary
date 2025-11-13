@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
-import Header from "@/components/Header"
 import PublicModelCard from "./PublicModelCard"
 import { Row, Col, Input, Select, Button, Space } from "antd"
 import { SearchOutlined } from "@ant-design/icons"
@@ -94,94 +93,94 @@ export default function ModelosPublicosPage() {
 
   return (
 
-      <main className="container py-6">
-        <h1 className="text-2xl font-bold mb-4">Modelos Públicos</h1>
+    <main className="container py-6">
+      <h1 className="text-2xl font-bold mb-4">Modelos públicos</h1>
 
-        {/* Buscador y Filtros */}
-        <Row gutter={[16, 16]} align="middle" className="mb-6">
-          <Col xs={24} md={12} lg={8}>
-            <form onSubmit={handleSearch}>
-              <Input
-                placeholder="Buscar modelos por nombre o descripción..."
-                prefix={<SearchOutlined />}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                allowClear
-              />
-            </form>
-          </Col>
-
-          <Col xs={24} md={12} lg={8}>
-            <Select
-              placeholder="Filtrar por método"
-              style={{ width: "100%" }}
+      {/* Buscador y Filtros */}
+      <Row gutter={[16, 16]} align="middle" className="mb-6">
+        <Col xs={24} md={12} lg={8}>
+          <form onSubmit={handleSearch}>
+            <Input
+              placeholder="Buscar modelos por nombre o descripción..."
+              prefix={<SearchOutlined />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               allowClear
-              value={selectedMetodo ?? undefined}
-              onChange={(value) => setSelectedMetodo(value || null)}
-              options={metodos.map((m) => ({
-                label: m.nombre,
-                value: m.id,
-              }))}
             />
-          </Col>
+          </form>
+        </Col>
 
-          <Col xs={24} md={24} lg={8}>
-            <Space>
-              <Button onClick={() => { setSearchTerm(""); setSelectedMetodo(null); setCurrentPage(1) }}>
-                Limpiar Filtros
-              </Button>
-              <Button type="primary" onClick={loadModelos}>Buscar</Button>
-            </Space>
-          </Col>
-        </Row>
+        <Col xs={24} md={12} lg={8}>
+          <Select
+            placeholder="Filtrar por método"
+            style={{ width: "100%" }}
+            allowClear
+            value={selectedMetodo ?? undefined}
+            onChange={(value) => setSelectedMetodo(value || null)}
+            options={metodos.map((m) => ({
+              label: m.nombre,
+              value: m.id,
+            }))}
+          />
+        </Col>
 
-        {/* Lista de modelos */}
-        {loading ? (
-          <div className="flex justify-center py-10">
-            <div className="spinner" style={{ width: 40, height: 40 }}></div>
-          </div>
-        ) : modelos.length === 0 ? (
-          <div className="text-center py-10 text-gray-500">
-            No se encontraron modelos públicos.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {modelos.map((modelo) => (
-              <PublicModelCard key={modelo.id} modelo={modelo} />
-            ))}
-          </div>
-        )}
+        <Col xs={24} md={24} lg={8}>
+          <Space>
+            <Button onClick={() => { setSearchTerm(""); setSelectedMetodo(null); setCurrentPage(1) }}>
+              Limpiar filtros
+            </Button>
+            <Button type="primary" onClick={loadModelos}>Buscar</Button>
+          </Space>
+        </Col>
+      </Row>
 
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <div className="pagination mt-8">
+      {/* Lista de modelos */}
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <div className="spinner" style={{ width: 40, height: 40 }}></div>
+        </div>
+      ) : modelos.length === 0 ? (
+        <div className="text-center py-10 text-gray-500">
+          No se encontraron modelos públicos.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
+          {modelos.map((modelo) => (
+            <PublicModelCard key={modelo.id} modelo={modelo} />
+          ))}
+        </div>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="pagination mt-8">
+          <button
+            className="pagination-btn"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Anterior
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
-              className="pagination-btn"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
+              key={page}
+              className={`pagination-btn ${currentPage === page ? "active" : ""}`}
+              onClick={() => setCurrentPage(page)}
             >
-              Anterior
+              {page}
             </button>
+          ))}
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                className={`pagination-btn ${currentPage === page ? "active" : ""}`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              className="pagination-btn"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente
-            </button>
-          </div>
-        )}
-      </main>
+          <button
+            className="pagination-btn"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
+    </main>
   )
 }

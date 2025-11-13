@@ -64,9 +64,6 @@ export default function ModelCard({ modelo }: ModelCardProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span title={modelo.publico ? "Público" : "Privado"}>
-              {modelo.publico ? "🔓" : "🔒"}
-            </span>
             <Image
               src={modelo.orientacion === "h" ? "/horizontal.png" : "/vertical.png"}
               alt={modelo.orientacion === "h" ? "Horizontal" : "Vertical"}
@@ -90,6 +87,16 @@ export default function ModelCard({ modelo }: ModelCardProps) {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Imagen pública o privada */}
+            <Image
+              src={modelo.publico ? "/public.png" : "/privado.png"}
+              alt={modelo.publico ? "Público" : "Privado"}
+              width={28}
+              height={28}
+              title={modelo.publico ? "El modelo es publico para otros usuarios" : "El modelo es privado para otros usuarios"}
+            />
+
+            {/* Botón editar */}
             <button
               onClick={() => {
                 SetLoading(true)
@@ -105,10 +112,11 @@ export default function ModelCard({ modelo }: ModelCardProps) {
                 height={35}
               />
             </button>
+
+            {/* Botón play (abrir en nueva pestaña) */}
             <button
               onClick={() => {
-                SetLoading(true)
-                window.location.href = "/evaluacion/" + modelo.id
+                window.open("/evaluacion/" + modelo.id, "_blank")
               }}
               className="focus:outline-none cursor-pointer"
               title="Evaluar"
