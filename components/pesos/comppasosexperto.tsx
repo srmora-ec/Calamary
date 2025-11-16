@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react"
 import type { Nodo } from "@/types/modelo"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, Info, Trash2 } from "lucide-react"
+import { AlertCircle, Info, Trash2, Download } from "lucide-react"
 import * as XLSX from "xlsx"
 import ExpertosModal from "../ExpertosModal"
 import { Col, Row } from "antd"
@@ -20,6 +20,7 @@ interface SaatyExpertosProps {
 type ExpertMatrix = {
   id?: number
   nombre: string
+  matrix?: Record<string, number>
   pesos: number[]
 }
 
@@ -38,7 +39,7 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave, idmod
 
   const cargarMatricesExpertos = async () => {
     if (nodos.length === 0) return
-    
+
     const idpadre = nodos[0].idpadre
     if (idpadre === null) return
 
@@ -59,6 +60,7 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave, idmod
         const matricesCargadas: ExpertMatrix[] = data.map((item: any) => ({
           id: item.id,
           nombre: item.nombreexperto,
+          matrix: item.matrix as Record<string, number>,
           pesos: Object.values(item.pesos) as number[]
         }))
         setExpertos(matricesCargadas)
@@ -171,6 +173,87 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave, idmod
     onSave(weightsObj)
   }
 
+  const descargarMatricesExpertos = () => {
+    if (expertos.length === 0) {
+      setErrors(["No hay matrices de expertos para descargar."])
+      return
+    }
+
+    const n = nodos.length
+    const workbook = XLSX.utils.book_new()
+
+    // Lleva el control de nombres para evitar duplicados
+    const usedNames: Record<string, number> = {}
+
+    expertos.forEach((experto) => {
+      if (!experto.matrix) return
+
+      const data: (string | number)[][] = []
+
+      // Encabezados
+      const headers = [""]
+      nodos.forEach(n => headers.push(n.titulo))
+      headers.push("Peso")
+      data.push(headers)
+
+      // Filas
+      for (let i = 0; i < n; i++) {
+        const fila: (string | number)[] = [nodos[i].titulo]
+        const currentId = nodos[i].idnodo
+
+        for (let j = 0; j < n; j++) {
+          const compareId = nodos[j].idnodo
+          let valor: number
+
+          if (i === j) {
+            valor = 1
+          } else if (i < j) {
+            const key = `${currentId}-${compareId}`
+            valor = experto.matrix[key] ||
+              (experto.matrix[`${compareId}-${currentId}`]
+                ? 1 / experto.matrix[`${compareId}-${currentId}`]
+                : 0)
+          } else {
+            const key = `${compareId}-${currentId}`
+            valor = experto.matrix[key]
+              ? 1 / experto.matrix[key]
+              : (experto.matrix[`${currentId}-${compareId}`] || 0)
+          }
+
+          fila.push(Number(valor.toFixed(4)))
+        }
+
+        fila.push(experto.pesos[i]?.toFixed(4) || 0)
+        data.push(fila)
+      }
+
+      const worksheet = XLSX.utils.aoa_to_sheet(data)
+
+      const wscols = [{ wch: 25 }]
+      for (let i = 0; i < n + 1; i++) {
+        wscols.push({ wch: 15 })
+      }
+      worksheet["!cols"] = wscols
+
+      // Crear nombre base válido
+      let baseName = experto.nombre.substring(0, 31).replace(/[\*\?\/\\\[\]]/g, "_")
+
+      // Si ya existe, añadir número incremental
+      if (usedNames[baseName]) {
+        usedNames[baseName]++
+        baseName = `${baseName}${usedNames[baseName]}`
+      } else {
+        usedNames[baseName] = 1
+      }
+
+      // Añadir hoja con el nombre final
+      XLSX.utils.book_append_sheet(workbook, worksheet, baseName)
+    })
+
+    XLSX.writeFile(workbook, `MatricesExpertos_Modelo${idmodelo}.xlsx`)
+  }
+
+
   return (
     <div className="w-full space-y-6">
       {loading && (
@@ -207,36 +290,48 @@ const SaatyExpertos: React.FC<SaatyExpertosProps> = ({ nodos = [], onSave, idmod
           </p>
         </div>
       </div>
-
+      <br />
+      {/* >>> BOTONES ACTUALIZADOS EN UN LAYOUT DE 4 COLUMNAS <<< */}
       <Row gutter={[8, 8]}>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={6}>
           <Button
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
             style={{ width: "100%" }}
           >
-            📂 Cargar Excel de experto
+            📂 Cargar Excel
           </Button>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={6}>
+          <Button
+            onClick={() => setOpenModal(true)}
+            style={{ width: "100%" }}
+          >
+            👥 Invitar expertos
+          </Button>
+        </Col>
+        <Col xs={24} sm={6}>
           <Button
             onClick={calcularFinal}
             disabled={expertos.length === 0}
             style={{ width: "100%" }}
           >
-            ⚖️ Calcular Pesos Finales
+            ⚖️ Calcular Pesos
           </Button>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={6}>
           <Button
-            onClick={() => setOpenModal(true)}
+            onClick={descargarMatricesExpertos}
+            disabled={expertos.length === 0}
             style={{ width: "100%" }}
           >
-            Invitar expertos
+            <Download className="w-4 h-4 mr-2" />
+            Descargar Matrices
           </Button>
         </Col>
       </Row>
-
+      {/* >>> FIN DE BOTONES ACTUALIZADOS <<< */}
+      <br />
       {expertos.length > 0 && (
         <div className="border rounded-lg p-4 overflow-x-auto">
           <table className="min-w-full border-collapse border text-sm">

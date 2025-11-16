@@ -13,6 +13,8 @@ import { MenuOutlined } from '@ant-design/icons'; // Importar un ícono para el 
 import CitasModelo from "./citas/CitasModelo";
 import Input from "antd/es/input/Input";
 import TextArea from "antd/es/input/TextArea";
+import Modal from "./Modal";
+import PaquetesDeAlternativas from "./Alternativa";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -40,6 +42,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges
   const [nodosSeleccionados, setNodosSeleccionados] = useState<Nodo[] | null>(null)
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [openModalAlt, setOpenModalAlt] = useState(false);
   const [metodos, setMetodos] = useState<Metodo[]>([]);
   const [metodo, setMetodo] = useState<string>("");
   const [nombreModelo, setNombreModelo] = useState(data.nombre);
@@ -349,7 +352,9 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           </select>
         </div>
       )}
-      <button
+
+
+      {/* <button
         onClick={() => {
           window.open("/evaluacion/" + data.id, "_blank")
         }}
@@ -361,32 +366,42 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           width={40}
           height={40}
         />
-      </button>
+      </button> */}
     </Space>
   );
 
+  const handleCloseAlt = () => {
+    setOpenModalAlt(false);
+  }
 
   return (
     <>
       <div style={{ width: '100vw', height: '100vh' }}>
-        <div className="fixed top-4 left-4 z-50 flex items-center space-x-4">
+        <div className="fixed top-4 left-4 z-50 flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-3">
 
-          {/* Botón para abrir el Drawer (Solo visible en móviles/pantallas pequeñas) */}
           <Button
             type="primary"
             icon={<MenuOutlined />}
             onClick={() => setOpenDrawer(true)}
-            className="lg:hidden" // Ocultar en pantallas grandes
+            className="w-full lg:hidden"
           >
-            Opciones
+          Opciones
           </Button>
 
-          {/* Opciones de configuración (Solo visible en pantallas grandes) */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <Button
+            type="default"
+            onClick={() => setOpenModalAlt(true)}
+            className="w-full lg:w-auto"
+          >
+            Alternativas
+          </Button>
+          <div className="hidden lg:flex items-center gap-4">
             <ConfigOptions />
           </div>
-
         </div>
+        <Modal isOpen={openModalAlt} onClose={handleCloseAlt} title="Alternativas" width="100%">
+          <PaquetesDeAlternativas modelo={modelo}></PaquetesDeAlternativas>
+        </Modal>
         <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
           <button
             onClick={() => {
@@ -439,20 +454,18 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               className="text-xs"
             />
             <label className="form-label block mb-2">Visibilidad</label>
-          <button
-            type="button"
-            onClick={() => setEsPublico( !esPublico )}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              esPublico ? "bg-blue-600" : "bg-gray-300"
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                esPublico ? "translate-x-6" : "translate-x-1"
-              }`}
-            />
-          </button>
-          <span className="ml-3">{esPublico ? "Público" : "Privado"}</span>
+            <button
+              type="button"
+              onClick={() => setEsPublico(!esPublico)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${esPublico ? "bg-blue-600" : "bg-gray-300"
+                }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${esPublico ? "translate-x-6" : "translate-x-1"
+                  }`}
+              />
+            </button>
+            <span className="ml-3">{esPublico ? "Público" : "Privado"}</span>
 
             <Switch
               option1={{ label: "Horizontal", value: "h" }}
