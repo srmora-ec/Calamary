@@ -27,8 +27,9 @@ export default function NodoInfo({ nodo, className = "" }: NodoInfoProps) {
                             />
                         </div>
                         <span className="text-xs font-medium text-blue-700">
-                            {nodo.beneficio ? "Beneficio" : "Costo"}
+                            {nodo.beneficio ? "Beneficio - Mejor que aumente" : "Costo - Mejor que disminuya"}
                         </span>
+                        {nodo.unidadmedida}
                     </div>
                 )}
             </div>

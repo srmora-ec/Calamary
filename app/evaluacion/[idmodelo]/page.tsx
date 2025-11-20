@@ -12,6 +12,8 @@ import Modal from "@/components/Modal"
 import { supabase } from "@/lib/supabase"
 import * as XLSX from "xlsx"
 import Image from "next/image"
+import HightSensitivityAnalysis from "@/components/AnalisisDeSensibilidad/hight-sensitivity-analysis"
+import HighSensitivityMAUT from "@/components/AnalisisDeSensibilidad/HighSensitivityMAUT"
 
 type ModoValor = "unico" | "rango"
 
@@ -1281,7 +1283,7 @@ export default function AlternativasPage() {
             <Card
               hoverable
               onClick={() => openSensitivityAnalysis("multidimensional")}
-              style={{ cursor: "pointer", opacity: 0.6 }}
+              style={{ cursor: "pointer"}}
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between">
@@ -1293,10 +1295,7 @@ export default function AlternativasPage() {
                     </p>
                   </div>
                 </div>
-                <div className="bg-gray-100 text-gray-800 px-3 py-1 rounded text-xs w-fit">
-                  Análisis Multidimensional (Próximamente)
-                </div>
-                <p className="text-xs text-gray-500">Funcionalidad en desarrollo</p>
+                <p className="text-xs text-gray-500">Haz clic para analizar la estabilidad de un criterio individual</p>
               </div>
             </Card>
           </div>
@@ -1444,6 +1443,18 @@ export default function AlternativasPage() {
             matrixNormMax={resultado?.result_max || []}
           />
         )}
+          {selectedAnalysisType === "multidimensional" && modelo && modelo.getMetodo() === "MAUT" && (
+          <HighSensitivityMAUT
+            alternativas={alternativas}
+            criterios={modelo.getNodos()}
+            metodoNombre={modelo.getMetodo()}
+            hierarchy={modelo.getData().nodos.nodes}
+            matrixNormMin={resultado?.result_min || []}
+            matrixNormPromedioMin={resultado?.result_promedio_min || []}
+            matrixNormPromedioMax={resultado?.result_promedio_max || []}
+            matrixNormMax={resultado?.result_max || []}
+          />
+        )}
         {selectedAnalysisType === "unidimensional" && modelo && modelo.getMetodo() !== "MAUT" && (
           <UnidimensionalSensitivityAnalysis
             alternativas={alternativas}
@@ -1454,10 +1465,15 @@ export default function AlternativasPage() {
             matrix={prepareAPIData()?.matrix || []}
           />
         )}
-        {selectedAnalysisType === "multidimensional" && (
-          <div className="p-4 text-center text-gray-500">
-            <p>Funcionalidad en desarrollo</p>
-          </div>
+        {selectedAnalysisType === "multidimensional" && modelo && modelo.getMetodo() !== "MAUT" && (
+          <HightSensitivityAnalysis 
+          alternativas={alternativas}
+            criterios={modelo.getNodos()}
+            tipos={modelo.getCriteriosFinales().map((c) => (c.beneficio ? "max" : "min"))}
+            metodoNombre={modelo.getMetodo()}
+            hierarchy={modelo.getData().nodos.nodes}
+            matrix={prepareAPIData()?.matrix || []}
+          />
         )}
       </Modal>
     </div>

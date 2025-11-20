@@ -42,6 +42,7 @@ export default function ModeloPage() {
           beneficio: n.beneficio,
           descripcion: n.descripcion,
           criterioFinal: n.criterioFinal,
+          unidadmedida: n.unidadmedida,
           min: n.min,
           max: n.max,
         }));
