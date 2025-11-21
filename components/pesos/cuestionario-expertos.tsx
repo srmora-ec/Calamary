@@ -22,14 +22,14 @@ interface CuestionarioExpertosProps {
 // Opciones de Saaty para el lado "más importante" (de 1 a 9)
 const SAATY_PREFERENCE_OPTIONS = [
   { value: 1, label: "Igual importancia", position: 0, scaleLabel: "1" },
-  { value: 2, label: "Entre moderadamente y ligeramente más importante", position: -1, scaleLabel: "2" },
-  { value: 3, label: "Moderadamente más importante", position: -2, scaleLabel: "3" },
-  { value: 4, label: "Entre fuertemente y moderadamente más importante", position: -3, scaleLabel: "4" },
-  { value: 5, label: "Fuertemente más importante", position: -4, scaleLabel: "5" },
-  { value: 6, label: "Entre muy fuertemente y fuertemente más importante", position: -5, scaleLabel: "6" },
-  { value: 7, label: "Muy fuertemente más importante", position: -6, scaleLabel: "7" },
-  { value: 8, label: "Muy, muy fuertemente más importante", position: -7, scaleLabel: "8" },
-  { value: 9, label: "Extremadamente más importante", position: -8, scaleLabel: "9" },
+  { value: 2, label: "Importancia entre igual y moderada", position: -1, scaleLabel: "2" },
+  { value: 3, label: "Importancia moderada", position: -2, scaleLabel: "3" },
+  { value: 4, label: "Entre moderada y fuerte", position: -3, scaleLabel: "4" },
+  { value: 5, label: "Importancia fuerte", position: -4, scaleLabel: "5" },
+  { value: 6, label: "Entre fuerte y muy fuerte", position: -5, scaleLabel: "6" },
+  { value: 7, label: "Importancia muy fuerte", position: -6, scaleLabel: "7" },
+  { value: 8, label: "Entre muy fuerte y extrema", position: -7, scaleLabel: "8" },
+  { value: 9, label: "Importancia extrema o absoluta", position: -8, scaleLabel: "9" },
 ]
 
 interface Comparison {
@@ -52,7 +52,7 @@ interface Recommendation {
   direction: "node1" | "node2" | "equal"
   suggestedValue: number
   label: string
-  path?: string
+  path?: string 
 }
 
 // Definición para el estado de la respuesta en 2 pasos
@@ -62,12 +62,12 @@ type PreferredCriterion = "none" | "node1" | "node2" | "equal"
 const getClosestSaatyLabel = (value: number): string => {
   const val = Math.abs(value)
   if (val < 1.1) return "Igual importancia"
-
+  
   // Buscamos la opción con la diferencia mínima
   const closest = SAATY_PREFERENCE_OPTIONS.reduce((prev, curr) => {
     return Math.abs(curr.value - val) < Math.abs(prev.value - val) ? curr : prev
   })
-
+  
   return closest.label
 }
 
@@ -79,11 +79,11 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
   const [consistencyRatio, setConsistencyRatio] = useState<number>(0)
   const [showResults, setShowResults] = useState(false)
   const [inconsistentComparisons, setInconsistentComparisons] = useState<InconsistentComparison[]>([])
-
+  
   // Modales
   const [modalOpen, setModalOpen] = useState(false) // Modal de ayuda de nodo
   const [introModalOpen, setIntroModalOpen] = useState(true) // NUEVO: Modal de bienvenida
-
+  
   const [selectedNodoId, setSelectedNodoId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [tourOpen, setTourOpen] = useState<boolean>(false)
@@ -176,7 +176,7 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
     [matrix],
   )
 
-  // --- LÓGICA DE RECOMENDACIÓN ACTUALIZADA (SOPORTA IGUALDADES) ---
+  // --- LÓGICA DE RECOMENDACIÓN ACTUALIZADA ---
   const generateRecommendation = useCallback(() => {
     if (!comparisons[currentQuestionIndex]) {
       setRecommendation(null)
@@ -184,7 +184,7 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
     }
 
     const { nodeId1, nodeId2, node1Title, node2Title } = comparisons[currentQuestionIndex]
-
+    
     let accumulatedValue = 0
     let pathFound = false
     let bestPathDescription = ""
@@ -198,33 +198,30 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
       const valA_K = getMatrixValue(nodeId1, kId)
       const valK_B = getMatrixValue(kId, nodeId2)
 
-      // Calculamos la transitividad matemática: A->B = (A->K) * (K->B)
-      // Ejemplo: Si A=K (1) y K>B (5), entonces A>B (1*5 = 5).
-      const impliedValue = valA_K * valK_B
+      // REGLA ESTRICTA: Ambos enlaces deben tener información significativa (no ser neutros/vacíos)
+      // Definimos "Neutro/Desconocido" como valores muy cercanos a 1 (0.9 a 1.1).
+      const isLink1Significant = valA_K < 0.9 || valA_K > 1.1
+      const isLink2Significant = valK_B < 0.9 || valK_B > 1.1
 
-      // CRITERIO DE FILTRADO:
-      // Recomendamos solo si el valor resultante implica una preferencia clara (desviación de la neutralidad 1).
-      // Esto filtra automáticamente el caso donde ambos son 1 (1*1=1) o valores que se cancelan (3 * 0.33 = 1).
-      // Pero permite casos como 1 * 5 = 5.
-      const isSignificant = Math.abs(impliedValue - 1) > 0.2
+      if (isLink1Significant && isLink2Significant) {
+        
+        // Calculamos la transitividad: A->B = (A->K) * (K->B)
+        const impliedValue = valA_K * valK_B
+        
+        // Filtro final: Si el resultado de la multiplicación da algo muy neutro, tampoco sugerimos
+        if (Math.abs(impliedValue - 1) < 0.2) {
+           continue
+        }
 
-      if (isSignificant) {
         accumulatedValue = impliedValue
-
-        // Generar explicación del camino manejando desigualdades e igualdades
-        let rel1 = ""
-        if (valA_K > 1.1) rel1 = `${node1Title} > ${nodoK.titulo}`
-        else if (valA_K < 0.9) rel1 = `${nodoK.titulo} > ${node1Title}`
-        else rel1 = `${node1Title} ≈ ${nodoK.titulo}` // Usamos aproximado para igualdades
-
-        let rel2 = ""
-        if (valK_B > 1.1) rel2 = `${nodoK.titulo} > ${node2Title}`
-        else if (valK_B < 0.9) rel2 = `${node2Title} > ${nodoK.titulo}`
-        else rel2 = `${nodoK.titulo} ≈ ${node2Title}`
-
+        
+        // Generar explicación del camino
+        let rel1 = valA_K > 1.1 ? `${node1Title} > ${nodoK.titulo}` : `${nodoK.titulo} > ${node1Title}`
+        let rel2 = valK_B > 1.1 ? `${nodoK.titulo} > ${node2Title}` : `${node2Title} > ${nodoK.titulo}`
+        
         bestPathDescription = `(Deducido de: ${rel1} y ${rel2})`
         pathFound = true
-        break // Nos quedamos con el primer camino lógico encontrado
+        break 
       }
     }
 
@@ -239,12 +236,12 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
         suggestedVal = Math.min(accumulatedValue, 9)
         saatyLabel = getClosestSaatyLabel(suggestedVal)
         text = `Para mantener la consistencia lógica, se sugiere que ${node1Title} sea valorado como "${saatyLabel}" respecto a ${node2Title}.`
-      } else if (accumulatedValue < 0.9) {
+      } else if (accumulatedValue < 0.9) { 
         direction = "node2"
         suggestedVal = Math.min(1 / accumulatedValue, 9)
         saatyLabel = getClosestSaatyLabel(suggestedVal)
         text = `Para mantener la consistencia lógica, se sugiere que ${node2Title} sea valorado como "${saatyLabel}" respecto a ${node1Title}.`
-      }
+      } 
 
       setRecommendation({
         direction,
@@ -263,14 +260,7 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
     generateRecommendation()
   }, [currentQuestionIndex, generateRecommendation])
 
-  // Scroll automático a la recomendación
-  useEffect(() => {
-    if (recommendation && recommendationRef.current) {
-      setTimeout(() => {
-        recommendationRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
-      }, 300)
-    }
-  }, [currentQuestionIndex, recommendation])
+
 
   // Cargar respuesta anterior
   useEffect(() => {
@@ -611,25 +601,6 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
         </Button>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-2">
-          Cuestionario de Comparación por Pares
-        </h3>
-        <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
-          <p>
-            Este cuestionario te ayudará a determinar la importancia relativa de cada criterio.
-          </p>
-          <p>
-            <strong>Instrucciones:</strong>
-          </p>
-          <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>**Paso 1:** Selecciona qué criterio es más importante (o si son iguales).</li>
-            <li>**Paso 2:** Indica el grado de importancia del criterio seleccionado.</li>
-            <li>El sistema te sugerirá respuestas basadas en tus elecciones anteriores para mantener coherencia.</li>
-          </ul>
-        </div>
-      </div>
-
       <div ref={ref5} className="bg-background border rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">Progreso del cuestionario</span>
@@ -659,9 +630,9 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
 
           {/* SECCIÓN DE RECOMENDACIÓN */}
           {recommendation && (
-            <div
-              id="recommendation-box"
-              ref={recommendationRef}
+            <div 
+              id="recommendation-box" 
+              ref={recommendationRef} 
               className="mb-6 mt-4 max-w-2xl mx-auto scroll-mt-20 transition-all duration-500"
             >
               <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800 shadow-sm">
@@ -681,10 +652,11 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
 
           <div ref={ref2} className="flex flex-col md:flex-row items-center justify-center gap-4 mb-6">
             <button
-              className={`flex-1 max-w-sm p-4 rounded-lg border-2 transition-all duration-200 text-left ${preferredCriterion === "node1"
+              className={`flex-1 max-w-sm p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                preferredCriterion === "node1"
                   ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-md"
                   : "border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-700"
-                }`}
+              }`}
               onClick={() => handleCriterionSelect("node1")}
             >
               <div className="flex items-center gap-2">
@@ -701,20 +673,22 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
             </button>
 
             <button
-              className={`px-4 py-2 border rounded-full transition-all duration-200 text-sm font-medium ${preferredCriterion === "equal"
+              className={`px-4 py-2 border rounded-full transition-all duration-200 text-sm font-medium ${
+                preferredCriterion === "equal"
                   ? "bg-gray-200 dark:bg-gray-700 border-gray-500 text-gray-800 dark:text-gray-200 shadow-inner"
                   : "bg-transparent border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400"
-                }`}
+              }`}
               onClick={() => handleCriterionSelect("equal")}
             >
               IGUAL IMPORTANCIA
             </button>
 
             <button
-              className={`flex-1 max-w-sm p-4 rounded-lg border-2 transition-all duration-200 text-left ${preferredCriterion === "node2"
+              className={`flex-1 max-w-sm p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                preferredCriterion === "node2"
                   ? "border-green-500 bg-green-50 dark:bg-green-950 shadow-md"
                   : "border-gray-200 hover:border-green-300 dark:border-gray-700 dark:hover:border-green-700"
-                }`}
+              }`}
               onClick={() => handleCriterionSelect("node2")}
             >
               <div className="flex items-center gap-2">
@@ -748,10 +722,11 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
                     <button
                       key={displayIndex}
                       onClick={() => handlePreferenceSelect(displayIndex)}
-                      className={`p-3 text-center rounded-lg border-2 transition-all duration-200 ${isSelected
+                      className={`p-3 text-center rounded-lg border-2 transition-all duration-200 ${
+                        isSelected
                           ? "border-blue-600 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 shadow-lg scale-105"
                           : "border-gray-200 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                        }`}
+                      }`}
                     >
                       <div className="text-lg font-medium">{option.label.replace("más importante", "")}</div>
                     </button>
@@ -764,7 +739,7 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
           {preferredCriterion === "equal" && (
             <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-6">
               <p className="text-center text-green-700 dark:text-green-300 font-semibold">
-                Sí consideras que ambos criterios son de **Igual Importancia** selecciona siguiente. Si crees que uno es más importante seleccionalo.
+                Has seleccionado **Igual Importancia**.
               </p>
             </div>
           )}
@@ -866,6 +841,16 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
                   </AlertDescription>
                 </Alert>
               )}
+               {isConsistent && (
+                 <Alert className="mt-4 bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-900">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <AlertDescription className="text-green-800 dark:text-green-300 ml-2">
+                    <strong>¡Encuesta completada con éxito!</strong>
+                    <p className="mt-1">Sus respuestas muestran un nivel de consistencia sólido. Agradecemos su valioso aporte técnico al modelo.</p>
+                    <p className="mt-1 font-medium">Por favor, haga clic en "Enviar pesos" para finalizar.</p>
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Pesos Calculados:</h4>
@@ -964,33 +949,33 @@ const CuestionarioExpertos: React.FC<CuestionarioExpertosProps> = ({ nodos = [],
       >
         <div className="space-y-5 text-sm md:text-base text-gray-700 dark:text-gray-300">
           <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-950/40 p-4 rounded-lg border border-blue-100 dark:border-blue-900">
-            <ClipboardList className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
-            <div>
-              <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-1">Su rol es fundamental</h4>
-              <p>Ha sido seleccionado por su experiencia y conocimiento técnico para colaborar en la construcción de este modelo de decisión multicriterio.</p>
-            </div>
+             <ClipboardList className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+             <div>
+               <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-1">Su rol es fundamental</h4>
+               <p>Ha sido seleccionado por su experiencia y conocimiento técnico para colaborar en la construcción de este modelo de decisión multicriterio.</p>
+             </div>
           </div>
-          <br />
+
           <div className="space-y-2">
             <p>
               <strong>¿Qué debe hacer?</strong>
             </p>
             <p>
-              Su tarea consiste en realizar una serie de <strong>comparaciones por pares</strong> entre distintos criterios. No existen respuestas correctas o incorrectas; buscamos capturar su juicio profesional sobre qué aspectos tienen mayor importancia relativo en el contexto del problema.
+              Su tarea consiste en realizar una serie de <strong>comparaciones por pares</strong> entre distintos criterios. No existen respuestas correctas o incorrectas; buscamos capturar su juicio profesional sobre qué aspectos tienen mayor peso relativo en el contexto del problema.
             </p>
           </div>
 
           <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-xs md:text-sm">
-            <p className="font-medium mb-1">Instrucciones rápidas:</p>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>Seleccione el criterio que considere más relevante entre los dos presentados.</li>
-              <li>Indique la intensidad de esa preferencia (desde "Igual" hasta "Extremadamente más importante").</li>
-              <li>El sistema le avisará si sus respuestas muestran inconsistencias lógicas.</li>
-            </ul>
+             <p className="font-medium mb-1">Instrucciones rápidas:</p>
+             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+               <li>Seleccione el criterio que considere más relevante entre los dos presentados.</li>
+               <li>Indique la intensidad de esa preferencia (desde "Igual" hasta "Extremadamente más importante").</li>
+               <li>El sistema le avisará si sus respuestas muestran inconsistencias lógicas.</li>
+             </ul>
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button className="flex items-center gap-2 cursor-pointer" onClick={() => setIntroModalOpen(false)}>
+            <Button className="flex items-center gap-2" onClick={() => setIntroModalOpen(false)}>
               Comenzar Encuesta
             </Button>
           </div>
