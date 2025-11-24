@@ -466,7 +466,6 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
       {/* Botón para iniciar el tour */}
       <div className="text-center mb-4">
         <Button
-          type="default"
           onClick={() => setTourOpen(true)}
           className="bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700"
         >

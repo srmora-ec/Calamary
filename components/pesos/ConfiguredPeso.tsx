@@ -9,6 +9,7 @@ import ComparacionPorPasos from "./comparacionporpasos"
 import { Tabs } from "antd"
 import SaatyExpertos from "./comppasosexperto"
 import AsignarIgual from "./AsignarIgual"
+import AsignarPesosDifusos from "./AsignarPesosFuzzy"
 
 interface ConfigureModalPesoProps {
   isOpen: boolean
@@ -97,6 +98,16 @@ export default function ConfigureModalPeso({
               />
             ),
           },
+          {
+            label: "Asignar pesos difusos",
+            key: "6",
+            children: (
+              <AsignarPesosDifusos
+                nodos={nodos}
+                onSave={handleGuardarPesos}
+              />
+            ),
+          }
         ]}
       />
     </Modal>
