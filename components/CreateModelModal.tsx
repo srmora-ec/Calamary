@@ -42,6 +42,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
       const { data, error } = await supabase
         .from("metodos")
         .select("id, nombre, descripcion")
+        .eq("estado",true)
         .order("id", { ascending: true })
 
       if (error) {
