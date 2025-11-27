@@ -270,7 +270,7 @@ ${extraFuncs}
     <div className="min-h-screen" style={{ backgroundColor: "var(--surface-color)" }}>
       <Header />
       <main className="container py-6">
-        <Card title={idMetodo ? "Editar Método" : "Crear Nuevo Método"} className="shadow-md">
+        <Card title={idMetodo ? "Editar Método" : "Crear nuevo método"} className="shadow-md">
           <Form layout="vertical">
             <Form.Item label="Nombre del método" required>
               <Input

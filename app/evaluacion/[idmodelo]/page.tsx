@@ -1458,8 +1458,8 @@ export default function AlternativasPage() {
                     {modelo?.getMetodo() === "MAUT"
                       ? "Modelo MAUT: Utilice rangos (mín-máx) para cada criterio."
                       : modoValor === "fuzzy"
-                        ? "Modo Difuso: Ingrese tres valores (Inferior, Medio, Superior) para cada criterio."
-                        : "Modo Normal: Ingrese un valor único para cada criterio."}
+                        ? "Modo difuso: Ingrese tres valores (Inferior, Medio, Superior) para cada criterio."
+                        : "Modo normal: Ingrese un valor único para cada criterio."}
                   </p>
                 </div>
               </Col>
@@ -1825,7 +1825,7 @@ export default function AlternativasPage() {
                   <Row gutter={[16, 16]} align="middle">
                     <Col xs={24} lg={12}>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Gestión de Alternativas</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">Gestión de alternativas</h3>
                         <p className="text-sm text-gray-600 mt-1">
                           {modelo?.getMetodo() === "MAUT"
                             ? "Modelo MAUT: Utilice rangos (mín-máx) para cada criterio."

@@ -106,7 +106,7 @@ export default function MetodosPage() {
       <main className="container py-6">
         {/* Encabezado */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Métodos Disponibles</h1>
+          <h1 className="text-2xl font-bold mb-2">Métodos disponibles</h1>
           <p className="text-secondary">Aquí puedes ver y gestionar los métodos creados.</p>
         </div>
 
@@ -128,7 +128,7 @@ export default function MetodosPage() {
             <Col xs={24} md={12} lg={16}>
               <Space wrap>
                 <Button type="primary" icon={<PlusOutlined />} onClick={() => router.push("/metodos/ingresar/crear")}>
-                  Crear Método
+                  Crear método
                 </Button>
               </Space>
             </Col>

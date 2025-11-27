@@ -144,13 +144,13 @@ const PaquetesDeAlternativas: React.FC<PaquetesDeAlternativasProps> = ({ modelo 
     <div className="p-4">
 
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Paquetes de Alternativas</h2>
+        <h2 className="text-xl font-bold">Paquetes de alternativas</h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setModalVisible(true)}
         >
-          Crear Nuevo Paquete de Alternativas
+          Crear nuevo paquete de alternativas
         </Button>
       </div>
 
