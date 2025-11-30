@@ -11,6 +11,8 @@ import { Row, Col, Input, Button, Space, Tabs } from "antd"
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import ModelosPublicosPage from "@/components/ModelosPublicosPage"
 import type { TabsProps } from 'antd';
+import { useTranslation } from 'react-i18next';
+
 
 
 interface Modelo {
@@ -34,6 +36,7 @@ export default function DashboardPage() {
   const [currentPage, setCurrentPage] = useState(1)//Para la página actual de la paginación
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)//Para abrir el componente modal de crear modelo
   const [isAdmin, setIsAdmin] = useState(false)//Para guardar el estado del usuario si es admin o no. De esa forma 
+  const { t } = useTranslation();//Para traducir
 
   useEffect(() => {
     if (!loading && !user) router.push("/login") //Si no hay usuario logeado enviamos a login
@@ -113,7 +116,7 @@ export default function DashboardPage() {
           items={[
             {
               key: "1",
-              label: "Mis modelos",
+              label: t('dashboard.tabs.tbmismod'),
               children: (
                 <>
                   {/* Sección de estadísticas mostrará la cantidad de modelos creados */}
@@ -121,7 +124,7 @@ export default function DashboardPage() {
                     <div className="card">
                       <div className="card-body">
                         <h2 className="text-3xl font-bold text-primary mb-2">{totalModelos}</h2>{/*La total*/}
-                        <p className="text-secondary">Modelos creados</p>
+                        <p className="text-secondary">{t('dashboard.labels.lbmodcreados')}</p>
                       </div>
                     </div>
                   </div>
@@ -132,7 +135,7 @@ export default function DashboardPage() {
                     <Col xs={24} md={12} lg={8}>
                       <form onSubmit={handleSearch}>{/*La busqueda*/}
                         <Input
-                          placeholder="Buscar modelos..."
+                          placeholder={t('dashboard.ph.buscarmod')+"..."}
                           prefix={<SearchOutlined />}
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
@@ -148,11 +151,11 @@ export default function DashboardPage() {
                           icon={<PlusOutlined />}
                           onClick={() => setIsCreateModalOpen(true)}
                         >
-                          Crear modelo
+                          {t('dashboard.bt.crearmod')}
                         </Button>
                         {isAdmin && (
                           <Button type="default" onClick={() => router.push("/metodos")}>{/*Si somos administradores tendremos opcion de crear métodos*/}
-                            Métodos
+                            {t('dashboard.bt.metodos')}
                           </Button>
                         )}
                       </Space>
@@ -168,8 +171,8 @@ export default function DashboardPage() {
                     <div className="text-center py-8">{/*Si no hay modelos un aviso*/}
                       <p className="text-secondary">
                         {searchTerm
-                          ? "No se encontraron modelos con ese término."
-                          : "No tienes modelos creados aún."}
+                          ? t('dashboard.ms.nomodel')
+                          : t('dashboard.ms.nocmodel')}
                       </p>
                     </div>
                   ) : (
@@ -188,7 +191,7 @@ export default function DashboardPage() {
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
                       >
-                        Anterior
+                        {t('tablas.back')}
                       </button>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                         <button
@@ -204,7 +207,7 @@ export default function DashboardPage() {
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
                       >
-                        Siguiente
+                        {t('tablas.next')}
                       </button>
                     </div>
                   )}
@@ -213,7 +216,7 @@ export default function DashboardPage() {
             },
             {
               key: "2",
-              label: "Buscar modelos",
+              label: t('dashboard.ph.buscarmod'),
               children: (
                 <ModelosPublicosPage />
               ),

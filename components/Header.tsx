@@ -6,8 +6,11 @@ import Image from "next/image"
 import { Drawer, Button } from "antd"
 import { MenuOutlined } from "@ant-design/icons"
 import Link from "next/link"
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTranslation } from 'react-i18next';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth()
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -50,17 +53,18 @@ export default function Header() {
             style={{ display: isMobile ? 'none' : 'flex' }}
           >
             <Link href="/" className="hover:text-primary">
-              Inicio
+              {t('header.home')}
             </Link>
             <Link href="/expertos" className="hover:text-primary">
-              Expertos
+              {t('header.expertos')}
             </Link>
             <span className="text-secondary">{user?.email || "cargando..."}</span>
+            <LanguageSwitcher />
             <button
               onClick={handleSignOut}
               className="btn btn-secondary px-3 py-1 rounded-md"
             >
-              Cerrar Sesión
+              {t('header.btn_cerrarsesion')}
             </button>
           </div>
 
