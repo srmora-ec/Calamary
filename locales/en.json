@@ -1,0 +1,41 @@
+{
+    "header": {
+        "btn_cerrarsesion": "Log out",
+        "home": "Home",
+        "expertos": "Experts"
+    },
+    "tablas": {
+        "back": "Previous",
+        "next": "Next"
+    },
+    "dashboard": {
+        "tabs": {
+            "tbmismod": "My models",
+            "tbpublicmod": "Public models"
+        },
+        "labels": {
+            "lbmodcreados": "Created models"
+        },
+        "ph": {
+            "buscarmod": "Search models"
+        },
+        "bt": {
+            "crearmod": "Create model",
+            "metodos": "Methods"
+        },
+        "ms": {
+            "nomodel": "No models found for that term.",
+            "nocmodel": "You haven’t created any models yet."
+        }
+    },
+    "botones": {
+        "btn_lang": "English",
+        "guardar": "Save Changes",
+        "cancelar": "Cancel",
+        "cambiar_idioma": "Cambiar a Español"
+    },
+    "mensajes": {
+        "bienvenida": "Welcome to Calamary",
+        "error": "Something went wrong"
+    }
+}

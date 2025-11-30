@@ -1,0 +1,41 @@
+{
+  "header": {
+    "btn_cerrarsesion": "Cerrar sesión",
+    "home": "Inicio",
+    "expertos": "Expertos"
+  },
+  "tablas":{
+    "back":"Anterior",
+    "next":"Siguiente"
+  },
+  "dashboard": {
+    "tabs": {
+      "tbmismod": "Mis modelos",
+      "tbpublicmod":"Modelos públicos"
+    },
+    "labels":{
+      "lbmodcreados":"Modelos creados"
+    },
+    "ph":{
+      "buscarmod":"Buscar modelos"
+    },
+    "bt":{
+      "crearmod":"Crear modelo",
+      "metodos":"Métodos"
+    },
+    "ms":{
+      "nomodel":"No se encontraron modelos con ese término.",
+      "nocmodel":"No tienes modelos creados aún."
+    }
+  },
+  "botones": {
+    "btn_lang": "Español",
+    "guardar": "Guardar Cambios",
+    "cancelar": "Cancelar",
+    "cambiar_idioma": "Switch to English"
+  },
+  "mensajes": {
+    "bienvenida": "Bienvenido a Calamary",
+    "error": "Algo salió mal"
+  }
+}
