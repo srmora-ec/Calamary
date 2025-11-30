@@ -12,19 +12,24 @@ import { Modelo, ModeloData, Nodo } from "@/types/modelo";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNotification } from "@/components/NotificationProvider";
 
 export default function ModeloPage() {
   const { idmodelo } = useParams(); // Cargar el parametro delicado
+
+  const { notify } = useNotification();
   const [modelo, setModelo] = useState<Modelo | null>(null); //estructura del modelo
   const [orientacion, setOrientacion] = useState<"h" | "v">("h"); //Para cambiar orientacion
   const [linea, setLinea] = useState<number>(1); //Para la linea
   const { user, loading } = useAuthContext(); //Verficamos que inicie sesión
   const [isConfigureOpen, setIsConfigureOpen] = useState(false);
   const [IsMautConfigured, setIsMautConfigured] = useState(false);
-  const [isPesoOpen, setIsPesoOpen] = useState(false); //Para abrir 
+  // const [isPesoOpen, setIsPesoOpen] = useState(false); //Para abrir 
   const [nodoActual, setNodoActual] = useState<Nodo | null>(null); //Para actualizar un nodo
 
   const router = useRouter();
+  const { t } = useTranslation("modelos");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -64,7 +69,7 @@ export default function ModeloPage() {
               acortado: n.acortado,
               beneficio: n.beneficio,
               unidadmedida: n.unidadmedida,
-              MAUT:n.MAUT,
+              MAUT: n.MAUT,
               min: n.min,
               max: n.max
             }))
@@ -89,7 +94,7 @@ export default function ModeloPage() {
   const handleCriterioMaut = (nodo: Nodo) => {
     setNodoActual(nodo);
     setIsMautConfigured(true);
-    
+
   }
 
   const handleModeloActualizado = async (modeloActual: Modelo) => {//Para actualizar elmodelo en la base de datos
@@ -108,9 +113,11 @@ export default function ModeloPage() {
 
     if (error) {
       console.error("Error actualizando modelo:", error);
+      notify("Error", "error", t('modelos.errorupdmodel'))
       return null;
     }
     alert("Modelo actualizado");
+    notify(t('alertas.exito'), "success", t('modelos.modelactua'))
     console.log("Modelo actualizado:", data);
   }
 

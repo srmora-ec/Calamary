@@ -1,41 +1,184 @@
 {
-    "header": {
-        "btn_cerrarsesion": "Log out",
-        "home": "Home",
-        "expertos": "Experts"
+  "header": {
+    "btn_cerrarsesion": "Log out",
+    "home": "Home",
+    "expertos": "Experts"
+  },
+  "generic": {
+    "nombre": "Name",
+    "del": "Delete",
+    "cargar": "Load",
+    "tipo": "Type",
+    "creado": "Created",
+    "acciones": "Actions",
+    "modeact": "Current mode",
+    "info": "Information",
+    "resultados": "Results",
+    "puntuacion": "Score"
+  },
+  "tablas": {
+    "back": "Previous",
+    "next": "Next"
+  },
+  "dashboard": {
+    "tabs": {
+      "tbmismod": "My Models",
+      "tbpublicmod": "Public Models"
     },
-    "tablas": {
-        "back": "Previous",
-        "next": "Next"
+    "labels": {
+      "lbmodcreados": "Created Models"
     },
-    "dashboard": {
-        "tabs": {
-            "tbmismod": "My models",
-            "tbpublicmod": "Public models"
-        },
-        "labels": {
-            "lbmodcreados": "Created models"
-        },
-        "ph": {
-            "buscarmod": "Search models"
-        },
-        "bt": {
-            "crearmod": "Create model",
-            "metodos": "Methods"
-        },
-        "ms": {
-            "nomodel": "No models found for that term.",
-            "nocmodel": "You haven’t created any models yet."
-        }
+    "ph": {
+      "buscarmod": "Search models"
     },
-    "botones": {
-        "btn_lang": "English",
-        "guardar": "Save Changes",
-        "cancelar": "Cancel",
-        "cambiar_idioma": "Cambiar a Español"
+    "bt": {
+      "crearmod": "Create Model",
+      "metodos": "Methods"
     },
-    "mensajes": {
-        "bienvenida": "Welcome to Calamary",
-        "error": "Something went wrong"
+    "ms": {
+      "nomodel": "No models found with that term.",
+      "nocmodel": "You haven't created any models yet."
     }
+  },
+  "alertas": {
+    "ups": "Something went wrong!",
+    "errordes": "Unknown error",
+    "exito": "Success!",
+    "cuidado": "Watch out!",
+    "carganumero": "Loaded "
+  },
+  "evaluacion": {
+    "punmin": "Score (Min)",
+    "puntaje": "Score (Avg)",
+    "punmax": "Score (Max)",
+    "titulo": "Alternative Management",
+    "desmaut": "MAUT Model: Use ranges (min-max) for each criterion.",
+    "desfuzzy": "Fuzzy Mode: Enter three values (Lower, Middle, Upper) for each criterion.",
+    "desnormal": "Normal Mode: Enter a single value for each criterion.",
+    "finalcri": "Final Criteria",
+    "normtitle": "Evaluation (Normalized)",
+    "matriznorm": "Normalized Matrix",
+    "desnorm": "Normalized values of each criterion for all alternatives",
+    "normexplicacion": "Normalization adjusts all values to a common scale (0-1) to allow fair comparisons between criteria with different ranges.",
+    "avisorang": "(showing only Min and Max)",
+    "noresultdis": "No results available",
+    "firstintruccion": "Add at least 2 alternatives and click on 'Evaluate Alternatives'",
+    "alertas": {
+      "actfuzzy": "You must activate 'Fuzzy Mode' (dashed line button) before loading this package.",
+      "paquetelen0": "The package contains no alternatives",
+      "paquetetipo": "The package is of type ",
+      "paquetenecesario": " but the model requires type ",
+      "errorpaquete": "Error loading package alternatives",
+      "errorevamaut": "Cannot evaluate. Utility functions are missing in final criteria (MAUT)",
+      "mauterror": "Error executing MAUT evaluation: ",
+      "error": "Error executing evaluation",
+      "mautexito": "MAUT (range) evaluation completed successfully",
+      "fuzzyexito": "Fuzzy evaluation completed successfully",
+      "evaexito": "Evaluation completed successfully",
+      "modocambio": "Mode changed ",
+      "configplis": "Please configure utility functions for all final criteria in the model dashboard before evaluating."
+    },
+    "fuzzy": {
+      "fuzzyact": "Fuzzy Mode ✓",
+      "nofuzzyact": "Activate Fuzzy Mode"
+    }
+  },
+  "resultados": {
+    "clasifinal": " Final Classification - Method ",
+    "presentacion": "Alternative ranking based on weighted scores",
+    "mejoralt": "Best Alternative",
+    "segundamejoralt": "Second Best",
+    "tercermejoralt": "Third Best"
+  },
+  "alternativas": {
+    "titulo": "Alternative",
+    "cantalt": "Num. Alternatives",
+    "carpaquete": "Load alternative package",
+    "loadingpaquetes": "Loading packages...",
+    "nohaypaq": "No alternative packages available for this model.",
+    "avisocrear": "Create a package from the 'Packages' tab.",
+    "add": "Add Alternative",
+    "eva": "Evaluate Alternatives",
+    "alertas": {
+      "add": "Alternative added",
+      "del": "Alternative deleted",
+      "excelori": " from Excel."
+    }
+  },
+  "analisissensibilidad": {
+    "titulo": "Sensitivity Analysis",
+    "descrip": "Analyze how changes in criteria weights affect alternative classification",
+    "pesouni": " One-Dimensional Weight",
+    "pesoalt": " High-Dimensional Weight",
+    "despesouni": "Evaluates how the best alternative changes when a specific criterion's weight varies while others remain constant.",
+    "despesoalt": "Evaluates how classification changes when multiple weights vary simultaneously, allowing for more complex analysis.",
+    "clic": "Click to analyze the stability of an individual criterion"
+  },
+  "excel": {
+    "firstalert": "The Excel file must have at least one header row and one data row",
+    "secondalert": "The Excel has ",
+    "thirdalert": " criteria columns, but the model has ",
+    "fouralert": " final criteria. Matching by name will be attempted.",
+    "errorcarga": "Error processing Excel file",
+    "cargar": "Load from Excel",
+    "formato": "Excel Format",
+    "format": {
+      "normaldes": "First column = alternative names, following columns = values for each criterion",
+      "fuzzydes": " (in fuzzy mode: criterion1_l, criterion1_m, criterion1_u, criterion2_l, criterion2_m, criterion2_u, ...).",
+      "mautdes": " (in range mode: criterion1_min, criterion1_max, criterion2_min, criterion2_max, ...).",
+      "mautdisdes": "the value must match the name of the configured discrete option.",
+      "mautdis": "For Discrete MAUT:"
+    },
+    "fuzzy": {
+      "esperocolumnas": " columns, but in fuzzy mode ",
+      "esperocolfin": " columns are expected (3 for each criterion: low, mid, upper)."
+    }
+  },
+  "botones": {
+    "btn_lang": "English",
+    "guardar": "Save Changes",
+    "cancelar": "Cancel",
+    "cambiar_idioma": "Switch to Spanish"
+  },
+  "mensajes": {
+    "bienvenida": "Welcome to Calamary",
+    "error": "Something went wrong"
+  },
+  "login": {
+    "logo_alt": "Calamary Logo",
+    "subtitle": "Sign in to your account",
+    "email_label": "Email",
+    "password_label": "Password",
+    "logging_in": "Signing in...",
+    "submit_btn": "Sign In",
+    "no_account": "Don't have an account?",
+    "register_link": "Register here"
+  },
+  "metodos_page": {
+    "titulo": "Available Methods",
+    "descripcion": "Here you can view and manage the created methods.",
+    "buscar_ph": "Search methods...",
+    "btn_crear": "Create Method",
+    "sin_metodos": "No methods registered.",
+    "creado_el": "Created on",
+    "btn_editar": "Edit",
+    "confirm_eliminar_titulo": "Confirm deletion",
+    "confirm_eliminar_texto": "Are you sure you want to delete this method?",
+    "msg_exito_eliminar": "Method successfully deleted.",
+    "msg_error_eliminar": "Error deleting the method."
+  },
+  "register": {
+    "title": "Create your account",
+    "subtitle": "Fill out the form to register.",
+    "password_mismatch": "Passwords do not match.",
+    "username_label": "Username",
+    "phone_label": "Phone Number",
+    "email_label": "Email",
+    "password_label": "Password",
+    "verify_password_label": "Verify Password",
+    "registering_btn": "Registering...",
+    "register_btn": "Sign Up",
+    "has_account": "Already have an account?",
+    "login_link": "Log in"
+  }
 }

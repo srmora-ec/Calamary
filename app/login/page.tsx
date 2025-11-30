@@ -5,9 +5,11 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
+import { useTranslation } from 'react-i18next';
 import Image from "next/image"
 
 export default function LoginPage() {
+  const { t } = useTranslation() // Inicialización del de traducción
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -57,7 +59,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/logo.png"
-              alt="Calamary Logo"
+              alt={t('login.logo_alt')} // Traducción agregada
               width={60}
               height={60}
               // Agregar priority para mejor rendimiento en imágenes importantes como logos
@@ -65,7 +67,7 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="text-2xl font-bold text-primary">Calamary</h1>
-          <p className="text-secondary mt-2">Inicia sesión en tu cuenta</p>
+          <p className="text-secondary mt-2">{t('login.subtitle')}</p> {/* Traducción agregada */}
         </div>
 
         <div className="card-body">
@@ -80,7 +82,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">{t('login.email_label')}</label> {/* Traducción agregada */}
               <input
                 type="email"
                 className="form-input"
@@ -92,7 +94,7 @@ export default function LoginPage() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Contraseña</label>
+              <label className="form-label">{t('login.password_label')}</label> {/* Traducción agregada */}
               <input
                 type="password"
                 className="form-input"
@@ -107,10 +109,10 @@ export default function LoginPage() {
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="spinner"></div>
-                  Iniciando sesión...
+                  {t('login.logging_in')} {/* Traducción agregada */}
                 </div>
               ) : (
-                "Iniciar Sesión"
+                t('login.submit_btn') // Traducción agregada
               )}
             </button>
           </form>
@@ -119,13 +121,13 @@ export default function LoginPage() {
         {/* --- Nuevo Bloque para Registrarse --- */}
         <div className="card-footer text-center mt-4">
           <p className="text-secondary text-sm">
-            ¿No tienes una cuenta?{" "}
+            {t('login.no_account')}{" "} {/* Traducción agregada */}
             <button
               onClick={handleGoToRegister}
               className="font-medium text-primary hover:text-primary-dark cursor-pointer p-0 m-0 border-none bg-transparent underline"
               disabled={loading}
             >
-              Regístrate aquí
+              {t('login.register_link')} {/* Traducción agregada */}
             </button>
           </p>
         </div>

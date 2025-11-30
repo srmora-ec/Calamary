@@ -24,7 +24,7 @@ export default function LanguageSwitcher() {
   return (
     <button 
       onClick={toggleLanguage}
-      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
     >
     {t('botones.btn_lang')}
     </button>

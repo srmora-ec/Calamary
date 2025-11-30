@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Modelo, Nodo } from "@/types/modelo"
 import { applyEdgeChanges, applyNodeChanges, Background, BackgroundVariant, Controls, MiniMap, ReactFlow } from "@xyflow/react"

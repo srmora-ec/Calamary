@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { AuthProvider } from "@/context/AuthProvider";
+import NotificationProvider from "@/components/NotificationProvider"
 
 
 export const metadata: Metadata = {
@@ -20,7 +21,11 @@ export default function RootLayout({
   return (
     <html lang="es">
        <link rel="icon" href="/logo.png" /> 
-      <body className={`${GeistSans.variable} ${GeistMono.variable}`}> <AuthProvider>{children}</AuthProvider></body>
+      <body className={`${GeistSans.variable} ${GeistMono.variable}`}> 
+        <NotificationProvider>
+        <AuthProvider>{children}</AuthProvider>
+        </NotificationProvider>
+        </body>
     </html>
   )
 }

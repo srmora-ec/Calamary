@@ -4,28 +4,144 @@
     "home": "Inicio",
     "expertos": "Expertos"
   },
-  "tablas":{
-    "back":"Anterior",
-    "next":"Siguiente"
+  "generic": {
+    "nombre": "Nombre",
+    "del": "Eliminar",
+    "cargar": "Cargar",
+    "tipo": "Tipo",
+    "creado": "Creado",
+    "acciones": "Acciones",
+    "modeact": "Modo actual",
+    "info": "Información",
+    "resultados": "Resultados",
+    "puntuacion": "Puntuación",
+    "loading": "Cargando ..."
+  },
+  "modelos": {
+    "nonodos": "No hay nodos disponibles.",
+    "errorupdmodel": "Error actualizando modelo",
+    "modelactua": "Modelo actualizado."
+  },
+  "expertos": {
+    "errorguardar": "Hubo un problema al guardar tu respuesta. Intenta nuevamente.",
+    "exito": "¡Gracias! Tu respuesta ha sido registrada."
+  },
+  "tablas": {
+    "back": "Anterior",
+    "next": "Siguiente"
   },
   "dashboard": {
     "tabs": {
       "tbmismod": "Mis modelos",
-      "tbpublicmod":"Modelos públicos"
+      "tbpublicmod": "Modelos públicos"
     },
-    "labels":{
-      "lbmodcreados":"Modelos creados"
+    "labels": {
+      "lbmodcreados": "Modelos creados"
     },
-    "ph":{
-      "buscarmod":"Buscar modelos"
+    "ph": {
+      "buscarmod": "Buscar modelos"
     },
-    "bt":{
-      "crearmod":"Crear modelo",
-      "metodos":"Métodos"
+    "bt": {
+      "crearmod": "Crear modelo",
+      "metodos": "Métodos"
     },
-    "ms":{
-      "nomodel":"No se encontraron modelos con ese término.",
-      "nocmodel":"No tienes modelos creados aún."
+    "ms": {
+      "nomodel": "No se encontraron modelos con ese término.",
+      "nocmodel": "No tienes modelos creados aún."
+    }
+  },
+  "alertas": {
+    "ups": "¡Algo salió mal!",
+    "errordes": "Error desconocido",
+    "exito": "¡Éxito!",
+    "cuidado": "¡Ojo!",
+    "carganumero": "Se cargaron "
+  },
+  "evaluacion": {
+    "punmin": "Puntaje (Mín)",
+    "puntaje": "Puntaje (Avg)",
+    "punmax": "Puntaje (Máx)",
+    "titulo": "Gestión de alternativas",
+    "desmaut": "Modelo MAUT: Utilice rangos (mín-máx) para cada criterio.",
+    "desfuzzy": "Modo difuso: Ingrese tres valores (Inferior, Medio, Superior) para cada criterio.",
+    "desnormal": "Modo normal: Ingrese un valor único para cada criterio.",
+    "finalcri": "Criterios finales",
+    "normtitle": "Evaluación (Normalizada)",
+    "matriznorm": "Matriz normalizada",
+    "desnorm": "Valores normalizados de cada criterio para todas las alternativas",
+    "normexplicacion": "La normalización ajusta todos los valores a una escala común (0-1) para permitir comparaciones justas entre criterios con diferentes rangos.",
+    "avisorang": "(mostrando solo Min y Máx)",
+    "noresultdis": "No hay resultados disponibles",
+    "firstintruccion": "Agrega al menos 2 alternativas y haz clic en ´Evaluar Alternativas´",
+    "alertas": {
+      "actfuzzy": "Debes activar el 'Modo Difuso' (botón con linea discontinua) antes de cargar este paquete.",
+      "paquetelen0": "El paquete no contiene alternativas",
+      "paquetetipo": "El paquete es de tipo ",
+      "paquetenecesario": " pero el modelo requiere tipo ",
+      "errorpaquete": "Error al cargar las alternativas del paquete",
+      "errorevamaut": "No se puede evaluar. Faltan funciones de utilidad en los criterios finales (MAUT)",
+      "mauterror": "Error al ejecutar la evaluación MAUT: ",
+      "error": "Error al ejecutar la evaluación",
+      "mautexito": "Evaluación MAUT (rango) completada exitosamente",
+      "fuzzyexito": "Evaluación difusa completada exitosamente",
+      "evaexito": "Evaluación completada exitosamente",
+      "modocambio": "Modo cambiado ",
+      "configplis": "Por favor, configura las funciones de utilidad para todos los criterios finales en el tablero del modelo antes de evaluar."
+    },
+    "fuzzy": {
+      "fuzzyact": "Modo difuso ✓",
+      "nofuzzyact": "Activar modo difuso"
+    }
+  },
+  "resultados": {
+    "clasifinal": " Clasificación Final - Método ",
+    "presentacion": "Ranking de alternativas basado en puntuaciones ponderadas",
+    "mejoralt": "Mejor Alternativa",
+    "segundamejoralt": "Segunda mejor",
+    "tercermejoralt": "Tercera mejor"
+  },
+  "alternativas": {
+    "titulo": "Alternativa",
+    "cantalt": "Cant. Alternativas",
+    "carpaquete": "Cargar paquete de alternativas",
+    "loadingpaquetes": "Cargando paquetes...",
+    "nohaypaq": "No hay paquetes de alternativas disponibles para este modelo.",
+    "avisocrear": "Crea un paquete desde la pestaña de 'Paquetes'.",
+    "add": "Agregar alternativa",
+    "eva": "Evaluar alternativas",
+    "alertas": {
+      "add": "Alternativa agregada",
+      "del": "Alternativa eliminada",
+      "excelori": " desde Excel."
+    }
+  },
+  "analisissensibilidad": {
+    "titulo": "Análisis de sensibilidad",
+    "descrip": "Analiza cómo cambios en los pesos de los criterios afectan la clasificación de alternativas",
+    "pesouni": " de Peso unidimensional",
+    "pesoalt": " de Peso de alta dimensión",
+    "despesouni": "Evalúa cómo cambia la mejor alternativa cuando varía el peso de un criterio específico mientras los demás permanecen constantes.",
+    "despesoalt": "Evalúa cómo cambia la clasificación cuando múltiples pesos varían simultáneamente, permitiendo análisis más complejos.",
+    "clic": "Haz clic para analizar la estabilidad de un criterio individual"
+  },
+  "excel": {
+    "firstalert": "El archivo Excel debe tener al menos una fila de encabezados y una fila de datos",
+    "secondalert": "El Excel tiene ",
+    "thirdalert": " columnas de criterios, pero el modelo tiene ",
+    "fouralert": " criterios finales. Se intentará hacer coincidir por nombre.",
+    "errorcarga": "Error al procesar el archivo de Excel",
+    "cargar": "Cargar desde Excel",
+    "formato": "Formato Excel",
+    "format": {
+      "normaldes": "Primera columna = nombres de alternativas, siguientes columnas = valores para cada criterio",
+      "fuzzydes": " (en modo difuso: criterio1_l, criterio1_m, criterio1_u, criterio2_l, criterio2_m, criterio2_u, ...).",
+      "mautdes": " (en modo rango: criterio1_min, criterio1_max, criterio2_min, criterio2_max, ...).",
+      "mautdisdes": "el valor debe coincidir con el nombre de la opción discreta configurada.",
+      "mautdis": "Para MAUT discreto:"
+    },
+    "fuzzy": {
+      "esperocolumnas": " columnas, pero en modo difuso se esperan ",
+      "esperocolfin": " columnas (3 por cada criterio: low, mid, upper)."
     }
   },
   "botones": {
@@ -37,5 +153,42 @@
   "mensajes": {
     "bienvenida": "Bienvenido a Calamary",
     "error": "Algo salió mal"
+  },
+  "login": {
+    "logo_alt": "Logo de Calamary",
+    "subtitle": "Inicia sesión en tu cuenta",
+    "email_label": "Email",
+    "password_label": "Contraseña",
+    "logging_in": "Iniciando sesión...",
+    "submit_btn": "Iniciar sesión",
+    "no_account": "¿No tienes una cuenta?",
+    "register_link": "Regístrate aquí"
+  },
+  "metodos_page": {
+    "titulo": "Métodos disponibles",
+    "descripcion": "Aquí puedes ver y gestionar los métodos creados.",
+    "buscar_ph": "Buscar métodos...",
+    "btn_crear": "Crear método",
+    "sin_metodos": "No hay métodos registrados.",
+    "creado_el": "Creado el",
+    "btn_editar": "Editar",
+    "confirm_eliminar_titulo": "Confirmar eliminación",
+    "confirm_eliminar_texto": "¿Seguro que quiere eliminar este método?",
+    "msg_exito_eliminar": "Método eliminado correctamente.",
+    "msg_error_eliminar": "Error al eliminar el método."
+  },
+  "register": {
+    "title": "Crea tu cuenta",
+    "subtitle": "Completa el formulario para registrarte.",
+    "password_mismatch": "Las contraseñas no coinciden.",
+    "username_label": "Nombre de usuario",
+    "phone_label": "Número de teléfono",
+    "email_label": "Email",
+    "password_label": "Contraseña",
+    "verify_password_label": "Verificar contraseña",
+    "registering_btn": "Registrando...",
+    "register_btn": "Registrarme",
+    "has_account": "¿Ya tienes una cuenta?",
+    "login_link": "Iniciar sesión"
   }
 }

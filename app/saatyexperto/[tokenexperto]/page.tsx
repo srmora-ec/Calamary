@@ -1,18 +1,28 @@
 "use client";
 
-import ComparacionPorPasos from "@/components/pesos/comparacionporpasos";
 import CuestionarioExpertos from "@/components/pesos/cuestionario-expertos";
 import { supabase } from "@/lib/supabase";
 import { Nodo } from "@/types/modelo";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNotification } from "@/components/NotificationProvider";
+
 
 export default function ModeloPage() {
+  const {t} = useTranslation();
+  const {notify}=useNotification();
   const { tokenexperto } = useParams();
   const router = useRouter();
 
   const [nodos, setNodos] = useState<Nodo[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  type InvitacionValida = {
+    nodosJSON: {
+      nodes: any[];
+    };
+  };
 
   useEffect(() => {
     if (!tokenexperto) return;
@@ -22,7 +32,7 @@ export default function ModeloPage() {
       try {
         const { data, error } = await supabase
           .rpc("obtener_invitacion_valida", { p_token: tokenexperto })
-          .single();
+          .single<InvitacionValida>();
 
         if (error || !data) {
           router.push("/token-caduco");
@@ -30,7 +40,7 @@ export default function ModeloPage() {
         }
 
         // Mapear nodosJSON a tu estructura de Nodo
-        const mappedNodos: Nodo[] = (data.nodosJSON?.nodes ?? []).map((n: any) => ({
+        const mappedNodos: Nodo[] = (data?.nodosJSON?.nodes ?? []).map((n: any) => ({
           idnodo: n.idnodo,
           posx: n.posx,
           posy: n.posy,
@@ -65,7 +75,7 @@ export default function ModeloPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <span>Cargando...</span>
+        <span>{t('generic.loading')}</span>
       </div>
     );
   }
@@ -73,7 +83,7 @@ export default function ModeloPage() {
   if (nodos.length === 0) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <span>No hay nodos disponibles.</span>
+        <span>{t('modelo.nonodos')}</span>
       </div>
     );
   }
@@ -86,12 +96,6 @@ export default function ModeloPage() {
         onSave={async (matrix, weights) => {
           try {
             const token = Array.isArray(tokenexperto) ? tokenexperto[0] : tokenexperto;
-
-            console.log("token:", tokenexperto)
-            console.log("matriz:", matrix)
-            console.log("pesos:", weights)
-
-
             const { data, error } = await supabase.rpc("responder_invitacion_experto", {
               p_tokenunico: token,
               p_matrix: matrix,
@@ -100,16 +104,16 @@ export default function ModeloPage() {
 
             if (error) {
               console.error("Error al guardar matriz:", error);
-              alert("Hubo un problema al guardar tu respuesta. Intenta nuevamente.");
+              notify("Error","error",t('expertos.errorguardar'))
               return;
             }
 
             console.log("Matriz guardada correctamente", data);
-            alert("¡Gracias! Tu respuesta ha sido registrada.");
+            notify(t('alertas.exito'),"success",t('expertos.exito'))
             router.push("/gracias");
           } catch (err) {
             console.error("Error inesperado:", err);
-            alert("Ocurrió un error inesperado.");
+            notify("Error","error",t('alertas.errordes'))
           }
         }}
       />

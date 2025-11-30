@@ -1,12 +1,13 @@
-// /app/register/page.tsx
 "use client"
 
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
+import { useTranslation } from "react-i18next"
 
 export default function RegisterPage() {
+  const { t } = useTranslation() // Inicialización del hook
   const [displayName, setDisplayName] = useState("")
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     setError("")
 
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden.")
+      setError(t('register.password_mismatch')) // Traducción aplicada
       setLoading(false)
       return
     }
@@ -59,8 +60,8 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--surface-color)" }}>
       <div className="card" style={{ width: "100%", maxWidth: "400px" }}>
         <div className="card-header text-center">
-          <h1 className="text-2xl font-bold text-primary">Crea tu cuenta</h1>
-          <p className="text-secondary mt-2">Completa el formulario para registrarte.</p>
+          <h1 className="text-2xl font-bold text-primary">{t('register.title')}</h1> {/* Traducción aplicada */}
+          <p className="text-secondary mt-2">{t('register.subtitle')}</p> {/* Traducción aplicada */}
         </div>
 
         <div className="card-body">
@@ -72,45 +73,45 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Nombre de usuario</label>
+              <label className="form-label">{t('register.username_label')}</label> {/* Traducción aplicada */}
               <input type="text" className="form-input" maxLength={10} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required disabled={loading} />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Número de teléfono</label>
+              <label className="form-label">{t('register.phone_label')}</label> {/* Traducción aplicada */}
               <input type="tel" className="form-input" value={phone} maxLength={10} onChange={(e) => setPhone(e.target.value)} required disabled={loading} />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label className="form-label">{t('register.email_label')}</label> {/* Traducción aplicada */}
               <input type="email" className="form-input" value={email} maxLength={30} onChange={(e) => setEmail(e.target.value)} required disabled={loading} />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Contraseña</label>
+              <label className="form-label">{t('register.password_label')}</label> {/* Traducción aplicada */}
               <input type="password" className="form-input" value={password} maxLength={12} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Verificar Contraseña</label>
+              <label className="form-label">{t('register.verify_password_label')}</label> {/* Traducción aplicada */}
               <input type="password" className="form-input" value={confirmPassword} maxLength={12} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={loading} />
             </div>
 
             <button type="submit" className="btn btn-primary w-full mt-4" disabled={loading}>
-              {loading ? "Registrando..." : "Registrarme"}
+              {loading ? t('register.registering_btn') : t('register.register_btn')} {/* Traducción aplicada */}
             </button>
           </form>
         </div>
 
         <div className="card-footer text-center mt-4">
           <p className="text-secondary text-sm">
-            ¿Ya tienes una cuenta? {"  "}
+            {t('register.has_account')} {"  "} {/* Traducción aplicada */}
             <button
               onClick={() => router.push("/")}
               className="font-medium text-primary hover:text-primary-dark cursor-pointer p-0 m-0 border-none bg-transparent underline"
               disabled={loading}
             >
-              Iniciar sesión
+              {t('register.login_link')} {/* Traducción aplicada */}
             </button>
           </p>
         </div>
