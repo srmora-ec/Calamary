@@ -81,7 +81,7 @@ export default function Header() {
 
       {/* Drawer móvil */}
       <Drawer
-        title="Menú"
+        title={t('generic.menu')}
         placement="right"
         onClose={() => setOpen(false)}
         open={open}

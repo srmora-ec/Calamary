@@ -15,7 +15,8 @@
     "info": "Información",
     "resultados": "Resultados",
     "puntuacion": "Puntuación",
-    "loading": "Cargando ..."
+    "loading": "Cargando ...",
+    "menu":"Menú"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
