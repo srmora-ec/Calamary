@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNotification } from "@/components/NotificationProvider";
-
+import "@/i18n";
 
 export default function ModeloPage() {
   const {t} = useTranslation();

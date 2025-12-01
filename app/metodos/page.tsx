@@ -9,6 +9,7 @@ import { Row, Col, Input, Button, Space, Card, Popover, message } from "antd"
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons"
 import { useAuthContext } from "@/context/AuthProvider"
 import { useTranslation } from "react-i18next"
+import "@/i18n";
 
 interface Metodo {
   id: number

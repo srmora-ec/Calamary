@@ -24,7 +24,10 @@
   },
   "expertos": {
     "errorguardar": "Hubo un problema al guardar tu respuesta. Intenta nuevamente.",
-    "exito": "¡Gracias! Tu respuesta ha sido registrada."
+    "exito": "¡Gracias! Tu respuesta ha sido registrada.",
+    "invitacion":"Invitación",
+    "novalid":"no válida.",
+    "indicaducar":" La invitación que intentaste abrir ya no es válida. Puede que el enlace haya caducado o que ya hayas respondido la solicitud."
   },
   "tablas": {
     "back": "Anterior",

@@ -29,7 +29,7 @@ export default function ModeloPage() {
   const [nodoActual, setNodoActual] = useState<Nodo | null>(null); //Para actualizar un nodo
 
   const router = useRouter();
-  const { t } = useTranslation("modelos");
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -116,7 +116,6 @@ export default function ModeloPage() {
       notify("Error", "error", t('modelos.errorupdmodel'))
       return null;
     }
-    alert("Modelo actualizado");
     notify(t('alertas.exito'), "success", t('modelos.modelactua'))
     console.log("Modelo actualizado:", data);
   }

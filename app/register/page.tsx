@@ -6,6 +6,7 @@ import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import { useTranslation } from "react-i18next"
 
+
 export default function RegisterPage() {
   const { t } = useTranslation() // Inicialización del hook
   const [displayName, setDisplayName] = useState("")
