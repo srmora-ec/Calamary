@@ -19,10 +19,10 @@ export default function Header() {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768)
     }
-    
+
     checkScreenSize()
     window.addEventListener('resize', checkScreenSize)
-    
+
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
@@ -48,7 +48,7 @@ export default function Header() {
           </div>
 
           {/* Menú Desktop */}
-          <div 
+          <div
             className="flex items-center gap-6"
             style={{ display: isMobile ? 'none' : 'flex' }}
           >
@@ -88,17 +88,19 @@ export default function Header() {
       >
         <nav className="flex flex-col gap-4">
           <Link href="/" onClick={() => setOpen(false)}>
-            Inicio
+             {t('header.home')}
           </Link>
           <Link href="/expertos" onClick={() => setOpen(false)}>
-            Expertos
+              {t('header.expertos')}
           </Link>
           <span className="text-secondary">{user?.email || "cargando..."}</span>
+          <LanguageSwitcher />
+
           <button
             onClick={handleSignOut}
             className="btn btn-secondary px-3 py-1 rounded-md"
           >
-            Cerrar Sesión
+              {t('header.btn_cerrarsesion')}
           </button>
         </nav>
       </Drawer>
