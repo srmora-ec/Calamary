@@ -16,7 +16,11 @@
     "resultados": "Results",
     "puntuacion": "Score",
     "loading": "Loading ...",
-    "menu": "Menu"
+    "menu": "Menu",
+    "o": "or",
+    "reenviar": "Resend",
+    "actual": "Current",
+    "interpre": "Interpretation"
   },
   "modelos": {
     "nonodos": "No nodes available.",
@@ -194,5 +198,36 @@
     "register_btn": "Register",
     "has_account": "Already have an account?",
     "login_link": "Sign in"
+  },
+  "correo": {
+    "verifica": "Verify your email",
+    "tehemos": "We have sent a ",
+    "codigo": "code",
+    "enlace": " verification link",
+    "bandejae": " to your inbox.",
+    "else": "If you don't see it, check your ",
+    "nodeseado": "spam folder.",
+    "volinicio": "Return to login",
+    "norecibiste": "Didn't receive the email?"
+  },
+  "asensibilidad": {
+    "pseleccrite": "Please select a criterion",
+    "okmaut": "MAUT Sensitivity Analysis (Full Ranking) completed",
+    "selecccrite": "Select the criterion to analyze",
+    "eligecrit": "Choose a criterion",
+    "ejeanalisis": "Run analysis",
+    "altasen": "High sensitivity",
+    "desalta": "*High sensitivity analysis determines the range where **no alternative changes position** in the ranking.",
+    "resultitulo": "Analysis results",
+    "criteriova": "Varied Criterion",
+    "rankini": "Initial ranking ",
+    "ploactual": "Current local weight",
+    "pgloactual": "Current global weight",
+    "rangestable": "Ranking stability range",
+    "minestable": "Stable minimum",
+    "maxestable": "Stable maximum",
+    "varia": " varies between ",
+    "firstdes": "The **complete ranking** of alternatives remains unchanged when the local weight of criterion **",
+    "seconddes": "This analysis uses strict sensitivity, detecting any change in position in the ranking, and considers the uncertainty ranges (min-max) of the input data "
   }
 }

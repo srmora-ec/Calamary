@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { Select, Button, message, Spin, Card, Tag } from "antd"
 import { Nodo } from "@/types/modelo"
-// Asumo que 'Nodo' y 'SensitivityChart' están disponibles o definidos.
+import { useTranslation } from "react-i18next"
+import { useNotification } from "../NotificationProvider"
 // import type { Nodo } from "@/types/modelo" 
 // import SensitivityChart from "./sensitivychart"
 
@@ -15,7 +16,7 @@ interface SensitivityResponse {
     criterion_name: string
     initial_local_weight: number
     initial_global_weight: number
-    initial_ranking: number[] // <-- Cambio: Ahora es el ranking completo (índices de alternativa + 1)
+    initial_ranking: number[] // Cambio: Ahora es el ranking completo (índices de alternativa + 1)
     stability_local_interval: [number, number]
     is_parent_criterion: boolean
 }
@@ -42,7 +43,6 @@ function buildNestedHierarchy(nodes: Nodo[]) {
             global_weight: node.pesofinal || 0,
             children: [],
             // Solo las hojas necesitan column_index para el cálculo. Lo incluimos para todos para simplicidad.
-            // Asumiendo que el `column_index` debe coincidir con el índice de la matriz de entrada `matrix`.
             column_index: node.criterioFinal ? index : undefined,
         })
     })
@@ -61,8 +61,8 @@ function buildNestedHierarchy(nodes: Nodo[]) {
             }
         }
     })
-    
-    // Asegurar que la jerarquía refleje correctamente la estructura si los IDs son complejos
+
+    // Asegurar qur la jerarquía refleje correctamente la estructura si los IDs son complejos
     // Para simplificar, asumimos que los IDs de los nodos en la matriz coinciden con los de la jerarquía.
     return rootNodes
 }
@@ -79,19 +79,17 @@ export default function HightSensitivityAnalysis({
     const [selectedCriterion, setSelectedCriterion] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<SensitivityResponse | null>(null)
+    const { t } = useTranslation();
+    const { notify } = useNotification();
 
     const handleAnalyze = async () => {
         if (!selectedCriterion) {
-            message.warning("Por favor selecciona un criterio")
             return
         }
 
         setLoading(true)
         try {
-            // Se debe obtener la jerarquía que contiene *todos* los nodos (padres e hijos) para el payload
-            // Aquí usamos `criterios` ya que parece contener la lista plana de todos los nodos.
-            // Si `hierarchy` ya es la lista plana completa, se usa esa. 
-            // Usaremos `hierarchy` como fuente de verdad para la estructura AHP.
+            // Se debe obtener la jerarquía que contiene todos los nodos (padres e hijos) para el payload
             const nestedHierarchy = buildNestedHierarchy(hierarchy)
 
             const payload = {
@@ -101,8 +99,6 @@ export default function HightSensitivityAnalysis({
                 criterion_id: selectedCriterion, // ID del criterio a variar
                 step_size: 0.01,
             }
-
-            console.log("Enviando payload a API (High Sensitivity):", JSON.stringify(payload, null, 2))
 
             // Llama al nuevo endpoint /hight-unidimensional
             const response = await fetch(
@@ -122,13 +118,14 @@ export default function HightSensitivityAnalysis({
                     statusText: response.statusText,
                     body: errorText,
                 })
+                notify(t('alertas.ups'), "error")
                 throw new Error(`Error ${response.status}: ${errorText || "Error desconocido en la API de sensibilidad"}`)
             }
 
             const data: SensitivityResponse = await response.json()
             console.log("Respuesta exitosa de API (High Sensitivity):", data)
             setResult(data)
-            message.success("Análisis de sensibilidad (Ranking Completo) completado")
+            notify(t('alertas.exito'), "success", t('asensibilidad.oknormal'))
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Error desconocido"
             console.error("Error completo en análisis de sensibilidad:", {
@@ -136,7 +133,7 @@ export default function HightSensitivityAnalysis({
                 error,
                 stack: error instanceof Error ? error.stack : undefined,
             })
-            message.error(`Error: ${errorMessage}`)
+            notify(t('alertas.ups'), "error")
         } finally {
             setLoading(false)
         }
@@ -150,13 +147,13 @@ export default function HightSensitivityAnalysis({
 
     return (
         <div className="space-y-6">
-            <Card title="Configuración del Análisis de Sensibilidad (Alta Sensibilidad)">
+            <Card>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium mb-2">Selecciona el criterio a variar</label>
+                        <label className="block text-sm font-medium mb-2">{t('asensibilidad.selecccrite')}</label>
                         <Select
                             className="w-full"
-                            placeholder="Elige un criterio..."
+                            placeholder={(t('asensibilidad.eligecrit')) + "..."}
                             value={selectedCriterion}
                             onChange={setSelectedCriterion}
                             options={criterios.map((c) => ({
@@ -165,17 +162,17 @@ export default function HightSensitivityAnalysis({
                             }))}
                         />
                     </div>
-                    <Button 
-                        type="primary" 
-                        onClick={handleAnalyze} 
-                        loading={loading} 
-                        disabled={!selectedCriterion} 
+                    <Button
+                        type="primary"
+                        onClick={handleAnalyze}
+                        loading={loading}
+                        disabled={!selectedCriterion}
                         block
                     >
-                        Ejecutar Análisis (High Sensitivity)
+                        {t('asensibilidad.ejeanalisis')} ({t('asensibilidad.altasen')})
                     </Button>
                     <p className="text-xs text-gray-500 mt-2">
-                        *Este análisis detecta el quiebre cuando *cualquier* alternativa cambia de posición en el ranking completo.
+                        {t('asensibilidad.desalta')}
                     </p>
                 </div>
             </Card>
@@ -187,19 +184,19 @@ export default function HightSensitivityAnalysis({
             )}
 
             {result && !loading && (
-                <Card title={`Resultados del Análisis: ${result.criterion_name}`}>
+                <Card title={`${t('asensibilidad.resultitulo')}: ${result.criterion_name}`}>
                     <div className="space-y-6">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            
+
                             {/* Criterio */}
                             <div className="bg-blue-50 p-4 rounded-lg">
-                                <p className="text-sm text-gray-600">Criterio Variado</p>
+                                <p className="text-sm text-gray-600">{t("asensibilidad.criteriova")}</p>
                                 <p className="text-xl font-bold">{result.criterion_name}</p>
                             </div>
-                            
+
                             {/* Ranking Inicial */}
                             <div className="bg-purple-50 p-4 rounded-lg col-span-2 lg:col-span-1">
-                                <p className="text-sm text-gray-600">Ranking Inicial (Top 3)</p>
+                                <p className="text-sm text-gray-600">{t('asensibilidad.rankini')} (Top 3)</p>
                                 <div className="text-xl font-bold space-y-1">
                                     {result.initial_ranking.slice(0, 3).map((altIndex, i) => (
                                         <div key={i}>
@@ -214,14 +211,14 @@ export default function HightSensitivityAnalysis({
 
                             {/* Peso Local Actual */}
                             <div className="bg-green-50 p-4 rounded-lg">
-                                <p className="text-sm text-gray-600">Peso Local Actual</p>
+                                <p className="text-sm text-gray-600">{t('asensibilidad.ploactual')}</p>
                                 <p className="text-xl font-bold">{(result.initial_local_weight * 100).toFixed(2)}%</p>
                             </div>
                         </div>
 
                         {/* Visualización del Rango de Estabilidad */}
                         <div className="bg-gray-50 p-6 rounded-lg">
-                            <h3 className="font-semibold mb-4">Rango de Estabilidad del Ranking Completo (Peso Local)</h3>
+                            <h3 className="font-semibold mb-4">{t('asensibilidad.rangestable')}</h3>
                             <div className="space-y-2">
                                 <div className="flex justify-between text-xs text-gray-600 mb-2">
                                     <span>0.0</span>
@@ -247,21 +244,21 @@ export default function HightSensitivityAnalysis({
                                         style={{
                                             left: `${result.initial_local_weight * 100}%`,
                                         }}
-                                        title={`Peso actual: ${(result.initial_local_weight * 100).toFixed(2)}%`}
+                                        title={`${'asensibilidad.pesoactual'}: ${(result.initial_local_weight * 100).toFixed(2)}%`}
                                     />
                                 </div>
 
                                 <div className="flex justify-between text-sm font-medium mt-4">
                                     <div className="text-center">
-                                        <p className="text-gray-600">Mínimo Estable</p>
+                                        <p className="text-gray-600">{t('asensibilidad.minestable')}</p>
                                         <p className="text-blue-600 font-bold">{(result.stability_local_interval[0] * 100).toFixed(2)}%</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-gray-600">Actual</p>
+                                        <p className="text-gray-600">{t('generic.actual')}</p>
                                         <p className="text-red-600 font-bold">{(result.initial_local_weight * 100).toFixed(2)}%</p>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-gray-600">Máximo Estable</p>
+                                        <p className="text-gray-600">{t('asensibilidad.maxestable')}</p>
                                         <p className="text-blue-600 font-bold">{(result.stability_local_interval[1] * 100).toFixed(2)}%</p>
                                     </div>
                                 </div>
@@ -269,19 +266,19 @@ export default function HightSensitivityAnalysis({
                         </div>
 
                         <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
-                            <p className="font-semibold mb-2">Interpretación (Alta Sensibilidad):</p>
-                            <p>
-                                El ranking completo de alternativas se mantiene sin cambios cuando el
-                                peso del criterio **"{result.criterion_name}"** varía entre{" "}
-                                <span className="font-bold text-blue-800">{(result.stability_local_interval[0] * 100).toFixed(2)}%</span> y{" "}
-                                <span className="font-bold text-blue-800">{(result.stability_local_interval[1] * 100).toFixed(2)}%</span>.
-                                El peso actual es <span className="font-bold text-red-600">{(result.initial_local_weight * 100).toFixed(2)}%</span>.
+                            <p className="font-semibold mb-2">
+                                {t('generic.interpre')} ({t('asensibilidad.altasen')}):
                             </p>
-                            <p className="mt-2 text-xs text-blue-600">
-                                Esto indica que el ranking es altamente sensible a variaciones fuera de este rango.
+                            <p>
+                                {t('asensibilidad.firstdes')}"{result.criterion_name}"** {t('asensibilidad.varia')}{" "}
+                                <span className="font-bold text-purple-600">{(result.stability_local_interval[0] * 100).toFixed(2)}%</span> y{" "}
+                                <span className="font-bold text-purple-600">{(result.stability_local_interval[1] * 100).toFixed(2)}%</span>.
+                            </p>
+                            <p className="mt-2 text-xs text-purple-600">
+                                {t('asensibilidad.seconddes')}.
                             </p>
                         </div>
-                        
+
                         {/* Se puede descomentar el componente SensitivityChart si está disponible */}
                         {/* <div className="mt-6">
                             <SensitivityChart

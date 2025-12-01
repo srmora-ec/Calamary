@@ -16,7 +16,11 @@
     "resultados": "Resultados",
     "puntuacion": "Puntuación",
     "loading": "Cargando ...",
-    "menu":"Menú"
+    "menu": "Menú",
+    "o": "o",
+    "reenviar": "Reenviar",
+    "actual":"Actual",
+    "interpre":"Interpretación"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
@@ -26,9 +30,9 @@
   "expertos": {
     "errorguardar": "Hubo un problema al guardar tu respuesta. Intenta nuevamente.",
     "exito": "¡Gracias! Tu respuesta ha sido registrada.",
-    "invitacion":"Invitación",
-    "novalid":"no válida.",
-    "indicaducar":" La invitación que intentaste abrir ya no es válida. Puede que el enlace haya caducado o que ya hayas respondido la solicitud."
+    "invitacion": "Invitación",
+    "novalid": "no válida.",
+    "indicaducar": " La invitación que intentaste abrir ya no es válida. Puede que el enlace haya caducado o que ya hayas respondido la solicitud."
   },
   "tablas": {
     "back": "Anterior",
@@ -122,8 +126,8 @@
   "analisissensibilidad": {
     "titulo": "Análisis de sensibilidad",
     "descrip": "Analiza cómo cambios en los pesos de los criterios afectan la clasificación de alternativas",
-    "pesouni": " de Peso unidimensional",
-    "pesoalt": " de Peso de alta dimensión",
+    "pesouni": " de peso unidimensional",
+    "pesoalt": " de peso de alta dimensión",
     "despesouni": "Evalúa cómo cambia la mejor alternativa cuando varía el peso de un criterio específico mientras los demás permanecen constantes.",
     "despesoalt": "Evalúa cómo cambia la clasificación cuando múltiples pesos varían simultáneamente, permitiendo análisis más complejos.",
     "clic": "Haz clic para analizar la estabilidad de un criterio individual"
@@ -194,5 +198,38 @@
     "register_btn": "Registrarme",
     "has_account": "¿Ya tienes una cuenta?",
     "login_link": "Iniciar sesión"
+  },
+  "correo": {
+    "verifica": "Verifica tu correo electrónico",
+    "tehemos": "Te hemos enviado un ",
+    "codigo": "código",
+    "enlace": " enlace de verificación",
+    "bandejae": " a tu bandeja de entrada.",
+    "else": "Si no lo ves, revisa la carpeta de ",
+    "nodeseado": "correo no deseado.",
+    "volinicio": "Volver al inicio de sesión",
+    "norecibiste": "¿No recibiste el correo?"
+  },
+  "asensibilidad": {
+    "pseleccrite": "Por favor selecciona un criterio",
+    "pesoactual":"Peso actual",
+    "okmaut": "Análisis de sensibilidad MAUT (Ranking Completo) completado",
+    "oknormal":"Análisis de sensibilidad (Ranking Completo) completado",
+    "selecccrite": "Selecciona el criterio a analizar",
+    "eligecrit": "Elige un criterio",
+    "ejeanalisis": "Ejecutar análisis",
+    "altasen": "Alta sensibilidad",
+    "desalta": "*El análisis de alta sensibilidad determina el rango donde **ninguna alternativa cambia de posición** en el ranking.",
+    "resultitulo": "Resultados del análisis",
+    "criteriova": "Criterio Variado",
+    "rankini": "Ranking inicial ",
+    "ploactual": "Peso local actual",
+    "pgloactual": "Peso global actual",
+    "rangestable": "Rango de estabilidad del ranking",
+    "minestable": "Mínimo estable",
+    "maxestable": "Máximo estable",
+    "varia":" varía entre ",
+    "firstdes":"El **ranking completo** de alternativas se mantiene sin cambios cuando el peso local del criterio **",
+    "seconddes":"Este análisis utiliza la sensibilidad estricta, detectando cualquier cambio de posición en la clasificación, y considera los rangos de incertidumbre (min-max) de los datos de entrada "
   }
 }

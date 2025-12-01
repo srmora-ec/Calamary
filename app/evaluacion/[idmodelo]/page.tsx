@@ -691,8 +691,6 @@ export default function AlternativasPage() {
 
     setAlternativas([...alternativas, nuevaAlternativa])
     setResultado(null)
-    notify(t('alertas.exito'), "success", t('alternativas.alertas.add'))
-
   }
 
   const eliminarAlternativa = (key: string) => {
@@ -1162,7 +1160,7 @@ export default function AlternativasPage() {
       render: (_: any, record: Alternativa) => renderCellEditor(record, criterio),
     })),
     {
-      title: "Acciones",
+      title: t('generic.acciones'),
       key: "acciones",
       fixed: "right" as const,
       width: 100,

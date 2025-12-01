@@ -1,6 +1,8 @@
 "use client"
-
+import { useTranslation } from "react-i18next"
 export default function CheckEmailPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4">
       <div className="w-full max-w-md text-center p-8 rounded-2xl shadow-lg bg-white border border-blue-100">
@@ -23,24 +25,24 @@ export default function CheckEmailPage() {
         </div>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-3">
-          Verifica tu correo electrónico
+          {t('correo.verifica')}
         </h1>
 
         <p className="text-gray-600 leading-relaxed mb-6">
-          Te hemos enviado un <span className="font-medium text-blue-600">código</span> o{" "}
-          <span className="font-medium text-blue-600">enlace de verificación</span> a tu bandeja de entrada.  
-          Si no lo ves, revisa la carpeta de <strong>spam</strong> o <strong>correo no deseado.</strong>
+          {t('correo.tehemos')}<span className="font-medium text-blue-600">{t('correo.codigo')}</span> {t('generic.o')}{" "}
+          <span className="font-medium text-blue-600">{t('correo.enlace')}</span>{t('correo.bandejae')}  <br/>
+          {t('correo.else')}<strong>spam</strong> {t('generic.o')} <strong>{t('correo.nodeseado')}</strong>
         </p>
 
         <button
           onClick={() => (window.location.href = "/")}
           className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-2.5 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md"
         >
-          Volver al inicio de sesión
+          {t('correo.volinicio')}
         </button>
 
         <p className="text-sm text-gray-500 mt-6">
-          ¿No recibiste el correo? <a href="#" className="text-blue-600 hover:underline">Reenviar</a>
+          {t('correo.norecibiste')} <a href="#" className="text-blue-600 hover:underline">{t('generic.reenviar')}</a>
         </p>
       </div>
     </div>
