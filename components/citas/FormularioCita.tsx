@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { useTranslation } from "react-i18next"
+import { useNotification } from "../NotificationProvider"
 
 interface Props {
   modeloId: number
@@ -19,6 +21,8 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
   const [tipo, setTipo] = useState(cita?.tipo || "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+    const { t } = useTranslation()
+    const { notify } = useNotification()
 
   async function buscarDOI() {
     if (!doi) return alert("Ingrese un DOI primero.")
@@ -33,7 +37,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       setAño(msg.issued?.["date-parts"]?.[0]?.[0] || "")
       setFuente(msg["container-title"]?.[0] || msg.publisher || "")
       setUrl(msg.URL || "")
-      alert("Datos del DOI cargados correctamente.")
+      notify(t('alertas.exito'),"success",t('citas.doiregis'))
     } catch (e: any) {
       alert(e.message)
     }
@@ -43,7 +47,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
   async function guardar(e: React.FormEvent) {
     e.preventDefault()
     if (!autor.trim() || !titulo.trim()) {
-      setError("Autor y título son obligatorios.")
+      setError(t('citas.alertaautor'))
       return
     }
 
@@ -63,7 +67,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       ? await supabase.from("cita").update(payload).eq("id", cita.id)
       : await supabase.from("cita").insert(payload)
 
-    if (error) alert("Error al guardar: " + error.message)
+    if (error) alert(t('alertas.errorguardar') + error.message)
     else onClose()
     setLoading(false)
   }
@@ -73,7 +77,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       {error && <div className="bg-red-100 text-red-700 p-2 rounded">{error}</div>}
 
       <div className="form-group">
-        <label className="form-label">Autor(es) *</label>
+        <label className="form-label">{t('citas.autor')} *</label>
         <input
           type="text"
           className="form-input"
@@ -84,7 +88,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Año</label>
+        <label className="form-label">{t('generic.anio')}</label>
         <input
           type="number"
           className="form-input"
@@ -94,7 +98,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Título *</label>
+        <label className="form-label">{t('generic.titulo')} *</label>
         <input
           type="text"
           className="form-input"
@@ -105,7 +109,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Fuente</label>
+        <label className="form-label">{t('citas.fuente')}</label>
         <input
           type="text"
           className="form-input"
@@ -129,7 +133,7 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
             onClick={buscarDOI}
             disabled={loading}
           >
-            Buscar
+            {t('generic.buscar')}
           </button>
         </div>
       </div>
@@ -145,17 +149,17 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Tipo</label>
+        <label className="form-label">{t('generic.tipo')}</label>
         <select
           className="form-select"
           value={tipo}
           onChange={(e) => setTipo(e.target.value)}
         >
-          <option value="">Seleccionar...</option>
-          <option value="articulo">Artículo</option>
-          <option value="libro">Libro</option>
-          <option value="tesis">Tesis</option>
-          <option value="otro">Otro</option>
+          <option value="">{t('generic.seleccionar')}...</option>
+          <option value="articulo">{t('citas.articulo')}</option>
+          <option value="libro">{t('citas.libro')}</option>
+          <option value="tesis">{t('citas.tesis')}</option>
+          <option value="otro">{t('generic.otro')}</option>
         </select>
       </div>
 
@@ -166,10 +170,10 @@ export default function FormularioCita({ modeloId, cita, onClose }: Props) {
           onClick={onClose}
           disabled={loading}
         >
-          Cancelar
+          {t('generic.cancelar')}
         </button>
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Guardando..." : cita ? "Actualizar" : "Guardar"}
+          {loading ? t('generic.loading') : cita ? t('generic.actualizar') : t('botones.guardar')}
         </button>
       </div>
     </form>

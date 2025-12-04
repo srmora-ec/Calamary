@@ -1,13 +1,12 @@
-// MAUT/DiscreteValuesConfig.tsx (Código Corregido)
 "use client"
 
 import { useState, useEffect, useMemo, useRef, useImperativeHandle, forwardRef } from "react"
-// Asegúrese de que la ruta sea correcta
 import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo"
+import { useTranslation } from "react-i18next"
+import { useNotification } from "../NotificationProvider"
 
 interface DiscreteValuesConfigProps {
   initialConfig?: MAUTConfig
-  // La función onConfigChange guarda el MAUTConfig en ConfiguredCriterioMaut
   onConfigChange: (config: MAUTConfig) => void
   nodeId: number // Para controlar la recarga al cambiar de nodo
 }
@@ -31,46 +30,48 @@ export default forwardRef(function DiscreteValuesConfig({
 
   const [valores, setValores] = useState<ValorDiscretoMAUT[]>(initialValues)
 
-  // Estados para el nuevo valor... (mantener igual)
+  // Estados para el nuevo valor... (Ya me cansé de comentar)
   const [newNombre, setNewNombre] = useState("")
   const [newUtilidadMin, setNewUtilidadMin] = useState(0.8)
   const [newUtilidadMax, setNewUtilidadMax] = useState(1.0)
+  const { t } = useTranslation()
+  const { notify } = useNotification()
 
 
-  // 1. Sincroniza el estado interno cuando cambia la configuración inicial del nodo
+  // Sincronizo el estado interno cuando cambia la configuración inicial del nodo
   useEffect(() => {
-    // Resetea isInitialLoad si el nodo ha cambiado.
+    // Reseteamos elcosodel nodo.
     if (lastNodeId.current !== nodeId) {
       isInitialLoad.current = true
       lastNodeId.current = nodeId
     }
-    // Siempre actualiza el estado local con la configuración entrante
+    // Actualizamos siempre con la configuración entrante
     setValores(initialValues)
-  }, [nodeId, initialValues]) // Depende de nodeId y initialValues
+  }, [nodeId, initialValues])
 
-  // 2. Llama a onConfigChange SÓLO cuando los valores cambian activamente por el usuario
+  //  Llama a onConfigChange SÓLO cuando los valores cambian activamente por el usuario
   useEffect(() => {
-    // PREVENIR EL BUCLE EN LA CARGA INICIAL
+    // PREVENIMOs EL BUCLE INFINITO EN LA CARGA INICIAL
     // Si es la carga inicial o si el nodo acaba de cambiar, evitamos llamar a onConfigChange.
     if (isInitialLoad.current) {
       isInitialLoad.current = false
       return
     }
 
-    // Si se llega aquí, 'valores' ha sido modificado por una acción del usuario.
+    // Si se llega aquí, entendemos que los valores fueron modificadoa por una acción del usuario.
     const newConfig: MAUTConfig = {
       tipoFuncion: "discreta",
       funcionDiscreta: {
         valores: valores,
       },
-      // Asegurar que las otras funciones se limpien para no generar conflictos
+      // Aseguramos que las funciones se limpien para no generar conflictos
       funcionSimple: undefined,
       funcionDual: undefined,
     }
-    // Notifica al padre para que actualice su estado mautConfig
+    // Notificamosal padre para que actualize el resto de cosos
     onConfigChange(newConfig)
 
-  }, [valores]) // 💡 CORRECCIÓN VITAL: Debe depender de `valores` para notificar el cambio
+  }, [valores])
 
   const guardar = () => {
     // Si se llega aquí, 'valores' ha sido modificado por una acción del usuario.
@@ -79,18 +80,17 @@ export default forwardRef(function DiscreteValuesConfig({
       funcionDiscreta: {
         valores: valores,
       },
-      // Asegurar que las otras funciones se limpien para no generar conflictos
+      // Limpiamos las otras acciones
       funcionSimple: undefined,
       funcionDual: undefined,
     }
-    // Notifica al padre para que actualice su estado mautConfig
+    // Notificamos al padre para que actualice su estado mautConfig
     onConfigChange(newConfig)
   }
   useImperativeHandle(ref, () => ({
     guardar,
   }))
 
-  // ... (Funciones de manejo de estado sin cambios)
   const handleAddValue = () => {
     if (newNombre.trim() === "") {
       alert("El nombre del valor discreto no puede estar vacío.")
@@ -105,7 +105,7 @@ export default forwardRef(function DiscreteValuesConfig({
     }
 
     const nuevoValor: ValorDiscretoMAUT = {
-      id: Date.now().toString(), // Usar un ID simple para la clave
+      id: Date.now().toString(), // se usa el id
       nombre: newNombre.trim(),
       utilidadMin: min,
       utilidadMax: max,
@@ -145,17 +145,17 @@ export default forwardRef(function DiscreteValuesConfig({
   return (
     // Se mantiene tu estructura de retorno
     <div className="space-y-6 border rounded-lg bg-white shadow">
-      <h3 className="text-lg font-semibold text-gray-700 p-4">Definir Valores Discretos de Utilidad</h3>
+      <h3 className="text-lg font-semibold text-gray-700 p-4">{t('discretos.definir')}</h3>
       <p className="text-sm text-gray-500 px-4">
-        Defina los posibles **valores categóricos** del criterio y el **rango de utilidad** (Min/Max) asociado a cada uno.
+        {t('discretos.indicacions')}
       </p>
 
       {/* Formulario para añadir nuevo valor */}
       <div className="p-4 border rounded-md bg-gray-50 space-y-3 mx-4">
-        <h4 className="text-md font-medium">Añadir Nuevo Valor</h4>
+        <h4 className="text-md font-medium">{t('discretos.anuevovalor')}</h4>
         <div className="flex flex-wrap items-end gap-4">
           <label className="flex flex-col text-sm font-medium">
-            Nombre del Valor
+            {t('discretos.nombrev')}
             <input
               type="text"
               value={newNombre}

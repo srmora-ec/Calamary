@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import Modal from "../Modal"
 import { supabase } from "@/lib/supabase"
 import FormularioCita from "./FormularioCita"
+import { useTranslation } from "react-i18next"
+import { useNotification } from "../NotificationProvider"
 
 interface Cita {
   id: number
@@ -28,6 +30,8 @@ export default function CitasModelo({ modeloId }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [editando, setEditando] = useState<Cita | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation()
+  const { notify } = useNotification()
 
   // ======= CARGAR CITAS =======
   async function cargarCitas() {
@@ -50,7 +54,8 @@ export default function CitasModelo({ modeloId }: Props) {
   async function eliminarCita(id: number) {
     const { error } = await supabase.from("cita").delete().eq("id", id)
     if (error) {
-      alert("Error al eliminar cita: " + error.message)
+      notify("Error","error",)
+      alert(t('citas.erroreliminar') + error.message)
     } else {
       cargarCitas()
     }
@@ -87,21 +92,21 @@ export default function CitasModelo({ modeloId }: Props) {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Citas asociadas</h2>
+        <h2 className="text-lg font-semibold">{t('citas.asociadas')}</h2>
         <button
           onClick={abrirCrear}
           className="btn btn-primary flex items-center gap-2"
         >
-          <span>＋</span> Nueva cita
+          <span>＋</span> {t('generic.nueva')} {t('citas.nombre').toLowerCase()}
         </button>
       </div>
 
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
       {loading ? (
-        <div className="text-gray-500">Cargando citas...</div>
+        <div className="text-gray-500">{t('citas.cargando')}</div>
       ) : citas.length === 0 ? (
-        <p className="text-gray-600">No hay citas registradas.</p>
+        <p className="text-gray-600">{t('citas.nohay')}</p>
       ) : (
         <div className="space-y-3">
           {citas.map((c) => (
@@ -117,20 +122,20 @@ export default function CitasModelo({ modeloId }: Props) {
                 {openPopoverId === c.id ? (
                   <div className="absolute right-0 top-0 bg-white border rounded-lg shadow-lg p-3 z-10">
                     <p className="mb-2 text-sm text-gray-700">
-                      ¿Eliminar esta cita?
+                      {t('citas.eliminar')}
                     </p>
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => setOpenPopoverId(null)}
                         className="btn btn-secondary"
                       >
-                        Cancelar
+                        {t('generic.cancelar')}
                       </button>
                       <button
                         onClick={() => eliminarCita(c.id)}
                         className="btn btn-danger"
                       >
-                        Eliminar
+                        {t('generic.del')}
                       </button>
                     </div>
                   </div>
@@ -140,13 +145,13 @@ export default function CitasModelo({ modeloId }: Props) {
                       onClick={() => abrirEditar(c)}
                       className="btn btn-secondary"
                     >
-                      Editar
+                      {t('generic.editar')}
                     </button>
                     <button
                       onClick={() => setOpenPopoverId(c.id)}
                       className="btn btn-danger"
                     >
-                      Eliminar
+                      {t('generic.del')}
                     </button>
                   </div>
                 )}
@@ -160,7 +165,7 @@ export default function CitasModelo({ modeloId }: Props) {
         <Modal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          title={editando ? "Editar cita" : "Nueva cita"}
+          title={editando ? (t('generic.editar')+" "+ t('citas.nombre').toLowerCase()) : (t('generic.nueva')+" "+ t('citas.nombre').toLowerCase())}
           width="600px"
         >
           <FormularioCita

@@ -274,9 +274,6 @@ export default function HightSensitivityAnalysis({
                                 <span className="font-bold text-purple-600">{(result.stability_local_interval[0] * 100).toFixed(2)}%</span> y{" "}
                                 <span className="font-bold text-purple-600">{(result.stability_local_interval[1] * 100).toFixed(2)}%</span>.
                             </p>
-                            <p className="mt-2 text-xs text-purple-600">
-                                {t('asensibilidad.seconddes')}.
-                            </p>
                         </div>
 
                         {/* Se puede descomentar el componente SensitivityChart si está disponible */}

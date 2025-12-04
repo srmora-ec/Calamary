@@ -19,8 +19,19 @@
     "menu": "Menú",
     "o": "o",
     "reenviar": "Reenviar",
-    "actual":"Actual",
-    "interpre":"Interpretación"
+    "actual": "Actual",
+    "minimo": "Mínimo",
+    "maximo": "Máximo",
+    "interpre": "Interpretación",
+    "cancelar": "Cancelar",
+    "editar": "Editar",
+    "actualizar":"Actualizar",
+    "nueva": "Nueva",
+    "anio":"Año",
+    "titulo":"Título",
+    "buscar":"Buscar",
+    "seleccionar":"Seleccionar",
+    "otro":"Otro"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
@@ -63,7 +74,8 @@
     "errordes": "Error desconocido",
     "exito": "¡Éxito!",
     "cuidado": "¡Ojo!",
-    "carganumero": "Se cargaron "
+    "carganumero": "Se cargaron ",
+    "errorguardar":"Error al guardar: "
   },
   "evaluacion": {
     "punmin": "Puntaje (Mín)",
@@ -104,7 +116,7 @@
   "resultados": {
     "clasifinal": " Clasificación Final - Método ",
     "presentacion": "Ranking de alternativas basado en puntuaciones ponderadas",
-    "mejoralt": "Mejor Alternativa",
+    "mejoralt": "Mejor alternativa",
     "segundamejoralt": "Segunda mejor",
     "tercermejoralt": "Tercera mejor"
   },
@@ -154,7 +166,7 @@
   },
   "botones": {
     "btn_lang": "Español",
-    "guardar": "Guardar Cambios",
+    "guardar": "Guardar cambios",
     "cancelar": "Cancelar",
     "cambiar_idioma": "Switch to English"
   },
@@ -212,24 +224,49 @@
   },
   "asensibilidad": {
     "pseleccrite": "Por favor selecciona un criterio",
-    "pesoactual":"Peso actual",
+    "pesoactual": "Peso actual",
     "okmaut": "Análisis de sensibilidad MAUT (Ranking Completo) completado",
-    "oknormal":"Análisis de sensibilidad (Ranking Completo) completado",
+    "oknormal": "Análisis de sensibilidad (Ranking Completo) completado",
     "selecccrite": "Selecciona el criterio a analizar",
     "eligecrit": "Elige un criterio",
     "ejeanalisis": "Ejecutar análisis",
     "altasen": "Alta sensibilidad",
+    "normalsen": "Unidimensional",
     "desalta": "*El análisis de alta sensibilidad determina el rango donde **ninguna alternativa cambia de posición** en el ranking.",
     "resultitulo": "Resultados del análisis",
-    "criteriova": "Criterio Variado",
+    "criteriova": "Criterio variado",
     "rankini": "Ranking inicial ",
     "ploactual": "Peso local actual",
     "pgloactual": "Peso global actual",
     "rangestable": "Rango de estabilidad del ranking",
+    "rangestapeso": "Rango de estabilidad del peso",
     "minestable": "Mínimo estable",
     "maxestable": "Máximo estable",
-    "varia":" varía entre ",
-    "firstdes":"El **ranking completo** de alternativas se mantiene sin cambios cuando el peso local del criterio **",
-    "seconddes":"Este análisis utiliza la sensibilidad estricta, detectando cualquier cambio de posición en la clasificación, y considera los rangos de incertidumbre (min-max) de los datos de entrada "
+    "varia": " varía entre ",
+    "firstdes": "El **ranking completo** de alternativas se mantiene sin cambios cuando el peso local del criterio **",
+    "seconddes": "Este análisis utiliza la sensibilidad estricta, detectando cualquier cambio de posición en la clasificación, y considera los rangos de incertidumbre (min-max) de los datos de entrada ",
+    "thirddes": "La mejor alternativa (Alternativa ",
+    "fordes": "se mantiene como la mejor, en el rango "
+  },
+  "citas": {
+    "nombre": "Cita",
+    "asociadas": "Citas asociadas",
+    "cargando": "Cargando citas...",
+    "nohay": "No hay citas registradas.",
+    "eliminar": "¿Eliminar esta cita?",
+    "erroreliminar": "Error al eliminar cita: ",
+    "doiregis":"Datos del DOI cargados correctamente.",
+    "alertaautor":"Autor y título son obligatorios.",
+    "autor":"Autor (es)",
+    "fuente":"Fuente",
+    "articulo":"Artículo",
+    "libro":"Libro",
+    "tesis":"Tesis"
+  },
+  "discretos":{
+    "definir":"Definir valores discretos de utilidad",
+    "indicacions":"Defina los posibles **valores categóricos** del criterio y el **rango de utilidad** (Min/Max) asociado a cada uno.",
+    "anuevovalor":"Añadir nuevo valor",
+    "nombrev":"Nombre del Valor"
   }
 }
