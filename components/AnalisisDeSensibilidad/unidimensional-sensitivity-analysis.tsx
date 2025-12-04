@@ -5,6 +5,7 @@ import { Select, Button, message, Spin, Card } from "antd"
 import type { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
 import { useNotification } from "../NotificationProvider"
+import "@/i18n";
 
 
 interface SensitivityResponse {
