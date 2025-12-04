@@ -31,7 +31,9 @@
     "titulo":"Título",
     "buscar":"Buscar",
     "seleccionar":"Seleccionar",
-    "otro":"Otro"
+    "otro":"Otro",
+    "anadir":"Añadir",
+    "vdefinidos":"Valores definidos"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
@@ -267,6 +269,12 @@
     "definir":"Definir valores discretos de utilidad",
     "indicacions":"Defina los posibles **valores categóricos** del criterio y el **rango de utilidad** (Min/Max) asociado a cada uno.",
     "anuevovalor":"Añadir nuevo valor",
-    "nombrev":"Nombre del Valor"
+    "nohay":"No se han definido valores discretos.",
+    "nombrev":"Nombre del Valor",
+    "umin":"U. Mínima (0-1)",
+    "umax":"U. Máxima (0-1)",
+    "umina":"U. Min",
+    "umaxa":"U. Max",
+    "ejemplo":"Ej: Excelente, Regular..."
   }
 }

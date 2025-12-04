@@ -20,7 +20,20 @@
     "o": "or",
     "reenviar": "Resend",
     "actual": "Current",
-    "interpre": "Interpretation"
+    "minimo": "Minimum",
+    "maximo": "Maximum",
+    "interpre": "Interpretation",
+    "cancelar": "Cancel",
+    "editar": "Edit",
+    "actualizar": "Update",
+    "nueva": "New",
+    "anio": "Year",
+    "titulo": "Title",
+    "buscar": "Search",
+    "seleccionar": "Select",
+    "otro": "Other",
+    "anadir": "Add",
+    "vdefinidos": "Defined values"
   },
   "modelos": {
     "nonodos": "No nodes available.",
@@ -32,7 +45,7 @@
     "exito": "Thank you! Your response has been recorded.",
     "invitacion": "Invitation",
     "novalid": "invalid.",
-    "indicaducar": " The invitation you tried to open is no longer valid. The link may have expired, or you may have already responded to the request."
+    "indicaducar": " The invitation you tried to open is no longer valid. The link may have expired or you may have already responded to the request."
   },
   "tablas": {
     "back": "Previous",
@@ -44,7 +57,7 @@
       "tbpublicmod": "Public Models"
     },
     "labels": {
-      "lbmodcreados": "Models created"
+      "lbmodcreados": "Created Models"
     },
     "ph": {
       "buscarmod": "Search models"
@@ -62,8 +75,9 @@
     "ups": "Something went wrong!",
     "errordes": "Unknown error",
     "exito": "Success!",
-    "cuidado": "Warning!",
-    "carganumero": "Loaded "
+    "cuidado": "Attention!",
+    "carganumero": "Loaded ",
+    "errorguardar": "Error saving: "
   },
   "evaluacion": {
     "punmin": "Score (Min)",
@@ -73,9 +87,9 @@
     "desmaut": "MAUT Model: Use ranges (min-max) for each criterion.",
     "desfuzzy": "Fuzzy Mode: Enter three values (Lower, Middle, Upper) for each criterion.",
     "desnormal": "Normal Mode: Enter a single value for each criterion.",
-    "finalcri": "Final Criteria",
+    "finalcri": "Final criteria",
     "normtitle": "Evaluation (Normalized)",
-    "matriznorm": "Normalized Matrix",
+    "matriznorm": "Normalized matrix",
     "desnorm": "Normalized values of each criterion for all alternatives",
     "normexplicacion": "Normalization adjusts all values to a common scale (0-1) to allow fair comparisons between criteria with different ranges.",
     "avisorang": "(showing only Min and Max)",
@@ -87,10 +101,10 @@
       "paquetetipo": "The package is of type ",
       "paquetenecesario": " but the model requires type ",
       "errorpaquete": "Error loading package alternatives",
-      "errorevamaut": "Cannot evaluate. Utility functions are missing for final criteria (MAUT)",
+      "errorevamaut": "Cannot evaluate. Utility functions are missing in final criteria (MAUT)",
       "mauterror": "Error executing MAUT evaluation: ",
       "error": "Error executing evaluation",
-      "mautexito": "MAUT (range) evaluation completed successfully",
+      "mautexito": "MAUT evaluation (range) completed successfully",
       "fuzzyexito": "Fuzzy evaluation completed successfully",
       "evaexito": "Evaluation completed successfully",
       "modocambio": "Mode changed ",
@@ -104,14 +118,14 @@
   "resultados": {
     "clasifinal": " Final Ranking - Method ",
     "presentacion": "Ranking of alternatives based on weighted scores",
-    "mejoralt": "Best Alternative",
+    "mejoralt": "Best alternative",
     "segundamejoralt": "Second best",
     "tercermejoralt": "Third best"
   },
   "alternativas": {
     "titulo": "Alternative",
-    "cantalt": "Num. Alternatives",
-    "carpaquete": "Load alternative package",
+    "cantalt": "Qty Alternatives",
+    "carpaquete": "Load alternatives package",
     "loadingpaquetes": "Loading packages...",
     "nohaypaq": "No alternative packages available for this model.",
     "avisocrear": "Create a package from the 'Packages' tab.",
@@ -126,8 +140,8 @@
   "analisissensibilidad": {
     "titulo": "Sensitivity Analysis",
     "descrip": "Analyze how changes in criteria weights affect the ranking of alternatives",
-    "pesouni": " One-dimensional Weight",
-    "pesoalt": " High-dimensional Weight",
+    "pesouni": " One-dimensional weight",
+    "pesoalt": " High-dimensional weight",
     "despesouni": "Evaluates how the best alternative changes when the weight of a specific criterion varies while others remain constant.",
     "despesoalt": "Evaluates how the ranking changes when multiple weights vary simultaneously, allowing for more complex analysis.",
     "clic": "Click to analyze the stability of an individual criterion"
@@ -136,25 +150,25 @@
     "firstalert": "The Excel file must have at least one header row and one data row",
     "secondalert": "The Excel has ",
     "thirdalert": " criteria columns, but the model has ",
-    "fouralert": " final criteria. It will attempt to match by name.",
-    "errorcarga": "Error processing the Excel file",
+    "fouralert": " final criteria. Matching by name will be attempted.",
+    "errorcarga": "Error processing Excel file",
     "cargar": "Load from Excel",
     "formato": "Excel Format",
     "format": {
       "normaldes": "First column = alternative names, next columns = values for each criterion",
       "fuzzydes": " (in fuzzy mode: criterion1_l, criterion1_m, criterion1_u, criterion2_l, criterion2_m, criterion2_u, ...).",
       "mautdes": " (in range mode: criterion1_min, criterion1_max, criterion2_min, criterion2_max, ...).",
-      "mautdisdes": "the value must match the name of the configured discrete option.",
+      "mautdisdes": "the value must match the configured discrete option name.",
       "mautdis": "For discrete MAUT:"
     },
     "fuzzy": {
-      "esperocolumnas": " columns, but fuzzy mode expects ",
-      "esperocolfin": " columns (3 for each criterion: low, mid, upper)."
+      "esperocolumnas": " columns, but in fuzzy mode ",
+      "esperocolfin": " columns are expected (3 for each criterion: low, mid, upper)."
     }
   },
   "botones": {
     "btn_lang": "English",
-    "guardar": "Save Changes",
+    "guardar": "Save changes",
     "cancelar": "Cancel",
     "cambiar_idioma": "Switch to Spanish"
   },
@@ -164,16 +178,16 @@
   },
   "login": {
     "logo_alt": "Calamary Logo",
-    "subtitle": "Sign in to your account",
+    "subtitle": "Log in to your account",
     "email_label": "Email",
     "password_label": "Password",
-    "logging_in": "Signing in...",
-    "submit_btn": "Sign In",
+    "logging_in": "Logging in...",
+    "submit_btn": "Log in",
     "no_account": "Don't have an account?",
     "register_link": "Register here"
   },
   "metodos_page": {
-    "titulo": "Available Methods",
+    "titulo": "Available methods",
     "descripcion": "Here you can view and manage created methods.",
     "buscar_ph": "Search methods...",
     "btn_crear": "Create method",
@@ -183,11 +197,11 @@
     "confirm_eliminar_titulo": "Confirm deletion",
     "confirm_eliminar_texto": "Are you sure you want to delete this method?",
     "msg_exito_eliminar": "Method deleted successfully.",
-    "msg_error_eliminar": "Error deleting the method."
+    "msg_error_eliminar": "Error deleting method."
   },
   "register": {
     "title": "Create your account",
-    "subtitle": "Complete the form to register.",
+    "subtitle": "Fill out the form to register.",
     "password_mismatch": "Passwords do not match.",
     "username_label": "Username",
     "phone_label": "Phone number",
@@ -197,7 +211,7 @@
     "registering_btn": "Registering...",
     "register_btn": "Register",
     "has_account": "Already have an account?",
-    "login_link": "Sign in"
+    "login_link": "Log in"
   },
   "correo": {
     "verifica": "Verify your email",
@@ -212,22 +226,54 @@
   },
   "asensibilidad": {
     "pseleccrite": "Please select a criterion",
+    "pesoactual": "Current weight",
     "okmaut": "MAUT Sensitivity Analysis (Full Ranking) completed",
+    "oknormal": "Sensitivity Analysis (Full Ranking) completed",
     "selecccrite": "Select the criterion to analyze",
     "eligecrit": "Choose a criterion",
     "ejeanalisis": "Run analysis",
     "altasen": "High sensitivity",
+    "normalsen": "One-dimensional",
     "desalta": "*High sensitivity analysis determines the range where **no alternative changes position** in the ranking.",
     "resultitulo": "Analysis results",
-    "criteriova": "Varied Criterion",
+    "criteriova": "Varied criterion",
     "rankini": "Initial ranking ",
     "ploactual": "Current local weight",
     "pgloactual": "Current global weight",
     "rangestable": "Ranking stability range",
+    "rangestapeso": "Weight stability range",
     "minestable": "Stable minimum",
     "maxestable": "Stable maximum",
     "varia": " varies between ",
-    "firstdes": "The **complete ranking** of alternatives remains unchanged when the local weight of criterion **",
-    "seconddes": "This analysis uses strict sensitivity, detecting any change in position in the ranking, and considers the uncertainty ranges (min-max) of the input data "
+    "firstdes": "The **full ranking** of alternatives remains unchanged when the local weight of criterion **",
+    "seconddes": "This analysis uses strict sensitivity, detecting any change in position in the ranking, and considers the uncertainty ranges (min-max) of input data ",
+    "thirddes": "The best alternative (Alternative ",
+    "fordes": "remains the best, in the range "
+  },
+  "citas": {
+    "nombre": "Citation",
+    "asociadas": "Associated citations",
+    "cargando": "Loading citations...",
+    "nohay": "No citations registered.",
+    "eliminar": "Delete this citation?",
+    "erroreliminar": "Error deleting citation: ",
+    "doiregis": "DOI data loaded successfully.",
+    "alertaautor": "Author and title are required.",
+    "autor": "Author(s)",
+    "fuente": "Source",
+    "articulo": "Article",
+    "libro": "Book",
+    "tesis": "Thesis"
+  },
+  "discretos": {
+    "definir": "Define discrete utility values",
+    "indicacions": "Define the possible **categorical values** of the criterion and the **utility range** (Min/Max) associated with each.",
+    "anuevovalor": "Add new value",
+    "nohay": "No discrete values defined.",
+    "nombrev": "Value Name",
+    "umin": "Min U. (0-1)",
+    "umax": "Max U. (0-1)",
+    "umina": "Min U.",
+    "umaxa": "Max U."
   }
 }

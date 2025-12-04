@@ -161,11 +161,11 @@ export default forwardRef(function DiscreteValuesConfig({
               value={newNombre}
               onChange={(e) => setNewNombre(e.target.value)}
               className="mt-1 p-2 border rounded-md w-48"
-              placeholder="Ej: Excelente, Regular..."
+              placeholder={t('discretos.ejemplo')}
             />
           </label>
           <label className="flex flex-col text-sm font-medium">
-            U. Mínima (0-1)
+            {t('discretos.umin')}
             <input
               type="number"
               value={newUtilidadMin}
@@ -177,7 +177,7 @@ export default forwardRef(function DiscreteValuesConfig({
             />
           </label>
           <label className="flex flex-col text-sm font-medium">
-            U. Máxima (0-1)
+            {t('discretos.umax')}
             <input
               type="number"
               value={newUtilidadMax}
@@ -192,23 +192,23 @@ export default forwardRef(function DiscreteValuesConfig({
             onClick={handleAddValue}
             className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 self-end"
           >
-            Añadir
+            {t('generic.anadir')}
           </button>
         </div>
       </div>
 
       {/* Lista de Valores Discretos */}
       <div className="space-y-3 px-4 pb-4">
-        <h4 className="text-md font-medium">Valores Definidos ({valores.length})</h4>
+        <h4 className="text-md font-medium">{t('generic.vdefinidos')} ({valores.length})</h4>
         {valores.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No se han definido valores discretos.</p>
+          <p className="text-sm text-gray-500 italic">{t('discretos.nohay')}</p>
         ) : (
           <ul className="space-y-2">
             {valores.map((valor, index) => (
               <li key={valor.id} className="flex flex-wrap items-center justify-between p-3 bg-white border rounded-md shadow-sm">
                 <div className="flex items-center gap-4">
                   <label className="flex flex-col text-sm font-medium">
-                    Nombre:
+                    {t('generic.nombre')}:
                     <input
                       type="text"
                       value={valor.nombre}
@@ -217,7 +217,7 @@ export default forwardRef(function DiscreteValuesConfig({
                     />
                   </label>
                   <label className="flex flex-col text-sm font-medium">
-                    U. Min:
+                    {t('discretos.umina')}:
                     <input
                       type="number"
                       value={valor.utilidadMin.toFixed(2)}
@@ -229,7 +229,7 @@ export default forwardRef(function DiscreteValuesConfig({
                     />
                   </label>
                   <label className="flex flex-col text-sm font-medium">
-                    U. Max:
+                    {t('discretos.umaxa')}:
                     <input
                       type="number"
                       value={valor.utilidadMax.toFixed(2)}
@@ -245,7 +245,7 @@ export default forwardRef(function DiscreteValuesConfig({
                   onClick={() => handleDeleteValue(valor.id)}
                   className="px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors"
                 >
-                  Eliminar
+                  {t('generic.del')}
                 </button>
               </li>
             ))}
