@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Select, Button, message, Spin, Card } from "antd"
 import type { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../../components/NotificationProvider"
-import Header from "../../components/Header"
+import { useNotification } from "../../../components/NotificationProvider"
+import Header from "../../../components/Header"
 // import LanguageSwitcher from "@/components/LanguageSwitcher";
 // import "@/i18n";
 
