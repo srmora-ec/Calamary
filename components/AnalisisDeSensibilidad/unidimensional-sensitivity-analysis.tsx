@@ -4,7 +4,7 @@ import { Select, Button, message, Spin, Card } from "antd"
 import type { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
 import { useNotification } from "../NotificationProvider"
-// import LanguageSwitcher from "@/components/LanguageSwitcher";
+ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import "@/i18n";
 
 
@@ -159,6 +159,7 @@ export default function UnidimensionalSensitivityAnalysis({
                     <Spin size="large" />
                 </div>
             )}
+            <LanguageSwitcher/>
 
             {result && !loading && (
                 <Card>
