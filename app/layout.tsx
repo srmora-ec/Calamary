@@ -6,8 +6,8 @@ import { GeistMono } from "geist/font/mono";
 
 import { AuthProvider } from "@/context/AuthProvider";
 import NotificationProvider from "@/components/NotificationProvider";
-import TranslationProvider from "@/components/i18n-provider";
 
+import "@/i18n";
 
 export const metadata: Metadata = {
   title: "Calamary - Gestión de Modelos",
@@ -26,9 +26,7 @@ export default function RootLayout({
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <NotificationProvider>
           <AuthProvider>
-<TranslationProvider>            
-    {children}
-            </TranslationProvider>
+              {children}
           </AuthProvider>
         </NotificationProvider>
       </body>
