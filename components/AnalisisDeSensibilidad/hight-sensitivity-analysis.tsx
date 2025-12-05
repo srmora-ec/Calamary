@@ -1,4 +1,3 @@
-"use client"
 
 import { useState } from "react"
 import { Select, Button, message, Spin, Card, Tag } from "antd"
