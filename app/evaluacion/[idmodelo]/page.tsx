@@ -21,7 +21,7 @@ import {
 import { UploadOutlined, FolderOpenOutlined } from "@ant-design/icons"
 import { Modelo, type ModeloData, type Nodo } from "@/types/modelo"
 import ModeloSvgViewer from "@/components/modelo-svg-viewer"
-import UnidimensionalSensitivityAnalysis from "@/ComAnalisisDeSensibilidad/unidimensionalsensitivityanalysis"
+import UnidimensionalSensitivityAnalysis from "@/components/unidimensionalsensitivityanalysis"
 import UnidimensionalSensitivityMAUT from "@/ComAnalisisDeSensibilidad/UnidimensionalSensitivityMAUT"
 import Modal from "@/components/Modal"
 import { supabase } from "@/lib/supabase"
