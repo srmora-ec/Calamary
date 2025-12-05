@@ -36,7 +36,6 @@ import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 
 
-
 type ModoValor = "unico" | "rango" | "fuzzy"//Modos de valor unico normal, rango para maut, fuzzy para difusos
 
 interface ValorUnico {//PAra el valor unico
