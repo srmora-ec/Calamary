@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Select, Button, message, Spin, Card, Tag } from "antd"
 import { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../NotificationProvider"
+import { useNotification } from "../components/NotificationProvider"
 
 interface SensitivityMAUTResponse {
     criterion_id: string//Necesitamos elid del criterio

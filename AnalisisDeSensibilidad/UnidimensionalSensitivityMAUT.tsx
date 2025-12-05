@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Select, Button, message, Spin, Card } from "antd"
 import type { Nodo } from "@/types/modelo"
-import { useNotification } from "../NotificationProvider"
+import { useNotification } from "../components/NotificationProvider"
 import { useTranslation } from "react-i18next"
 
 interface SensitivityMAUTResponse {
