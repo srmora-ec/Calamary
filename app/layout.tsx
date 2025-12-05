@@ -6,8 +6,7 @@ import { GeistMono } from "geist/font/mono";
 
 import { AuthProvider } from "@/context/AuthProvider";
 import NotificationProvider from "@/components/NotificationProvider";
-import i18n from "@/i18n";
-import { I18nextProvider } from "react-i18next";
+import TranslationProvider from "@/components/i18n-provider";
 
 
 export const metadata: Metadata = {
@@ -27,9 +26,9 @@ export default function RootLayout({
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <NotificationProvider>
           <AuthProvider>
-            <I18nextProvider i18n={i18n}>
-              {children}
-            </I18nextProvider>
+<TranslationProvider>            
+    {children}
+            </TranslationProvider>
           </AuthProvider>
         </NotificationProvider>
       </body>
