@@ -6,7 +6,6 @@ import Modal from "./Modal"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
-import Header from "./Header"
 
 interface Metodo {
   id: number
@@ -118,7 +117,6 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Crear nuevo modelo">
-      <Header/>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="mb-4 p-4 rounded bg-red-50 text-red-600">

@@ -6,6 +6,7 @@ import { Select, Button, message, Spin, Card } from "antd"
 import type { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
 import { useNotification } from "../NotificationProvider"
+import Header from "../Header"
 // import LanguageSwitcher from "@/components/LanguageSwitcher";
 // import "@/i18n";
 
@@ -135,6 +136,7 @@ export default function UnidimensionalSensitivityAnalysis({
 
     return (
         <div className="space-y-6">
+            <Header/>
             <Card>
                 <div className="space-y-4">
                     <div>
