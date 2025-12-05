@@ -7,7 +7,6 @@ import type { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
 import { useNotification } from "../NotificationProvider"
 // import LanguageSwitcher from "@/components/LanguageSwitcher";
-import '../../i18n';
 // import "@/i18n";
 
 
