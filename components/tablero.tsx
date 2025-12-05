@@ -12,7 +12,7 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { Button, Checkbox, Drawer, Space } from "antd"; // Importar Button y Drawer
 import { MenuOutlined } from '@ant-design/icons'; // Importar un ícono para el botón de menú
-import CitasModelo from "./citas/CitasModelo";
+import CitasModelo from "./CitasModelo";
 import Input from "antd/es/input/Input";
 import TextArea from "antd/es/input/TextArea";
 import Modal from "./Modal";

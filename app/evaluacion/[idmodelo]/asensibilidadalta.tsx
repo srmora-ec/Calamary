@@ -1,29 +1,32 @@
-"use client"
 
 import { useState } from "react"
 import { Select, Button, message, Spin, Card, Tag } from "antd"
 import { Nodo } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../components/NotificationProvider"
+import { useNotification } from "../../../components/NotificationProvider"
+// import type { Nodo } from "@/types/modelo" 
+// import SensitivityChart from "./sensitivychart"
 
-interface SensitivityMAUTResponse {
-    criterion_id: string//Necesitamos elid del criterio
-    criterion_name: string//El nombre me sirve
-    initial_local_weight: number//El peso inicial
-    initial_ranking: number[] // Los ranking iniciales
-    stability_local_interval: [number, number]//El intervalo de estabilidad
-    is_parent_criterion: boolean//Si es padre (Realmente creo que eso no sirve)
+
+
+// INTERFAZ ACTUALIZADA para el endpoint /hight-unidimensional
+interface SensitivityResponse {
+    criterion_id: string
+    criterion_name: string
+    initial_local_weight: number
+    initial_global_weight: number
+    initial_ranking: number[] // Cambio: Ahora es el ranking completo (índices de alternativa + 1)
+    stability_local_interval: [number, number]
+    is_parent_criterion: boolean
 }
 
-interface UnidimensionalSensitivityMAUTProps {
-    alternativas: any[]//Props, las alt
-    criterios: Nodo[]//Los criterios finales
-    metodoNombre: string//El nombre del metodo a evaluar
-    hierarchy: Nodo[]//Todo el arbol
-    matrixNormMin: number[][]//Normalizacion minima
-    matrixNormPromedioMin: number[][]//Normalicación promedio min
-    matrixNormPromedioMax: number[][]//Normalización promedio max
-    matrixNormMax: number[][]//Normalización max
+interface HightSensitivityProps {
+    alternativas: any[]
+    criterios: Nodo[]
+    tipos: string[]
+    metodoNombre: string
+    hierarchy: Nodo[]
+    matrix: number[][]
 }
 
 // Función auxiliar para construir la jerarquía anidada para el backend
@@ -32,88 +35,74 @@ function buildNestedHierarchy(nodes: Nodo[]) {
 
     // Fase 1: Crear nodos planos
     nodes.forEach((node, index) => {
-        // Usamos el ID del nodo como string para el backend (coherente con el payload)
-        const mappedNode = {
+        nodeMap.set(node.idnodo, {
             id: node.idnodo.toString(),
             name: node.titulo,
             local_weight: node.peso || 0,
             global_weight: node.pesofinal || 0,
             children: [],
-            // El column_index es crucial solo para los nodos hoja para mapear a la matriz de criterios
+            // Solo las hojas necesitan column_index para el cálculo. Lo incluimos para todos para simplicidad.
             column_index: node.criterioFinal ? index : undefined,
-        }
-        nodeMap.set(node.idnodo, mappedNode)
+        })
     })
 
     // Fase 2: Construir relaciones padre-hijo
     const rootNodes: any[] = []
-    nodes.forEach((node, index) => {
+    nodes.forEach((node) => {
         const mappedNode = nodeMap.get(node.idnodo)
-        if (node.idpadre === null || node.idpadre === undefined) {
+        // Usamos el idpadre para determinar si es un nodo raíz
+        if (node.idpadre === null) {
             rootNodes.push(mappedNode)
         } else {
             const parent = nodeMap.get(node.idpadre)
             if (parent) {
-                // Aseguramos que los nodos hoja tengan su índice de columna si son necesarios
-                if (mappedNode.column_index === undefined && node.criterioFinal) {
-                    // Esto asume que la lista `criterios` (o `hierarchy`) está ordenada por column_index
-                    // En este contexto, el índice `index` puede ser un proxy si la lista es plana y ordenada.
-                    mappedNode.column_index = index;
-                }
                 parent.children.push(mappedNode)
             }
         }
     })
 
+    // Asegurar qur la jerarquía refleje correctamente la estructura si los IDs son complejos
+    // Para simplificar, asumimos que los IDs de los nodos en la matriz coinciden con los de la jerarquía.
     return rootNodes
 }
 
-
-export default function HighSensitivityMAUT({
+// Componente principal
+export default function HightSensitivityAnalysis({
     alternativas,
     criterios,
-    metodoNombre,//Luego lo elimino, a lo mejor lo puedo aprovechar en una interfaz visual
+    tipos,
+    metodoNombre,
     hierarchy,
-    matrixNormMin,
-    matrixNormPromedioMin,
-    matrixNormPromedioMax,
-    matrixNormMax,
-}: UnidimensionalSensitivityMAUTProps) {
-    const [selectedCriterion, setSelectedCriterion] = useState<string | null>(null)//El criterio seleccionado
-    const [loading, setLoading] = useState(false)//loading
-    const [result, setResult] = useState<SensitivityMAUTResponse | null>(null)//resultado
-    const { t } = useTranslation()
-    const { notify } = useNotification()
-    // Función auxiliar para obtener el nombre de la alternativa por su índice + 1
-    const getAltName = (indexPlusOne: number): string => {
-        const alt = alternativas?.[indexPlusOne - 1]
-        return alt ? alt.nombre : `${t('alternativas.titulo')} ${indexPlusOne}`
-    }
+    matrix,
+}: HightSensitivityProps) {
+    const [selectedCriterion, setSelectedCriterion] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
+    const [result, setResult] = useState<SensitivityResponse | null>(null)
+    const { t } = useTranslation();
+    const { notify } = useNotification();
 
-    const handleAnalyze = async () => {//Para realizar el analisis de sensibilidad
+    const handleAnalyze = async () => {
         if (!selectedCriterion) {
-            notify(t('alertas.cuidado'), "warning", t('asensibilidad.pseleccrite'))
             return
         }
 
         setLoading(true)
         try {
-            // Construir la jerarquía anidada con pesos locales y globales
+            // Se debe obtener la jerarquía que contiene todos los nodos (padres e hijos) para el payload
             const nestedHierarchy = buildNestedHierarchy(hierarchy)
 
             const payload = {
-                matrix_norm_min: matrixNormMin,
-                matrix_norm_promedio_min: matrixNormPromedioMin,
-                matrix_norm_promedio_max: matrixNormPromedioMax,
-                matrix_norm_max: matrixNormMax,
-                hierarchy: nestedHierarchy, // Jerarquía con pesos para la redistribución
+                matrix,
+                hierarchy: nestedHierarchy, // Jerarquía anidada AHP
+                tipos,
                 criterion_id: selectedCriterion, // ID del criterio a variar
-                step_size: 0.01,//Salto de pasos
+                step_size: 0.01,
             }
 
+            // Llama al nuevo endpoint /hight-unidimensional
             const response = await fetch(
-                // Llamada al endpoint de Alta Sensibilidad MAUT
-                `${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/maut/sensitivity/hight-unidimensional`,
+                // Nota: Usando el endpoint /hight-unidimensional
+                `${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/run-sensitivity/${metodoNombre}/hight-unidimensional`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -123,51 +112,47 @@ export default function HighSensitivityMAUT({
 
             if (!response.ok) {
                 const errorText = await response.text()
-                console.error("Error en respuesta API:", {
+                console.error("Error en respuesta API (High Sensitivity):", {
                     status: response.status,
                     statusText: response.statusText,
                     body: errorText,
                 })
                 notify(t('alertas.ups'), "error")
-                throw new Error(`Error ${response.status}: ${errorText || "Error desconocido en la API de sensibilidad MAUT"}`)
+                throw new Error(`Error ${response.status}: ${errorText || "Error desconocido en la API de sensibilidad"}`)
             }
 
-            // La respuesta se mapea a la interfaz de High Sensitivity (que incluye initial_ranking)
-            const data: SensitivityMAUTResponse = await response.json()
+            const data: SensitivityResponse = await response.json()
+            console.log("Respuesta exitosa de API (High Sensitivity):", data)
             setResult(data)
-            notify(t('alertas.exito'), "success", t('asensibilidad.okmaut'))
+            notify(t('alertas.exito'), "success", t('asensibilidad.oknormal'))
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Error desconocido"
-            console.error(" Error completo:", {
+            console.error("Error completo en análisis de sensibilidad:", {
                 message: errorMessage,
                 error,
                 stack: error instanceof Error ? error.stack : undefined,
             })
             notify(t('alertas.ups'), "error")
-
         } finally {
             setLoading(false)
         }
     }
 
-    // Calculamos el peso global del criterio seleccionado para mostrarlo,
-    // ya que la API solo devuelve el peso local en el resultado final de High Sensitivity.
-    const getInitialGlobalWeight = () => {
-        if (!selectedCriterion || !hierarchy) return 0;
-
-        const targetNode = hierarchy.find(n => n.idnodo.toString() === selectedCriterion);
-        return targetNode?.pesofinal || 0;
+    // Función auxiliar para obtener el nombre de la alternativa por su índice + 1
+    const getAltName = (indexPlusOne: number): string => {
+        const alt = alternativas?.[indexPlusOne - 1]
+        return alt ? alt.nombre : `Alternativa ${indexPlusOne}`
     }
 
     return (
         <div className="space-y-6">
-            <Card >
+            <Card>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('asensibilidad.selecccrite')}</label>
                         <Select
                             className="w-full"
-                            placeholder={(t('asensibilidad.eligecrit'))+"..."}
+                            placeholder={(t('asensibilidad.eligecrit')) + "..."}
                             value={selectedCriterion}
                             onChange={setSelectedCriterion}
                             options={criterios.map((c) => ({
@@ -213,11 +198,11 @@ export default function HighSensitivityMAUT({
                                 <p className="text-sm text-gray-600">{t('asensibilidad.rankini')} (Top 3)</p>
                                 <div className="text-xl font-bold space-y-1">
                                     {result.initial_ranking.slice(0, 3).map((altIndex, i) => (
-                                        <div key={i} className="flex items-center">
-                                            <Tag color={i === 0 ? "gold" : (i === 1 ? "silver" : "gray")} className="mr-2">
+                                        <div key={i}>
+                                            <Tag color={i === 0 ? "gold" : (i === 1 ? "silver" : "gray")}>
                                                 {i + 1}°
                                             </Tag>
-                                            <span className="text-base">{getAltName(altIndex)}</span>
+                                            {getAltName(altIndex)}
                                         </div>
                                     ))}
                                 </div>
@@ -227,12 +212,6 @@ export default function HighSensitivityMAUT({
                             <div className="bg-green-50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-600">{t('asensibilidad.ploactual')}</p>
                                 <p className="text-xl font-bold">{(result.initial_local_weight * 100).toFixed(2)}%</p>
-                            </div>
-
-                            {/* Peso Global Actual (Calculado en el front ya que la API MAUT High Sens no lo devuelve) */}
-                            <div className="bg-green-50 p-4 rounded-lg">
-                                <p className="text-sm text-gray-600">{t('asensibilidad.pgloactual')}</p>
-                                <p className="text-xl font-bold">{(getInitialGlobalWeight() * 100).toFixed(2)}%</p>
                             </div>
                         </div>
 
@@ -285,19 +264,30 @@ export default function HighSensitivityMAUT({
                             </div>
                         </div>
 
-                        <div className="bg-purple-50 p-4 rounded-lg text-sm text-gray-700 border border-purple-200">
-                            <p className="font-semibold mb-2 flex items-center gap-2">
-                             {t('generic.interpre')} ({t('asensibilidad.altasen')} MAUT):
+                        <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
+                            <p className="font-semibold mb-2">
+                                {t('generic.interpre')} ({t('asensibilidad.altasen')}):
                             </p>
                             <p>
                                 {t('asensibilidad.firstdes')}"{result.criterion_name}"** {t('asensibilidad.varia')}{" "}
                                 <span className="font-bold text-purple-600">{(result.stability_local_interval[0] * 100).toFixed(2)}%</span> y{" "}
                                 <span className="font-bold text-purple-600">{(result.stability_local_interval[1] * 100).toFixed(2)}%</span>.
                             </p>
-                            <p className="mt-2 text-xs text-purple-600">
-                                {t('asensibilidad.seconddes')} MAUT.
-                            </p>
                         </div>
+
+                        {/* Se puede descomentar el componente SensitivityChart si está disponible */}
+                        {/* <div className="mt-6">
+                            <SensitivityChart
+                                alternativas={alternativas}
+                                matrix={matrix}
+                                hierarchy={buildNestedHierarchy(hierarchy)}
+                                tipos={tipos}
+                                metodoNombre={metodoNombre}
+                                criterionId={selectedCriterion!}
+                                criterionName={result.criterion_name}
+                                maxRange={result.stability_local_interval} 
+                            />
+                        </div> */}
                     </div>
                 </Card>
             )}

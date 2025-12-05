@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Modal from "../Modal"
+import Modal from "./Modal"
 import { supabase } from "@/lib/supabase"
 import FormularioCita from "./FormularioCita"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../NotificationProvider"
+import { useNotification } from "./NotificationProvider"
 
 interface Cita {
   id: number

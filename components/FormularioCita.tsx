@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../NotificationProvider"
+import { useNotification } from "./NotificationProvider"
 
 interface Props {
   modeloId: number
