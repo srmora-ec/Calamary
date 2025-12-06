@@ -6,9 +6,9 @@ import { useState, useEffect, useRef } from "react"
 import Modal from "./Modal"
 import type { Nodo, MAUTConfig } from "@/types/modelo"
 import { Tabs } from "antd"
-import LinearFunctionConfig from "./MAUT/LinearFunctionModal"
+import LinearFunctionConfig from "../app/tablero/[idmodelo]/configvallineal"
 // 💡 IMPORTACIÓN AÑADIDA
-import DiscreteValuesConfig from "../app/tablero/[idmodelo]/configvaldiscretos" 
+import DiscreteValuesConfig from "../app/tablero/[idmodelo]/configvaldiscretos"
 
 interface ConfigureModalNodoProps {
   isOpen: boolean
@@ -37,31 +37,23 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
   const handleConfigChange = (config: MAUTConfig) => {
     // Esta función actualiza el estado mautConfig del componente padre
     console.log("Esto funciona?", config)
-    setMautConfig(config)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
     try {
-      configRef.current?.guardar()
-
+      setMautConfig(config)
       const nodoActualizado = {
         ...formData,
-        MAUT: mautConfig,
+        MAUT: config,
       }
 
       // Llama a la función de actualización
       onNodoUpdated(nodoActualizado)
-      onClose()
     } catch (err: any) {
       setError(err.message || "Error al actualizar el nodo")
     } finally {
       setLoading(false)
     }
+
   }
+
 
   const items = [
     {
@@ -81,11 +73,11 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
               <strong>Tipo:</strong> {formData.beneficio ? "Beneficio (mayor es mejor)" : "Costo (menor es mejor)"}
             </p>
           </div>
-
+          {formData.beneficio}
           <LinearFunctionConfig
             min={formData.min || 0}
             max={formData.max || 100}
-            beneficio={formData.beneficio || true}
+            beneficio={formData.beneficio}
             unidadMedida={formData.unidadmedida || "Unidad"}
             initialConfig={mautConfig}
             onConfigChange={handleConfigChange}
@@ -93,25 +85,6 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
           />
 
           {error && <div className="mt-4 p-3 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-
-          {/* 💡 BLOQUE DE BOTONES EN PESTAÑA 1 */}
-          <div className="mt-6 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-              disabled={loading}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-              disabled={loading}
-            >
-              {loading ? "Guardando..." : "Guardar configuración"}
-            </button>
-          </div>
         </div>
       ),
     },
@@ -127,30 +100,10 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
           <DiscreteValuesConfig
             initialConfig={mautConfig}
             onConfigChange={handleConfigChange}
-              ref={configRef}
             nodeId={formData.idnodo}
           />
-          
-          {error && <div className="mt-4 p-3 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
+          {error && <div className="mt-4 p-3 bg-red-50 text-red-700 rounded text-sm">{error}</div>}       
 
-          {/* 💡 BLOQUE DE BOTONES EN PESTAÑA 2 (Copiado) */}
-          <div className="mt-6 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-              disabled={loading}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-              disabled={loading}
-            >
-              {loading ? "Guardando..." : "Guardar configuración"}
-            </button>
-          </div>
         </div>
       ),
     },

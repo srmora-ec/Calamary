@@ -53,11 +53,11 @@
   },
   "dashboard": {
     "tabs": {
-      "tbmismod": "My Models",
-      "tbpublicmod": "Public Models"
+      "tbmismod": "My models",
+      "tbpublicmod": "Public models"
     },
     "labels": {
-      "lbmodcreados": "Created Models"
+      "lbmodcreados": "Models created"
     },
     "ph": {
       "buscarmod": "Search models"
@@ -68,14 +68,14 @@
     },
     "ms": {
       "nomodel": "No models found with that term.",
-      "nocmodel": "You haven't created any models yet."
+      "nocmodel": "You have not created any models yet."
     }
   },
   "alertas": {
-    "ups": "Something went wrong!",
+    "ups": "Oops!",
     "errordes": "Unknown error",
     "exito": "Success!",
-    "cuidado": "Attention!",
+    "cuidado": "Watch out!",
     "carganumero": "Loaded ",
     "errorguardar": "Error saving: "
   },
@@ -89,7 +89,7 @@
     "desnormal": "Normal Mode: Enter a single value for each criterion.",
     "finalcri": "Final criteria",
     "normtitle": "Evaluation (Normalized)",
-    "matriznorm": "Normalized matrix",
+    "matriznorm": "Normalized Matrix",
     "desnorm": "Normalized values of each criterion for all alternatives",
     "normexplicacion": "Normalization adjusts all values to a common scale (0-1) to allow fair comparisons between criteria with different ranges.",
     "avisorang": "(showing only Min and Max)",
@@ -101,14 +101,14 @@
       "paquetetipo": "The package is of type ",
       "paquetenecesario": " but the model requires type ",
       "errorpaquete": "Error loading package alternatives",
-      "errorevamaut": "Cannot evaluate. Utility functions are missing in final criteria (MAUT)",
+      "errorevamaut": "Cannot evaluate. Utility functions are missing for final criteria (MAUT)",
       "mauterror": "Error executing MAUT evaluation: ",
       "error": "Error executing evaluation",
       "mautexito": "MAUT evaluation (range) completed successfully",
       "fuzzyexito": "Fuzzy evaluation completed successfully",
       "evaexito": "Evaluation completed successfully",
       "modocambio": "Mode changed ",
-      "configplis": "Please configure utility functions for all final criteria in the model dashboard before evaluating."
+      "configplis": "Please configure the utility functions for all final criteria in the model dashboard before evaluating."
     },
     "fuzzy": {
       "fuzzyact": "Fuzzy mode ✓",
@@ -116,7 +116,7 @@
     }
   },
   "resultados": {
-    "clasifinal": " Final Ranking - Method ",
+    "clasifinal": " Final Classification - Method ",
     "presentacion": "Ranking of alternatives based on weighted scores",
     "mejoralt": "Best alternative",
     "segundamejoralt": "Second best",
@@ -124,7 +124,7 @@
   },
   "alternativas": {
     "titulo": "Alternative",
-    "cantalt": "Qty Alternatives",
+    "cantalt": "Qty. Alternatives",
     "carpaquete": "Load alternatives package",
     "loadingpaquetes": "Loading packages...",
     "nohaypaq": "No alternative packages available for this model.",
@@ -139,10 +139,10 @@
   },
   "analisissensibilidad": {
     "titulo": "Sensitivity Analysis",
-    "descrip": "Analyze how changes in criteria weights affect the ranking of alternatives",
-    "pesouni": " One-dimensional weight",
-    "pesoalt": " High-dimensional weight",
-    "despesouni": "Evaluates how the best alternative changes when the weight of a specific criterion varies while others remain constant.",
+    "descrip": "Analyzes how changes in criteria weights affect the ranking of alternatives",
+    "pesouni": " one-dimensional weight",
+    "pesoalt": " high-dimensional weight",
+    "despesouni": "Evaluates how the best alternative changes when the weight of a specific criterion varies while the others remain constant.",
     "despesoalt": "Evaluates how the ranking changes when multiple weights vary simultaneously, allowing for more complex analysis.",
     "clic": "Click to analyze the stability of an individual criterion"
   },
@@ -187,8 +187,8 @@
     "register_link": "Register here"
   },
   "metodos_page": {
-    "titulo": "Available methods",
-    "descripcion": "Here you can view and manage created methods.",
+    "titulo": "Available Methods",
+    "descripcion": "Here you can view and manage the created methods.",
     "buscar_ph": "Search methods...",
     "btn_crear": "Create method",
     "sin_metodos": "No methods registered.",
@@ -197,7 +197,7 @@
     "confirm_eliminar_titulo": "Confirm deletion",
     "confirm_eliminar_texto": "Are you sure you want to delete this method?",
     "msg_exito_eliminar": "Method deleted successfully.",
-    "msg_error_eliminar": "Error deleting method."
+    "msg_error_eliminar": "Error deleting the method."
   },
   "register": {
     "title": "Create your account",
@@ -221,7 +221,7 @@
     "bandejae": " to your inbox.",
     "else": "If you don't see it, check your ",
     "nodeseado": "spam folder.",
-    "volinicio": "Return to login",
+    "volinicio": "Back to login",
     "norecibiste": "Didn't receive the email?"
   },
   "asensibilidad": {
@@ -245,8 +245,8 @@
     "minestable": "Stable minimum",
     "maxestable": "Stable maximum",
     "varia": " varies between ",
-    "firstdes": "The **full ranking** of alternatives remains unchanged when the local weight of criterion **",
-    "seconddes": "This analysis uses strict sensitivity, detecting any change in position in the ranking, and considers the uncertainty ranges (min-max) of input data ",
+    "firstdes": "The **complete ranking** of alternatives remains unchanged when the local weight of criterion **",
+    "seconddes": "This analysis uses strict sensitivity, detecting any position change in the classification, and considers the uncertainty ranges (min-max) of input data ",
     "thirddes": "The best alternative (Alternative ",
     "fordes": "remains the best, in the range "
   },
@@ -258,7 +258,7 @@
     "eliminar": "Delete this citation?",
     "erroreliminar": "Error deleting citation: ",
     "doiregis": "DOI data loaded successfully.",
-    "alertaautor": "Author and title are required.",
+    "alertaautor": "Author and title are mandatory.",
     "autor": "Author(s)",
     "fuente": "Source",
     "articulo": "Article",
@@ -273,7 +273,10 @@
     "nombrev": "Value Name",
     "umin": "Min U. (0-1)",
     "umax": "Max U. (0-1)",
-    "umina": "Min U.",
-    "umaxa": "Max U."
+    "umina": "U. Min",
+    "umaxa": "U. Max",
+    "ejemplo": "Ex: Excellent, Regular...",
+    "adver1": "The discrete value name cannot be empty.",
+    "adver2": "Utilities must be between 0 and 1, and Minimum cannot be greater than Maximum."
   }
 }

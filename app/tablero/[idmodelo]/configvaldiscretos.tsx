@@ -1,21 +1,22 @@
 "use client"
 
-import { useState, useEffect, useMemo, useRef, useImperativeHandle, forwardRef } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
 import { useNotification } from "@/components/NotificationProvider"
+import { Trash2 } from "lucide-react";
 
 interface DiscreteValuesConfigProps {
   initialConfig?: MAUTConfig
   onConfigChange: (config: MAUTConfig) => void
-  nodeId: number // Para controlar la recarga al cambiar de nodo
+  nodeId: number
 }
 
-export default forwardRef(function DiscreteValuesConfig({
+export default function DiscreteValuesConfig({
   initialConfig,
   onConfigChange,
-  nodeId,
-}: DiscreteValuesConfigProps, ref) {
+  nodeId
+}: DiscreteValuesConfigProps) {
 
   // Refs para controlar el ciclo de vida del componente y el cambio de nodo
   const isInitialLoad = useRef(true)
@@ -26,70 +27,51 @@ export default forwardRef(function DiscreteValuesConfig({
     return initialConfig?.tipoFuncion === "discreta" && initialConfig.funcionDiscreta?.valores
       ? initialConfig.funcionDiscreta.valores
       : []
-  }, [nodeId, initialConfig]) // Dependencia de nodeId y initialConfig
+  }, [nodeId, initialConfig])
 
+  // Estado local (este cambiará libremente sin notificar al padre todavía)
   const [valores, setValores] = useState<ValorDiscretoMAUT[]>(initialValues)
 
-  // Estados para el nuevo valor... (Ya me cansé de comentar)
+  // Estados para el formulario de nuevo valor
   const [newNombre, setNewNombre] = useState("")
   const [newUtilidadMin, setNewUtilidadMin] = useState(0.8)
   const [newUtilidadMax, setNewUtilidadMax] = useState(1.0)
+  
   const { t } = useTranslation()
   const { notify } = useNotification()
 
-
-  // Sincronizo el estado interno cuando cambia la configuración inicial del nodo
+  // Sincronizo el estado interno cuando cambia el NODO o la CONFIG INICIAL
   useEffect(() => {
-    // Reseteamos elcosodel nodo.
     if (lastNodeId.current !== nodeId) {
       isInitialLoad.current = true
       lastNodeId.current = nodeId
     }
-    // Actualizamos siempre con la configuración entrante
     setValores(initialValues)
   }, [nodeId, initialValues])
 
-  //  Llama a onConfigChange SÓLO cuando los valores cambian activamente por el usuario
-  useEffect(() => {
-    // PREVENIMOs EL BUCLE INFINITO EN LA CARGA INICIAL
-    // Si es la carga inicial o si el nodo acaba de cambiar, evitamos llamar a onConfigChange.
-    if (isInitialLoad.current) {
-      isInitialLoad.current = false
-      return
-    }
+  // --- HE ELIMINADO EL useEffect QUE TENÍAS AQUÍ PARA AUTO-GUARDAR ---
+  // Antes había un useEffect con dependencia [valores] que llamaba a onConfigChange.
+  // Al quitarlo, ahora los cambios en 'valores' son puramente locales hasta que des click en Guardar.
 
-    // Si se llega aquí, entendemos que los valores fueron modificadoa por una acción del usuario.
+  // --- NUEVA FUNCIÓN HANDLE GUARDAR ---
+  const handleGuardar = (e: React.FormEvent) => {
+    // 1. Construimos la configuración final
     const newConfig: MAUTConfig = {
       tipoFuncion: "discreta",
       funcionDiscreta: {
         valores: valores,
       },
-      // Aseguramos que las funciones se limpien para no generar conflictos
+      // Limpiamos las otras configuraciones para evitar conflictos en la DB
       funcionSimple: undefined,
       funcionDual: undefined,
     }
-    // Notificamosal padre para que actualize el resto de cosos
-    onConfigChange(newConfig)
 
-  }, [valores])
-
-  const guardar = () => {
-    // Si se llega aquí, 'valores' ha sido modificado por una acción del usuario.
-    const newConfig: MAUTConfig = {
-      tipoFuncion: "discreta",
-      funcionDiscreta: {
-        valores: valores,
-      },
-      // Limpiamos las otras acciones
-      funcionSimple: undefined,
-      funcionDual: undefined,
-    }
-    // Notificamos al padre para que actualice su estado mautConfig
+    // 2. Actualizamos el estado en el Padre (Modelo)
     onConfigChange(newConfig)
+      notify(t('alertas.exito'), "success", t('generic.cguardad'))
   }
-  useImperativeHandle(ref, () => ({
-    guardar,
-  }))
+
+  // --- LÓGICA INTERNA (Solo afecta al estado local 'valores') ---
 
   const handleAddValue = () => {
     if (newNombre.trim() === "") {
@@ -105,13 +87,15 @@ export default forwardRef(function DiscreteValuesConfig({
     }
 
     const nuevoValor: ValorDiscretoMAUT = {
-      id: Date.now().toString(), // se usa el id
+      id: Date.now().toString(),
       nombre: newNombre.trim(),
       utilidadMin: min,
       utilidadMax: max,
     }
 
     setValores([...valores, nuevoValor])
+    
+    // Reset inputs
     setNewNombre("")
     setNewUtilidadMin(0.8)
     setNewUtilidadMax(1.0)
@@ -125,7 +109,6 @@ export default forwardRef(function DiscreteValuesConfig({
       const numValue = typeof value === 'string' ? Number.parseFloat(value) : value
       if (numValue < 0 || numValue > 1) return
 
-      // Lógica de validación cruzada para Min/Max
       if (field === 'utilidadMin' && numValue > updatedValue.utilidadMax) return
       if (field === 'utilidadMax' && numValue < updatedValue.utilidadMin) return
 
@@ -141,9 +124,7 @@ export default forwardRef(function DiscreteValuesConfig({
     setValores(valores.filter((v) => v.id !== id))
   }
 
-
   return (
-    // Se mantiene tu estructura de retorno
     <div className="space-y-6 border rounded-lg bg-white shadow">
       <h3 className="text-lg font-semibold text-gray-700 p-4">{t('discretos.definir')}</h3>
       <p className="text-sm text-gray-500 px-4">
@@ -151,7 +132,7 @@ export default forwardRef(function DiscreteValuesConfig({
       </p>
 
       {/* Formulario para añadir nuevo valor */}
-      <div className="p-4 border rounded-md bg-gray-50 space-y-3 mx-4">
+      <div className="p-4 border bg-gray-50 space-y-3 mx-4">
         <h4 className="text-md font-medium">{t('discretos.anuevovalor')}</h4>
         <div className="flex flex-wrap items-end gap-4">
           <label className="flex flex-col text-sm font-medium">
@@ -205,8 +186,11 @@ export default forwardRef(function DiscreteValuesConfig({
         ) : (
           <ul className="space-y-2">
             {valores.map((valor, index) => (
-              <li key={valor.id} className="flex flex-wrap items-center justify-between p-3 bg-white border rounded-md shadow-sm">
-                <div className="flex items-center gap-4">
+              <li
+                key={valor.id}
+                className="flex items-stretch justify-between bg-white border rounded-md rounded-l-none shadow-sm overflow-hidden"
+              >
+                <div className="flex flex-wrap items-center gap-4 p-3 flex-grow">
                   <label className="flex flex-col text-sm font-medium">
                     {t('generic.nombre')}:
                     <input
@@ -241,18 +225,27 @@ export default forwardRef(function DiscreteValuesConfig({
                     />
                   </label>
                 </div>
+
                 <button
                   onClick={() => handleDeleteValue(valor.id)}
-                  className="px-3 py-1 bg-red-500 text-white text-xs rounded-md hover:bg-red-600 transition-colors"
+                  className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white w-14 transition-colors shrink-0 cursor-pointer"
                 >
-                  {t('generic.del')}
+                  <Trash2 className="h-6 w-6" />
                 </button>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      <div className="p-4 border-t border-gray-200">
+        <button
+          onClick={(e) => handleGuardar(e)}
+          className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded font-medium hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
+        >
+          {t('botones.guardar')}
+        </button>
+      </div>
     </div>
   )
 }
-)

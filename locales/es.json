@@ -33,7 +33,10 @@
     "seleccionar":"Seleccionar",
     "otro":"Otro",
     "anadir":"Añadir",
-    "vdefinidos":"Valores definidos"
+    "vdefinidos":"Valores definidos",
+    "cguardad":"Configuración guardada",
+    "utilidad":"Utilidad",
+    "punto":"Punto"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
@@ -278,5 +281,21 @@
     "ejemplo":"Ej: Excelente, Regular...",
     "adver1":"El nombre del valor discreto no puede estar vacío.",
     "adver2":"Las utilidades deben estar entre 0 y 1, y la Mínima no puede ser mayor que la Máxima."
+  },
+  "lineal":{
+    "porsegmen":"Ecuaciones por segmento",
+    "fudual":"Funciones de utilidad dual (GMMA)",
+    "fmin":"Función mínima",
+    "fmax":"Función máxima",
+    "tipode":"Tipo de función de utilidad",
+    "fsimple":"Función simple",
+    "fdual":"Función dual (mín/máx - GMMA)",
+    "s1":"Una sola función lineal para todo el rango de valores",
+    "s2":"Dos funciones separadas (mínima y máxima) definidas por pares de utilidad para cada valor de atributo (x). La utilidad del promedio se calcula interpolando (MAUT GMMA).",
+    "s3":"Cada punto de atributo (X) define una utilidad mínima (rojo) y una utilidad máxima (verde).",
+    "pfuncion":"Puntos de la función",
+    "pfunciondual":"Puntos de la función dual",
+    "addp":"Agregar punto",
+    "mgmaa":"Modo GMMA"
   }
 }
