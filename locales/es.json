@@ -275,6 +275,8 @@
     "umax":"U. Máxima (0-1)",
     "umina":"U. Min",
     "umaxa":"U. Max",
-    "ejemplo":"Ej: Excelente, Regular..."
+    "ejemplo":"Ej: Excelente, Regular...",
+    "adver1":"El nombre del valor discreto no puede estar vacío.",
+    "adver2":"Las utilidades deben estar entre 0 y 1, y la Mínima no puede ser mayor que la Máxima."
   }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useImperativeHandle, forwardRef } from "react"
 import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../NotificationProvider"
+import { useNotification } from "../../../components/NotificationProvider"
 
 interface DiscreteValuesConfigProps {
   initialConfig?: MAUTConfig
@@ -93,14 +93,14 @@ export default forwardRef(function DiscreteValuesConfig({
 
   const handleAddValue = () => {
     if (newNombre.trim() === "") {
-      alert("El nombre del valor discreto no puede estar vacío.")
+      notify(t('alertas.cuidado'),"warning",t('discretos.adver1'))
       return
     }
     const min = Number.parseFloat(newUtilidadMin.toFixed(2));
     const max = Number.parseFloat(newUtilidadMax.toFixed(2));
 
     if (min < 0 || min > 1 || max < 0 || max > 1 || min > max) {
-      alert("Las utilidades deben estar entre 0 y 1, y la Mínima no puede ser mayor que la Máxima.")
+      notify(t('alertas.cuidado'),"warning",t('discretos.adver2'))
       return
     }
 

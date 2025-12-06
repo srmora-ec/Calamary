@@ -8,7 +8,7 @@ import type { Nodo, MAUTConfig } from "@/types/modelo"
 import { Tabs } from "antd"
 import LinearFunctionConfig from "./MAUT/LinearFunctionModal"
 // 💡 IMPORTACIÓN AÑADIDA
-import DiscreteValuesConfig from "./MAUT/DiscreteValuesConfig" 
+import DiscreteValuesConfig from "../app/tablero/[idmodelo]/configvaldiscretos" 
 
 interface ConfigureModalNodoProps {
   isOpen: boolean
