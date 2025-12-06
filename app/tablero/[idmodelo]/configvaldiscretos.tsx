@@ -252,9 +252,7 @@ export default forwardRef(function DiscreteValuesConfig({
           </ul>
         )}
       </div>
-
     </div>
   )
-
 }
 )
