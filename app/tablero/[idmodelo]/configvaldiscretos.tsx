@@ -93,14 +93,14 @@ export default forwardRef(function DiscreteValuesConfig({
 
   const handleAddValue = () => {
     if (newNombre.trim() === "") {
-      notify(t('alertas.cuidado'),"warning",t('discretos.adver1'))
+      notify(t('alertas.cuidado'), "warning", t('discretos.adver1'))
       return
     }
     const min = Number.parseFloat(newUtilidadMin.toFixed(2));
     const max = Number.parseFloat(newUtilidadMax.toFixed(2));
 
     if (min < 0 || min > 1 || max < 0 || max > 1 || min > max) {
-      notify(t('alertas.cuidado'),"warning",t('discretos.adver2'))
+      notify(t('alertas.cuidado'), "warning", t('discretos.adver2'))
       return
     }
 
