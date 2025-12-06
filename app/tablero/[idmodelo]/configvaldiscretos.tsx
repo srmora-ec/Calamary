@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useImperativeHandle, forwardRef } from "react"
 import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
-import { useNotification } from "../../../components/NotificationProvider"
+import { useNotification } from "@/components/NotificationProvider"
 
 interface DiscreteValuesConfigProps {
   initialConfig?: MAUTConfig
