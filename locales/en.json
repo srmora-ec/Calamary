@@ -33,7 +33,10 @@
     "seleccionar": "Select",
     "otro": "Other",
     "anadir": "Add",
-    "vdefinidos": "Defined values"
+    "vdefinidos": "Defined values",
+    "cguardad": "Configuration saved",
+    "utilidad": "Utility",
+    "punto": "Point"
   },
   "modelos": {
     "nonodos": "No nodes available.",
@@ -57,7 +60,7 @@
       "tbpublicmod": "Public models"
     },
     "labels": {
-      "lbmodcreados": "Models created"
+      "lbmodcreados": "Created models"
     },
     "ph": {
       "buscarmod": "Search models"
@@ -68,11 +71,11 @@
     },
     "ms": {
       "nomodel": "No models found with that term.",
-      "nocmodel": "You have not created any models yet."
+      "nocmodel": "You don't have any created models yet."
     }
   },
   "alertas": {
-    "ups": "Oops!",
+    "ups": "Something went wrong!",
     "errordes": "Unknown error",
     "exito": "Success!",
     "cuidado": "Watch out!",
@@ -89,7 +92,7 @@
     "desnormal": "Normal Mode: Enter a single value for each criterion.",
     "finalcri": "Final criteria",
     "normtitle": "Evaluation (Normalized)",
-    "matriznorm": "Normalized Matrix",
+    "matriznorm": "Normalized matrix",
     "desnorm": "Normalized values of each criterion for all alternatives",
     "normexplicacion": "Normalization adjusts all values to a common scale (0-1) to allow fair comparisons between criteria with different ranges.",
     "avisorang": "(showing only Min and Max)",
@@ -101,14 +104,14 @@
       "paquetetipo": "The package is of type ",
       "paquetenecesario": " but the model requires type ",
       "errorpaquete": "Error loading package alternatives",
-      "errorevamaut": "Cannot evaluate. Utility functions are missing for final criteria (MAUT)",
+      "errorevamaut": "Cannot evaluate. Utility functions missing in final criteria (MAUT)",
       "mauterror": "Error executing MAUT evaluation: ",
       "error": "Error executing evaluation",
-      "mautexito": "MAUT evaluation (range) completed successfully",
+      "mautexito": "MAUT (range) evaluation completed successfully",
       "fuzzyexito": "Fuzzy evaluation completed successfully",
       "evaexito": "Evaluation completed successfully",
       "modocambio": "Mode changed ",
-      "configplis": "Please configure the utility functions for all final criteria in the model dashboard before evaluating."
+      "configplis": "Please configure utility functions for all final criteria in the model dashboard before evaluating."
     },
     "fuzzy": {
       "fuzzyact": "Fuzzy mode ✓",
@@ -139,31 +142,31 @@
   },
   "analisissensibilidad": {
     "titulo": "Sensitivity Analysis",
-    "descrip": "Analyzes how changes in criteria weights affect the ranking of alternatives",
+    "descrip": "Analyze how changes in criteria weights affect alternative rankings",
     "pesouni": " one-dimensional weight",
     "pesoalt": " high-dimensional weight",
-    "despesouni": "Evaluates how the best alternative changes when the weight of a specific criterion varies while the others remain constant.",
-    "despesoalt": "Evaluates how the ranking changes when multiple weights vary simultaneously, allowing for more complex analysis.",
-    "clic": "Click to analyze the stability of an individual criterion"
+    "despesouni": "Evaluate how the best alternative changes when the weight of a specific criterion varies while others remain constant.",
+    "despesoalt": "Evaluate how the ranking changes when multiple weights vary simultaneously, allowing for more complex analysis.",
+    "clic": "Click to analyze individual criterion stability"
   },
   "excel": {
     "firstalert": "The Excel file must have at least one header row and one data row",
     "secondalert": "The Excel has ",
     "thirdalert": " criteria columns, but the model has ",
-    "fouralert": " final criteria. Matching by name will be attempted.",
+    "fouralert": " final criteria. Will attempt to match by name.",
     "errorcarga": "Error processing Excel file",
     "cargar": "Load from Excel",
     "formato": "Excel Format",
     "format": {
-      "normaldes": "First column = alternative names, next columns = values for each criterion",
+      "normaldes": "First column = alternative names, subsequent columns = values for each criterion",
       "fuzzydes": " (in fuzzy mode: criterion1_l, criterion1_m, criterion1_u, criterion2_l, criterion2_m, criterion2_u, ...).",
       "mautdes": " (in range mode: criterion1_min, criterion1_max, criterion2_min, criterion2_max, ...).",
-      "mautdisdes": "the value must match the configured discrete option name.",
+      "mautdisdes": "the value must match the name of the configured discrete option.",
       "mautdis": "For discrete MAUT:"
     },
     "fuzzy": {
-      "esperocolumnas": " columns, but in fuzzy mode ",
-      "esperocolfin": " columns are expected (3 for each criterion: low, mid, upper)."
+      "esperocolumnas": " columns, but in fuzzy mode it expects ",
+      "esperocolfin": " columns (3 for each criterion: low, mid, upper)."
     }
   },
   "botones": {
@@ -187,8 +190,8 @@
     "register_link": "Register here"
   },
   "metodos_page": {
-    "titulo": "Available Methods",
-    "descripcion": "Here you can view and manage the created methods.",
+    "titulo": "Available methods",
+    "descripcion": "Here you can view and manage created methods.",
     "buscar_ph": "Search methods...",
     "btn_crear": "Create method",
     "sin_metodos": "No methods registered.",
@@ -197,7 +200,7 @@
     "confirm_eliminar_titulo": "Confirm deletion",
     "confirm_eliminar_texto": "Are you sure you want to delete this method?",
     "msg_exito_eliminar": "Method deleted successfully.",
-    "msg_error_eliminar": "Error deleting the method."
+    "msg_error_eliminar": "Error deleting method."
   },
   "register": {
     "title": "Create your account",
@@ -209,7 +212,7 @@
     "password_label": "Password",
     "verify_password_label": "Verify password",
     "registering_btn": "Registering...",
-    "register_btn": "Register",
+    "register_btn": "Register me",
     "has_account": "Already have an account?",
     "login_link": "Log in"
   },
@@ -221,7 +224,7 @@
     "bandejae": " to your inbox.",
     "else": "If you don't see it, check your ",
     "nodeseado": "spam folder.",
-    "volinicio": "Back to login",
+    "volinicio": "Return to login",
     "norecibiste": "Didn't receive the email?"
   },
   "asensibilidad": {
@@ -229,7 +232,7 @@
     "pesoactual": "Current weight",
     "okmaut": "MAUT Sensitivity Analysis (Full Ranking) completed",
     "oknormal": "Sensitivity Analysis (Full Ranking) completed",
-    "selecccrite": "Select the criterion to analyze",
+    "selecccrite": "Select criterion to analyze",
     "eligecrit": "Choose a criterion",
     "ejeanalisis": "Run analysis",
     "altasen": "High sensitivity",
@@ -246,7 +249,7 @@
     "maxestable": "Stable maximum",
     "varia": " varies between ",
     "firstdes": "The **complete ranking** of alternatives remains unchanged when the local weight of criterion **",
-    "seconddes": "This analysis uses strict sensitivity, detecting any position change in the classification, and considers the uncertainty ranges (min-max) of input data ",
+    "seconddes": "This analysis uses strict sensitivity, detecting any position change in the ranking, and considers the uncertainty ranges (min-max) of input data ",
     "thirddes": "The best alternative (Alternative ",
     "fordes": "remains the best, in the range "
   },
@@ -273,10 +276,30 @@
     "nombrev": "Value Name",
     "umin": "Min U. (0-1)",
     "umax": "Max U. (0-1)",
-    "umina": "U. Min",
-    "umaxa": "U. Max",
-    "ejemplo": "Ex: Excellent, Regular...",
+    "umina": "Min U.",
+    "umaxa": "Max U.",
+    "ejemplo": "Ex: Excellent, Average...",
     "adver1": "The discrete value name cannot be empty.",
-    "adver2": "Utilities must be between 0 and 1, and Minimum cannot be greater than Maximum."
+    "adver2": "Utilities must be between 0 and 1, and Minimum cannot be greater than Maximum.",
+    "label": "Discrete Values (Categorical)"
+  },
+  "lineal": {
+    "porsegmen": "Equations by segment",
+    "fudual": "Dual Utility Functions (GMMA)",
+    "fmin": "Minimum function",
+    "fmax": "Maximum function",
+    "tipode": "Utility function type",
+    "fsimple": "Simple function",
+    "fdual": "Dual function (min/max - GMMA)",
+    "s1": "A single linear function for the entire range of values",
+    "s2": "Two separate functions (minimum and maximum) defined by utility pairs for each attribute value (x). The average utility is calculated by interpolating (GMMA MAUT).",
+    "s3": "Each attribute point (X) defines a minimum utility (red) and a maximum utility (green).",
+    "pfuncion": "Function points",
+    "pfunciondual": "Dual function points",
+    "addp": "Add point",
+    "mgmaa": "GMMA Mode",
+    "errornodo": "Error updating node",
+    "flineal": "Linear/Dual Function (Continuous)",
+    "config": "Utility configuration"
   }
 }

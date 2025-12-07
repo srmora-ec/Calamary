@@ -280,7 +280,8 @@
     "umaxa":"U. Max",
     "ejemplo":"Ej: Excelente, Regular...",
     "adver1":"El nombre del valor discreto no puede estar vacío.",
-    "adver2":"Las utilidades deben estar entre 0 y 1, y la Mínima no puede ser mayor que la Máxima."
+    "adver2":"Las utilidades deben estar entre 0 y 1, y la Mínima no puede ser mayor que la máxima.",
+"label":"Valores Discretos (Categórica)"
   },
   "lineal":{
     "porsegmen":"Ecuaciones por segmento",
@@ -296,6 +297,9 @@
     "pfuncion":"Puntos de la función",
     "pfunciondual":"Puntos de la función dual",
     "addp":"Agregar punto",
-    "mgmaa":"Modo GMMA"
+    "mgmaa":"Modo GMMA",
+    "errornodo":"Error al actualizar el nodo",
+    "flineal":"Función Lineal/Dual (Continua)",
+    "config":"Configuración de utilidad"
   }
 }

@@ -49,29 +49,24 @@ export default function DiscreteValuesConfig({
     setValores(initialValues)
   }, [nodeId, initialValues])
 
-  // --- HE ELIMINADO EL useEffect QUE TENÍAS AQUÍ PARA AUTO-GUARDAR ---
-  // Antes había un useEffect con dependencia [valores] que llamaba a onConfigChange.
-  // Al quitarlo, ahora los cambios en 'valores' son puramente locales hasta que des click en Guardar.
 
-  // --- NUEVA FUNCIÓN HANDLE GUARDAR ---
   const handleGuardar = (e: React.FormEvent) => {
-    // 1. Construimos la configuración final
+    // Construimos la configuración final
     const newConfig: MAUTConfig = {
       tipoFuncion: "discreta",
       funcionDiscreta: {
         valores: valores,
       },
-      // Limpiamos las otras configuraciones para evitar conflictos en la DB
+      // Limpiamos las otras configuraciones para evitar conflictos
       funcionSimple: undefined,
       funcionDual: undefined,
     }
 
-    // 2. Actualizamos el estado en el Padre (Modelo)
+    // Actualizamos el estado en el Padre (Modelo)
     onConfigChange(newConfig)
       notify(t('alertas.exito'), "success", t('generic.cguardad'))
   }
 
-  // --- LÓGICA INTERNA (Solo afecta al estado local 'valores') ---
 
   const handleAddValue = () => {
     if (newNombre.trim() === "") {
@@ -125,7 +120,7 @@ export default function DiscreteValuesConfig({
   }
 
   return (
-    <div className="space-y-6 border rounded-lg bg-white shadow">
+    <div>
       <h3 className="text-lg font-semibold text-gray-700 p-4">{t('discretos.definir')}</h3>
       <p className="text-sm text-gray-500 px-4">
         {t('discretos.indicacions')}

@@ -1,7 +1,7 @@
 // app/modelos/[idmodelo]/page.tsx  (Next.js 13+ con App Router)
 "use client";
 
-import ConfigureMautNodo from "@/components/ConfiguredCriterioMaut";
+import ConfigureMautNodo from "@/app/tablero/[idmodelo]/configmaut";
 import ConfigureModalNodo from "@/components/ConfiguredNodo";//Configurar la información del nodo
 import ConfigureModalPeso from "@/components/pesos/ConfiguredPeso";//Modal para confugurar el peso
 import Spinner from "@/components/pesos/Spinner";
@@ -140,6 +140,7 @@ export default function ModeloPage() {
           <ConfigureMautNodo
             isOpen={IsMautConfigured}
             onClose={() => { setIsMautConfigured(false) }}
+            tipo={nodoActual?.MAUT?.tipoFuncion || null}
             nodo={nodoActual}
             onNodoUpdated={setNodoActual}
           />

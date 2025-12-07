@@ -3,40 +3,40 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import Modal from "./Modal"
+import Modal from "@/components/Modal"
 import type { Nodo, MAUTConfig } from "@/types/modelo"
 import { Tabs } from "antd"
-import LinearFunctionConfig from "../app/tablero/[idmodelo]/configvallineal"
-// 💡 IMPORTACIÓN AÑADIDA
-import DiscreteValuesConfig from "../app/tablero/[idmodelo]/configvaldiscretos"
+import LinearFunctionConfig from "./configvallineal"
+import DiscreteValuesConfig from "./configvaldiscretos"
+import { useTranslation } from "react-i18next"
 
 interface ConfigureModalNodoProps {
   isOpen: boolean
   onClose: () => void
-  nodo: Nodo
+  nodo: Nodo,
+  tipo:string|null,
   onNodoUpdated: (nodoActualizado: Nodo) => void
 }
 
-export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated }: ConfigureModalNodoProps) {
+export default function ConfigureMautNodo({ isOpen, onClose, nodo, tipo, onNodoUpdated }: ConfigureModalNodoProps) {
   const [formData, setFormData] = useState<Nodo>(nodo)
   const [mautConfig, setMautConfig] = useState<MAUTConfig | undefined>(nodo.MAUT)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const {t} = useTranslation()
 
   // Cuando cambie el nodo recibido, refresca el form
   useEffect(() => {
     if (nodo) {
+      console.log("veamos",nodo.MAUT)
       setFormData(nodo)
       setMautConfig(nodo.MAUT)
     }
   }, [nodo])
 
-  const configRef = useRef<any>(null)
-
 
   const handleConfigChange = (config: MAUTConfig) => {
     // Esta función actualiza el estado mautConfig del componente padre
-    console.log("Esto funciona?", config)
     try {
       setMautConfig(config)
       const nodoActualizado = {
@@ -47,7 +47,7 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
       // Llama a la función de actualización
       onNodoUpdated(nodoActualizado)
     } catch (err: any) {
-      setError(err.message || "Error al actualizar el nodo")
+      setError(err.message || t('lineal.errornodo'))
     } finally {
       setLoading(false)
     }
@@ -58,21 +58,9 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
   const items = [
     {
       key: "1",
-      label: "Función Lineal/Dual (Continua)", // Etiqueta actualizada
+      label: t('lineal.flineal'), // Etiqueta actualizada
       children: (
         <div className="p-4">
-          <div className="mb-4 p-3 bg-blue-50 rounded">
-            <h3 className="font-semibold text-sm mb-2">Información del criterio:</h3>
-            <p className="text-xs">
-              <strong>Título:</strong> {formData.titulo}
-            </p>
-            <p className="text-xs">
-              <strong>Rango:</strong> {formData.min} - {formData.max} {formData.unidadmedida}
-            </p>
-            <p className="text-xs">
-              <strong>Tipo:</strong> {formData.beneficio ? "Beneficio (mayor es mejor)" : "Costo (menor es mejor)"}
-            </p>
-          </div>
           {formData.beneficio}
           <LinearFunctionConfig
             min={formData.min || 0}
@@ -90,12 +78,9 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
     },
     {
       key: "2",
-      label: "Valores Discretos (Categórica)", // Nueva pestaña
+      label: t('discretos.label'), // Nueva pestaña
       children: (
         <div className="p-4">
-          <p className="text-sm text-gray-600 mb-4">
-            Configuración de utilidad para criterios con **valores discretos** o categóricos (Ej: Calidad, Nivel de Riesgo).
-          </p>
 
           <DiscreteValuesConfig
             initialConfig={mautConfig}
@@ -110,8 +95,8 @@ export default function ConfigureMautNodo({ isOpen, onClose, nodo, onNodoUpdated
   ]
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Configuración de utilidad: ${formData.titulo}`} width="800px">
-      <Tabs type="card" defaultActiveKey="1" items={items} />
+    <Modal isOpen={isOpen} onClose={onClose} title={`${t('lineal.config')}: ${formData.titulo}`} width="800px">
+      <Tabs type="card" defaultActiveKey={tipo=="discreta"?"2":"1"} items={items} />
     </Modal>
   )
 }
