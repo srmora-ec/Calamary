@@ -5,6 +5,7 @@ import type { MAUTConfig, ValorDiscretoMAUT } from "@/types/modelo"
 import { useTranslation } from "react-i18next"
 import { useNotification } from "@/components/NotificationProvider"
 import { Trash2 } from "lucide-react";
+import BotonAyuda from "@/components/BotonAyuda"
 
 interface DiscreteValuesConfigProps {
   initialConfig?: MAUTConfig
@@ -36,7 +37,7 @@ export default function DiscreteValuesConfig({
   const [newNombre, setNewNombre] = useState("")
   const [newUtilidadMin, setNewUtilidadMin] = useState(0.8)
   const [newUtilidadMax, setNewUtilidadMax] = useState(1.0)
-  
+
   const { t } = useTranslation()
   const { notify } = useNotification()
 
@@ -64,7 +65,7 @@ export default function DiscreteValuesConfig({
 
     // Actualizamos el estado en el Padre (Modelo)
     onConfigChange(newConfig)
-      notify(t('alertas.exito'), "success", t('generic.cguardad'))
+    notify(t('alertas.exito'), "success", t('generic.cguardad'))
   }
 
 
@@ -89,7 +90,7 @@ export default function DiscreteValuesConfig({
     }
 
     setValores([...valores, nuevoValor])
-    
+
     // Reset inputs
     setNewNombre("")
     setNewUtilidadMin(0.8)
@@ -121,12 +122,24 @@ export default function DiscreteValuesConfig({
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-gray-700 p-4">{t('discretos.definir')}</h3>
+      <div className="flex items-center p-4">
+        <h3 className="text-lg font-semibold text-gray-700">
+          {t('discretos.definir')}
+        </h3>
+
+        {/* Este contenedor ocupa el espacio restante y alinea su contenido a la derecha */}
+        <div className="flex-1 flex justify-end items-center relative">
+          <BotonAyuda route="/docs/discretevalues#crear-discretos">
+            {t('discretos.ayuda')}          </BotonAyuda>
+        </div>
+      </div>
+
+
+
+
       <p className="text-sm text-gray-500 px-4">
         {t('discretos.indicacions')}
       </p>
-
-      {/* Formulario para añadir nuevo valor */}
       <div className="p-4 border bg-gray-50 space-y-3 mx-4">
         <h4 className="text-md font-medium">{t('discretos.anuevovalor')}</h4>
         <div className="flex flex-wrap items-end gap-4">
@@ -220,6 +233,7 @@ export default function DiscreteValuesConfig({
                     />
                   </label>
                 </div>
+
 
                 <button
                   onClick={() => handleDeleteValue(valor.id)}

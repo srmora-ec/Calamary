@@ -8,7 +8,7 @@ import ComparacionPorPares from "./comparacionParesMatriz"
 import ComparacionPorPasos from "./comparacionporpasos"
 import { Tabs } from "antd"
 import SaatyExpertos from "./comppasosexperto"
-import AsignarIgual from "./AsignarIgual"
+import AsignarIgual from "../AsignarIgual"
 import AsignarPesosDifusos from "./AsignarPesosFuzzy"
 
 interface ConfigureModalPesoProps {
