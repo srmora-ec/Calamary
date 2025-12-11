@@ -1,6 +1,6 @@
 {
   "header": {
-    "btn_cerrarsesion": "Log out",
+    "btn_cerrarsesion": "Sign out",
     "home": "Home",
     "expertos": "Experts"
   },
@@ -48,7 +48,7 @@
     "exito": "Thank you! Your response has been recorded.",
     "invitacion": "Invitation",
     "novalid": "invalid.",
-    "indicaducar": " The invitation you tried to open is no longer valid. The link may have expired or you may have already responded to the request."
+    "indicaducar": " The invitation you tried to open is no longer valid. The link may have expired or you may have already answered the request."
   },
   "tablas": {
     "back": "Previous",
@@ -71,7 +71,7 @@
     },
     "ms": {
       "nomodel": "No models found with that term.",
-      "nocmodel": "You don't have any created models yet."
+      "nocmodel": "You haven't created any models yet."
     }
   },
   "alertas": {
@@ -86,7 +86,7 @@
     "punmin": "Score (Min)",
     "puntaje": "Score (Avg)",
     "punmax": "Score (Max)",
-    "titulo": "Alternatives Management",
+    "titulo": "Alternative Management",
     "desmaut": "MAUT Model: Use ranges (min-max) for each criterion.",
     "desfuzzy": "Fuzzy Mode: Enter three values (Lower, Middle, Upper) for each criterion.",
     "desnormal": "Normal Mode: Enter a single value for each criterion.",
@@ -104,23 +104,23 @@
       "paquetetipo": "The package is of type ",
       "paquetenecesario": " but the model requires type ",
       "errorpaquete": "Error loading package alternatives",
-      "errorevamaut": "Cannot evaluate. Utility functions missing in final criteria (MAUT)",
+      "errorevamaut": "Cannot evaluate. Utility functions are missing in the final criteria (MAUT)",
       "mauterror": "Error executing MAUT evaluation: ",
       "error": "Error executing evaluation",
       "mautexito": "MAUT (range) evaluation completed successfully",
       "fuzzyexito": "Fuzzy evaluation completed successfully",
       "evaexito": "Evaluation completed successfully",
       "modocambio": "Mode changed ",
-      "configplis": "Please configure utility functions for all final criteria in the model dashboard before evaluating."
+      "configplis": "Please configure the utility functions for all final criteria in the model dashboard before evaluating."
     },
     "fuzzy": {
       "fuzzyact": "Fuzzy mode ✓",
-      "nofuzzyact": "Activate fuzzy mode"
+      "nofuzzyact": "Enable fuzzy mode"
     }
   },
   "resultados": {
-    "clasifinal": " Final Classification - Method ",
-    "presentacion": "Ranking of alternatives based on weighted scores",
+    "clasifinal": " Final Ranking - Method ",
+    "presentacion": "Alternative ranking based on weighted scores",
     "mejoralt": "Best alternative",
     "segundamejoralt": "Second best",
     "tercermejoralt": "Third best"
@@ -128,7 +128,7 @@
   "alternativas": {
     "titulo": "Alternative",
     "cantalt": "Qty. Alternatives",
-    "carpaquete": "Load alternatives package",
+    "carpaquete": "Load alternative package",
     "loadingpaquetes": "Loading packages...",
     "nohaypaq": "No alternative packages available for this model.",
     "avisocrear": "Create a package from the 'Packages' tab.",
@@ -142,31 +142,31 @@
   },
   "analisissensibilidad": {
     "titulo": "Sensitivity Analysis",
-    "descrip": "Analyze how changes in criteria weights affect alternative rankings",
-    "pesouni": " one-dimensional weight",
-    "pesoalt": " high-dimensional weight",
-    "despesouni": "Evaluate how the best alternative changes when the weight of a specific criterion varies while others remain constant.",
-    "despesoalt": "Evaluate how the ranking changes when multiple weights vary simultaneously, allowing for more complex analysis.",
-    "clic": "Click to analyze individual criterion stability"
+    "descrip": "Analyze how changes in criteria weights affect alternative ranking",
+    "pesouni": " of one-dimensional weight",
+    "pesoalt": " of high-dimensional weight",
+    "despesouni": "Evaluates how the best alternative changes when the weight of a specific criterion varies while others remain constant.",
+    "despesoalt": "Evaluates how the ranking changes when multiple weights vary simultaneously, allowing for more complex analysis.",
+    "clic": "Click to analyze the stability of an individual criterion"
   },
   "excel": {
     "firstalert": "The Excel file must have at least one header row and one data row",
     "secondalert": "The Excel has ",
     "thirdalert": " criteria columns, but the model has ",
-    "fouralert": " final criteria. Will attempt to match by name.",
-    "errorcarga": "Error processing Excel file",
+    "fouralert": " final criteria. Matching by name will be attempted.",
+    "errorcarga": "Error processing the Excel file",
     "cargar": "Load from Excel",
     "formato": "Excel Format",
     "format": {
-      "normaldes": "First column = alternative names, subsequent columns = values for each criterion",
+      "normaldes": "First column = alternative names, next columns = values for each criterion",
       "fuzzydes": " (in fuzzy mode: criterion1_l, criterion1_m, criterion1_u, criterion2_l, criterion2_m, criterion2_u, ...).",
       "mautdes": " (in range mode: criterion1_min, criterion1_max, criterion2_min, criterion2_max, ...).",
       "mautdisdes": "the value must match the name of the configured discrete option.",
       "mautdis": "For discrete MAUT:"
     },
     "fuzzy": {
-      "esperocolumnas": " columns, but in fuzzy mode it expects ",
-      "esperocolfin": " columns (3 for each criterion: low, mid, upper)."
+      "esperocolumnas": " columns, but in fuzzy mode ",
+      "esperocolfin": " columns are expected (3 for each criterion: low, mid, upper)."
     }
   },
   "botones": {
@@ -181,16 +181,16 @@
   },
   "login": {
     "logo_alt": "Calamary Logo",
-    "subtitle": "Log in to your account",
+    "subtitle": "Sign in to your account",
     "email_label": "Email",
     "password_label": "Password",
-    "logging_in": "Logging in...",
-    "submit_btn": "Log in",
+    "logging_in": "Signing in...",
+    "submit_btn": "Sign in",
     "no_account": "Don't have an account?",
     "register_link": "Register here"
   },
   "metodos_page": {
-    "titulo": "Available methods",
+    "titulo": "Available Methods",
     "descripcion": "Here you can view and manage created methods.",
     "buscar_ph": "Search methods...",
     "btn_crear": "Create method",
@@ -204,7 +204,7 @@
   },
   "register": {
     "title": "Create your account",
-    "subtitle": "Fill out the form to register.",
+    "subtitle": "Complete the form to register.",
     "password_mismatch": "Passwords do not match.",
     "username_label": "Username",
     "phone_label": "Phone number",
@@ -212,9 +212,9 @@
     "password_label": "Password",
     "verify_password_label": "Verify password",
     "registering_btn": "Registering...",
-    "register_btn": "Register me",
+    "register_btn": "Register",
     "has_account": "Already have an account?",
-    "login_link": "Log in"
+    "login_link": "Sign in"
   },
   "correo": {
     "verifica": "Verify your email",
@@ -224,7 +224,7 @@
     "bandejae": " to your inbox.",
     "else": "If you don't see it, check your ",
     "nodeseado": "spam folder.",
-    "volinicio": "Return to login",
+    "volinicio": "Back to sign in",
     "norecibiste": "Didn't receive the email?"
   },
   "asensibilidad": {
@@ -232,13 +232,13 @@
     "pesoactual": "Current weight",
     "okmaut": "MAUT Sensitivity Analysis (Full Ranking) completed",
     "oknormal": "Sensitivity Analysis (Full Ranking) completed",
-    "selecccrite": "Select criterion to analyze",
+    "selecccrite": "Select the criterion to analyze",
     "eligecrit": "Choose a criterion",
     "ejeanalisis": "Run analysis",
     "altasen": "High sensitivity",
     "normalsen": "One-dimensional",
     "desalta": "*High sensitivity analysis determines the range where **no alternative changes position** in the ranking.",
-    "resultitulo": "Analysis results",
+    "resultitulo": "Analysis Results",
     "criteriova": "Varied criterion",
     "rankini": "Initial ranking ",
     "ploactual": "Current local weight",
@@ -248,8 +248,8 @@
     "minestable": "Stable minimum",
     "maxestable": "Stable maximum",
     "varia": " varies between ",
-    "firstdes": "The **complete ranking** of alternatives remains unchanged when the local weight of criterion **",
-    "seconddes": "This analysis uses strict sensitivity, detecting any position change in the ranking, and considers the uncertainty ranges (min-max) of input data ",
+    "firstdes": "The **full ranking** of alternatives remains unchanged when the local weight of criterion **",
+    "seconddes": "This analysis uses strict sensitivity, detecting any position change in the classification, and considers the uncertainty ranges (min-max) of input data ",
     "thirddes": "The best alternative (Alternative ",
     "fordes": "remains the best, in the range "
   },
@@ -273,26 +273,27 @@
     "indicacions": "Define the possible **categorical values** of the criterion and the **utility range** (Min/Max) associated with each.",
     "anuevovalor": "Add new value",
     "nohay": "No discrete values defined.",
-    "nombrev": "Value Name",
-    "umin": "Min U. (0-1)",
-    "umax": "Max U. (0-1)",
+    "nombrev": "Value name",
+    "umin": "Min Utility (0-1)",
+    "umax": "Max Utility (0-1)",
     "umina": "Min U.",
     "umaxa": "Max U.",
     "ejemplo": "Ex: Excellent, Average...",
     "adver1": "The discrete value name cannot be empty.",
     "adver2": "Utilities must be between 0 and 1, and Minimum cannot be greater than Maximum.",
-    "label": "Discrete Values (Categorical)"
+    "label": "Discrete Values (Categorical)",
+    "ayuda": "You can add qualitative values that will have a minimum and maximum utility. When evaluating alternatives, you must choose one of the options configured in this section. An example set is (Low, Medium, and High)"
   },
   "lineal": {
     "porsegmen": "Equations by segment",
-    "fudual": "Dual Utility Functions (GMMA)",
+    "fudual": "Dual utility functions (GMMA)",
     "fmin": "Minimum function",
     "fmax": "Maximum function",
     "tipode": "Utility function type",
     "fsimple": "Simple function",
     "fdual": "Dual function (min/max - GMMA)",
     "s1": "A single linear function for the entire range of values",
-    "s2": "Two separate functions (minimum and maximum) defined by utility pairs for each attribute value (x). The average utility is calculated by interpolating (GMMA MAUT).",
+    "s2": "Two separate functions (minimum and maximum) defined by utility pairs for each attribute value (x). Average utility is calculated by interpolating (MAUT GMMA).",
     "s3": "Each attribute point (X) defines a minimum utility (red) and a maximum utility (green).",
     "pfuncion": "Function points",
     "pfunciondual": "Dual function points",
@@ -301,5 +302,10 @@
     "errornodo": "Error updating node",
     "flineal": "Linear/Dual Function (Continuous)",
     "config": "Utility configuration"
+  },
+  "docs":{
+    "discretos":{
+      "crearv":"Create discrete values for a criterion"
+    }
   }
 }

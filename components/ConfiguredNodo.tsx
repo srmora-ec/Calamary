@@ -89,7 +89,7 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                         className="form-input"
                         value={formData.descripcion}
                         onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                        maxLength={200}
+                        maxLength={800}
                         rows={4} // opcional, para definir alto inicial
                     />
                 </div>
