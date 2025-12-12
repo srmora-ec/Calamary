@@ -36,7 +36,8 @@
     "vdefinidos": "Defined values",
     "cguardad": "Configuration saved",
     "utilidad": "Utility",
-    "punto": "Point"
+    "punto": "Point",
+    "descripcion": "Description"
   },
   "modelos": {
     "nonodos": "No nodes available.",
@@ -303,9 +304,9 @@
     "flineal": "Linear/Dual Function (Continuous)",
     "config": "Utility configuration"
   },
-  "docs":{
-    "discretos":{
-      "crearv":"Create discrete values for a criterion"
+  "docs": {
+    "discretos": {
+      "crearv": "Create discrete values for a criterion"
     }
   }
 }

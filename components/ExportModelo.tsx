@@ -22,10 +22,12 @@ interface ExportModeloProps {
   orientacion: "h" | "v"
   linea: number
   nombreModelo: string
+  descripcion: string | null
+  metodo: string 
   logoUrl?: string
 }
 
-const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, nombreModelo, logoUrl = "https://calamary.vercel.app/logo.png" }) => {
+const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, nombreModelo,descripcion, metodo, logoUrl = "https://calamary.vercel.app/logo.png" }) => {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -650,6 +652,30 @@ const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, 
     setShowMenu(false)
   }
 
+    const exportJSON = () => {
+    const modeloData = {
+      nombreModelo,
+      orientacion,
+      descripcion,
+      metodo,
+      linea,
+      nodos,
+      fechaExportacion: new Date().toISOString()
+    }
+
+    const jsonString = JSON.stringify(modeloData, null, 2)
+    const blob = new Blob([jsonString], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${nombreModelo || "modelo"}.json`
+    link.click()
+
+    URL.revokeObjectURL(url)
+    setShowMenu(false)
+  }
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -674,6 +700,12 @@ const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, 
             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
           >
             Exportar SVG
+          </button>
+          <button
+            onClick={exportJSON}
+            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+          >
+            Exportar json
           </button>
         </div>
       )}

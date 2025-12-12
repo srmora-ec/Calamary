@@ -36,7 +36,8 @@
     "vdefinidos": "Valores definidos",
     "cguardad": "Configuración guardada",
     "utilidad": "Utilidad",
-    "punto": "Punto"
+    "punto": "Punto",
+    "descripcion": "Descripcion"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
@@ -303,9 +304,32 @@
     "flineal": "Función Lineal/Dual (Continua)",
     "config": "Configuración de utilidad"
   },
-  "docs":{
-    "discretos":{
-      "crearv":"Crear valores discretos para un criterio"
+  "docs": {
+    "discretos": {
+      "crearv": "Crear valores discretos para un criterio"
     }
+  },
+  "tokens_page": {
+    "titulo": "Token de API",
+    "descripcion": "Gestiona tu token de acceso para usar la API de modelos de decisión",
+    "info_titulo": "¿Qué es un token de API?",
+    "info_desc1": "Un token de API es una clave única que te permite:",
+    "info_item1": "Probar modelos creados mediante ",
+    "info_item2": "Realizar consultas mediante la API REST",
+    "info_item3": "Integrar los modelos con tus aplicaciones externas",
+    "card_titulo": "Tu Token de Acceso",
+    "token_existente": "Ya tienes un token generado. Haz clic en el botón para copiarlo:",
+    "sin_token": "Aún no has generado un token. Haz clic en el botón para crear uno:",
+    "creado_el": "Creado el:",
+    "btn_copiar": "Copiar Token",
+    "btn_generar": "Generar Token",
+    "seguridad_titulo": "⚠️ Importante: Seguridad del Token",
+    "seguridad_desc": "No compartas tu token con nadie. Cualquier persona con acceso a tu token podrá usar la API en tu nombre. Guárdalo en un lugar seguro.",
+    "no_autorizado_titulo": "Acceso Denegado",
+    "no_autorizado_desc": "Solo los administradores pueden acceder a esta sección y generar tokens de API.",
+    "msg_exito_crear": "Token generado y copiado al portapapeles correctamente",
+    "msg_error_crear": "Error al generar el token",
+    "msg_exito_copiar": "Token copiado al portapapeles",
+    "msg_error_copiar": "Error al copiar el token"
   }
 }

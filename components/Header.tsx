@@ -55,9 +55,9 @@ export default function Header() {
             <Link href="/" className="hover:text-primary">
               {t('header.home')}
             </Link>
-            <Link href="/expertos" className="hover:text-primary">
+            {/* <Link href="/expertos" className="hover:text-primary">
               {t('header.expertos')}
-            </Link>
+            </Link> */}
             <span className="text-secondary">{user?.email || "cargando..."}</span>
             <LanguageSwitcher />
             <button
@@ -90,9 +90,9 @@ export default function Header() {
           <Link href="/" onClick={() => setOpen(false)}>
              {t('header.home')}
           </Link>
-          <Link href="/expertos" onClick={() => setOpen(false)}>
+          {/* <Link href="/expertos" onClick={() => setOpen(false)}>
               {t('header.expertos')}
-          </Link>
+          </Link> */}
           <span className="text-secondary">{user?.email || "cargando..."}</span>
           <LanguageSwitcher />
 

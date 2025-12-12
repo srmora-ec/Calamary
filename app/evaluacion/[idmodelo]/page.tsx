@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Tabs,
   Button,
@@ -34,6 +34,7 @@ import { useNotification } from "@/components/NotificationProvider";
 import { useTranslation } from "react-i18next"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
+import NodoInfo from "@/components/NodoInfo"
 
 
 type ModoValor = "unico" | "rango" | "fuzzy"//Modos de valor unico normal, rango para maut, fuzzy para difusos
@@ -107,13 +108,20 @@ export default function AlternativasPage() {
   const { notify } = useNotification();
   const criteriosFinales = modelo?.getCriteriosFinales() || []//Para cardar los criterios finales del modelo
   const { t } = useTranslation();
-    const router = useRouter() //Para movernos entre rutas
-  
+  const router = useRouter() //Para movernos entre rutas
+  const [NodoInfoModal, setNodoInfoModal] = useState(false);
+  const [selectedNodoId, setSeletedNodoId] = useState<Number | null>(null)
+
   const { user } = useAuth()
 
-   useEffect(() => {
-      if (!loading && !user) router.push("/login") //Si no hay usuario logeado enviamos a login
-    }, [loading, user])
+  const selectedNodo = useMemo(() => {
+    if (!selectedNodoId || !criteriosFinales || criteriosFinales.length === 0) return null
+    return criteriosFinales.find((n) => n.idnodo === selectedNodoId) || null
+  }, [selectedNodoId, criteriosFinales])
+
+  useEffect(() => {
+    if (!loading && !user) router.push("/login") //Si no hay usuario logeado enviamos a login
+  }, [loading, user])
 
   useEffect(() => {
     if (modelo && modelo.getData().metodo === "MAUT") {//Si el modelo es maut debemos validar si esta correctamente configurado
@@ -1121,6 +1129,20 @@ export default function AlternativasPage() {
   //       },
   //     ])
 
+  const handleInfo = (nodoId: number) => {
+    if (nodoId && criteriosFinales.some((n) => n.idnodo === nodoId)) {
+      setSeletedNodoId(nodoId)
+      setNodoInfoModal(true)
+    }
+  }
+
+  const handleCloseNodoInfo = () => {
+    setNodoInfoModal(false)
+    setTimeout(() => {
+      setSeletedNodoId(null)
+    }, 200)
+  }
+
   const columns = [//Para la matriz, de cada uno 
     {
       title: t('generic.nombre'),//El nombre dela alternativa
@@ -1143,14 +1165,24 @@ export default function AlternativasPage() {
     },
     ...criteriosFinales.map((criterio, idx) => ({
       title: (
-        <div className="text-center">
-          <div className="font-medium">{criterio.titulo}</div>
-          <div className="text-xs text-gray-500 mt-1">
-            {modoValor === "fuzzy"
-              ? "(L, M, U)"
-              : modoValor === "rango"
-                ? "(Min-Max)"
-                : `(${criterio.min} - ${criterio.max})`}
+        <div className="flex flex-col justify-between h-full min-h-[110px] text-center p-1">
+
+          {/* Parte Superior: Título y Rango */}
+          <div>
+            <div className="font-medium leading-tight mb-1">
+              {criterio.titulo}
+            </div>
+            <div className="text-xs text-gray-500">
+              {modoValor === "fuzzy"
+                ? "(L, M, U)"
+                : modoValor === "rango"
+                  ? "(Min-Max)"
+                  : `(${criterio.min} - ${criterio.max})`}
+            </div>
+          </div>
+
+          <div onClick={() => { handleInfo(criterio.idnodo) }} className="text-xs rounded-lg text-white bg-blue-600 w-full p-2 cursor-pointer mt-2 hover:bg-blue-700 transition-colors">
+            {t('generic.descripcion')}
           </div>
         </div>
       ),
@@ -1852,7 +1884,7 @@ export default function AlternativasPage() {
           items={[
             {
               key: "1",
-              label: (t('alternativas.titulo')+"s"),
+              label: (t('alternativas.titulo') + "s"),
               children: (
                 <div className="space-y-4">
                   <div className="bg-gray-50 p-4 rounded-lg">
@@ -2160,7 +2192,14 @@ export default function AlternativasPage() {
             },
           ]}
         />
-
+        <Modal
+          isOpen={NodoInfoModal}
+          onClose={handleCloseNodoInfo}
+          title={selectedNodo ? `Información del Criterio: ${selectedNodo.titulo}` : "Información del Criterio"}
+          width="600px"
+        >
+          {selectedNodo && <NodoInfo nodo={selectedNodo} />}
+        </Modal>
         {/* Modal para seleccionar paquete de alternativas */}
         <AntModal
           title={t('alternativas.carpaquete')}
@@ -2198,8 +2237,8 @@ export default function AlternativasPage() {
           }}
           title={
             selectedAnalysisType === "unidimensional"
-              ? t('analisissensibilidad.titulo')+" "+t('analisissensibilidad.pesouni')
-              : t('analisissensibilidad.titulo')+" "+t('analisissensibilidad.pesoalt')
+              ? t('analisissensibilidad.titulo') + " " + t('analisissensibilidad.pesouni')
+              : t('analisissensibilidad.titulo') + " " + t('analisissensibilidad.pesoalt')
           }
           width="900px"
         >

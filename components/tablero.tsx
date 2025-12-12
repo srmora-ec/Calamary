@@ -315,6 +315,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
         orientacion={orientacion}
         linea={linea}
         nombreModelo={data.nombre}
+        descripcion={data.descripcion}
+        metodo={data.metodo}
       />
       <Switch
         option1={{ label: "Horizontal", value: "h" }}
@@ -387,7 +389,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
             onClick={() => setOpenDrawer(true)}
             className="w-full lg:hidden"
           >
-          Opciones
+            Opciones
           </Button>
 
           <Button
@@ -513,6 +515,8 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               orientacion={orientacion}
               linea={linea}
               nombreModelo={data.nombre}
+              descripcion={data.descripcion}
+              metodo={data.metodo}
             />
 
             <CitasModelo modeloId={Number(data.id)} />
