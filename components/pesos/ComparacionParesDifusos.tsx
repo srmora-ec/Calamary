@@ -31,7 +31,7 @@ interface Comparison {
   node2Title: string
 }
 
-// ESCALA DIFUSA (Tabla 1 del PDF)
+// ESCALA DIFUSA 
 const FUZZY_SCALE: Record<number, { label: string; value: FuzzyNumber }> = {
   0: { label: "Igual (1,1,1)", value: { l: 1, m: 1, u: 1 } },
   1: { label: "Intermedio (1,2,3)", value: { l: 1, m: 2, u: 3 } },
@@ -237,7 +237,7 @@ const ComparacionParesDifusos: React.FC<ComparacionParesDifusosProps> = ({ nodos
         </p>
         <p>
           Deslice hacia el lado del criterio más importante. El cálculo aplicará el Método de Buckley:
-          Media Geométrica por Fila (Izquierda $\rightarrow$ Derecha).
+          Media Geométrica por Fila (Izquierda - Derecha).
         </p>
       </div>
 

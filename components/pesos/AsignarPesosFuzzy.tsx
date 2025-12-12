@@ -146,7 +146,7 @@ const AsignarPesosDifusos: React.FC<AsignarPesosDifusosProps> = ({ nodos, onSave
                     </Button>
 
                     <div className="flex items-center gap-2 ml-2 px-2 py-1 bg-muted rounded">
-                        <span className="text-muted-foreground">Suma $N_i$:</span>
+                        <span className="text-muted-foreground">Suma :</span>
                         <span className={`font-mono font-bold ${Math.abs((Object.values(results).reduce((a, b) => a + b.N, 0)) - 1) < 0.0001 ? "text-green-600" : "text-orange-500"}`}>
                             {Object.values(results).reduce((a, b) => a + b.N, 0).toFixed(4)}
                         </span>
@@ -189,7 +189,7 @@ const AsignarPesosDifusos: React.FC<AsignarPesosDifusosProps> = ({ nodos, onSave
                                             {nodo.titulo}
                                         </Label>
                                         <div className="text-right">
-                                            <span className="text-xs text-muted-foreground mr-2">Peso Final ($N_i$):</span>
+                                            <span className="text-xs text-muted-foreground mr-2">Peso Final:</span>
                                             <span className="font-mono font-bold text-sm">{data.N.toFixed(4)}</span>
                                         </div>
                                     </div>
@@ -240,9 +240,9 @@ const AsignarPesosDifusos: React.FC<AsignarPesosDifusosProps> = ({ nodos, onSave
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                     <Card className="bg-slate-50 dark:bg-slate-900 border-dashed">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium uppercase text-muted-foreground">Detalles del Proceso (Step 6 & 7)</CardTitle>
+                            <CardTitle className="text-sm font-medium uppercase text-muted-foreground">Detalles del Proceso</CardTitle>
                             <CardDescription className="text-xs">
-                                Cálculo de medias ($M_i$) y normalización ($N_i$) según Tabla 5 y 6 del documento.
+                                Cálculo de medias y normalización según Tabla 5 y 6 del documento.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -253,8 +253,8 @@ const AsignarPesosDifusos: React.FC<AsignarPesosDifusosProps> = ({ nodos, onSave
                                         <tr>
                                             <th className="px-4 py-2 rounded-l-md">Criterio</th>
                                             <th className="px-4 py-2 text-center">Input $(l,m,u)$</th>
-                                            <th className="px-4 py-2 text-right">Media $M_i$</th>
-                                            <th className="px-4 py-2 text-right rounded-r-md">Peso Norm. $N_i$</th>
+                                            <th className="px-4 py-2 text-right">Media </th>
+                                            <th className="px-4 py-2 text-right rounded-r-md">Peso Norm. </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-muted/50">
@@ -277,7 +277,7 @@ const AsignarPesosDifusos: React.FC<AsignarPesosDifusosProps> = ({ nodos, onSave
                                             )
                                         })}
                                         <tr className="bg-muted/30 font-semibold">
-                                            <td className="px-4 py-2 text-right" colSpan={2}>Totales ($\Sigma$)</td>
+                                            <td className="px-4 py-2 text-right" colSpan={2}>Totales </td>
                                             <td className="px-4 py-2 text-right font-mono">{sumM.toFixed(4)}</td>
                                             <td className="px-4 py-2 text-right font-mono">1.0000</td>
                                         </tr>
