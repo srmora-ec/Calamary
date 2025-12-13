@@ -17,8 +17,10 @@ import {
   Col,
   Drawer,
   Modal as AntModal,
+  Tooltip,
+  Alert,
 } from "antd"
-import { UploadOutlined, FolderOpenOutlined } from "@ant-design/icons"
+import { UploadOutlined, FolderOpenOutlined,DeploymentUnitOutlined,CalculatorOutlined } from "@ant-design/icons"
 import { Modelo, type ModeloData, type Nodo } from "@/types/modelo"
 import ModeloSvgViewer from "@/components/modelo-svg-viewer"
 import UnidimensionalSensitivityAnalysis from "@/app/evaluacion/[idmodelo]/asensibilidaduni"
@@ -35,6 +37,8 @@ import { useTranslation } from "react-i18next"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
 import NodoInfo from "@/components/NodoInfo"
+import ComparacionPorPasos from "@/components/pesos/comparacionporpasos"
+import ComparacionParesDifusos from "@/components/pesos/ComparacionParesDifusos"
 
 
 type ModoValor = "unico" | "rango" | "fuzzy"//Modos de valor unico normal, rango para maut, fuzzy para difusos
@@ -112,6 +116,117 @@ export default function AlternativasPage() {
   const [NodoInfoModal, setNodoInfoModal] = useState(false);
   const [selectedNodoId, setSeletedNodoId] = useState<Number | null>(null)
 
+  //------------------------
+  const [saatyModalOpen, setSaatyModalOpen] = useState(false);
+  const [currentSaatyCriterio, setCurrentSaatyCriterio] = useState<Nodo | null>(null);
+  const [fuzzyModalOpen, setFuzzyModalOpen] = useState(false);
+  const [currentFuzzyCriterio, setCurrentFuzzyCriterio] = useState<Nodo | null>(null);
+
+  // Validar antes de abrir comparación
+  const validarParaComparacion = () => {
+    const alternativasSinNombre = alternativas.some((a) => !a.nombre || a.nombre.trim() === "")
+    if (alternativasSinNombre) {
+      alert("Por favor asigne nombre a todas las alternativas antes de compararlas.")
+      return false
+    }
+    if (alternativas.length < 2) {
+     alert("Se necesitan al menos 2 alternativas para realizar una comparación.")
+      return false
+    }
+    return true
+  }
+
+  // Transformar Alternativas a Nodos para los componentes de comparación
+  // Usamos el índice de la alternativa como 'idnodo' temporal para mapear la respuesta
+  const alternativasComoNodos = useMemo(() => {
+    if (!saatyModalOpen && !fuzzyModalOpen) return []
+    return alternativas.map((alt, index) => ({
+      idnodo: index,
+      titulo: alt.nombre,
+      descripcion: `Alternativa: ${alt.nombre}`,
+      posx: 0,
+      posy: 0,
+      idpadre: null,
+      min: 0,
+      max: 0,
+      criterioFinal: true,
+      beneficio: true,
+      unidadmedida: "",
+    } as Nodo))
+  }, [alternativas, saatyModalOpen, fuzzyModalOpen])
+
+  // --- Lógica SAATY (Individual) ---
+  const handleOpenSaaty = (criterio: Nodo) => {
+    if (!validarParaComparacion()) return
+    setCurrentSaatyCriterio(criterio)
+    setSaatyModalOpen(true)
+  }
+
+  const handleSaveSaatyWeights = (weights: Record<number, number>) => {
+    if (!currentSaatyCriterio) return
+
+    // Actualizamos las alternativas con los nuevos valores calculados
+    const nuevasAlternativas = alternativas.map((alt, index) => {
+      const pesoCalculado = weights[index]
+      if (pesoCalculado !== undefined) {
+        return {
+          ...alt,
+          valores: {
+            ...alt.valores,
+            [currentSaatyCriterio.idnodo]: {
+              tipo: "unico", // Mantenemos la estructura de tu page.tsx
+              valor: Number(pesoCalculado.toFixed(4)),
+            },
+          },
+        }
+      }
+      return alt
+    })
+
+    setAlternativas(nuevasAlternativas as Alternativa[])
+    setResultado(null) // Limpiar resultados anteriores
+    setSaatyModalOpen(false)
+    setCurrentSaatyCriterio(null)
+    alert("Pesos (Individuales) aplicados correctamente a las alternativas.")
+  }
+
+  // --- Lógica DIFUSA (Triangular) ---
+  const handleOpenFuzzy = (criterio: Nodo) => {
+    if (!validarParaComparacion()) return
+    setCurrentFuzzyCriterio(criterio)
+    setFuzzyModalOpen(true)
+  }
+
+  const handleSaveFuzzyWeights = (weights: Record<number, { l: string; m: string; u: string }>) => {
+    if (!currentFuzzyCriterio) return
+
+    const nuevasAlternativas = alternativas.map((alt, index) => {
+      const pesoObj = weights[index]
+      if (pesoObj) {
+        return {
+          ...alt,
+          valores: {
+            ...alt.valores,
+            [currentFuzzyCriterio.idnodo]: {
+              tipo: "fuzzy", // Mantenemos la estructura fuzzy de tu page.tsx
+              l: parseFloat(pesoObj.l),
+              m: parseFloat(pesoObj.m),
+              u: parseFloat(pesoObj.u),
+            },
+          },
+        }
+      }
+      return alt
+    })
+
+    setAlternativas(nuevasAlternativas as Alternativa[])
+    setResultado(null)
+    setFuzzyModalOpen(false)
+    setCurrentFuzzyCriterio(null)
+    alert("Pesos Difusos aplicados correctamente a las alternativas.")
+  }
+  //--------------------------------------------------
+
   const { user } = useAuth()
 
   const selectedNodo = useMemo(() => {
@@ -157,7 +272,6 @@ export default function AlternativasPage() {
         p_idmodelo: Number(idmodelo),
       })
       if (error) {
-        message.error("Error al cargar el modelo")
         notify(t('alertas.ups'), "error")
         setLoading(false)
         return
@@ -1184,6 +1298,37 @@ export default function AlternativasPage() {
           <div onClick={() => { handleInfo(criterio.idnodo) }} className="text-xs rounded-lg text-white bg-blue-600 w-full p-2 cursor-pointer mt-2 hover:bg-blue-700 transition-colors">
             {t('generic.descripcion')}
           </div>
+          {modelo?.getMetodo() !== "MAUT" && (
+             <div className="mt-1">
+                {modoValor === "unico" && (
+                  <Tooltip title={`Comparar alternativas por pasos (AHP) bajo el criterio: ${criterio.titulo}`}>
+                    <Button
+                      size="small"
+                      type="dashed"
+                      icon={<DeploymentUnitOutlined />}
+                      onClick={() => handleOpenSaaty(criterio)}
+                      className="text-xs flex items-center justify-center w-full h-6"
+                    >
+                      Comparar
+                    </Button>
+                  </Tooltip>
+                )}
+
+                {modoValor === "fuzzy" && (
+                  <Tooltip title={`Comparar alternativas (Fuzzy AHP) bajo el criterio: ${criterio.titulo}`}>
+                    <Button
+                      size="small"
+                      type="dashed"
+                      icon={<CalculatorOutlined />}
+                      onClick={() => handleOpenFuzzy(criterio)}
+                      className="text-xs flex items-center justify-center w-full h-6"
+                    >
+                      Comp. Difuso
+                    </Button>
+                  </Tooltip>
+                )}
+             </div>
+          )}
         </div>
       ),
       dataIndex: ["valores", criterio.idnodo],
@@ -2228,6 +2373,58 @@ export default function AlternativasPage() {
             />
           )}
         </AntModal>
+
+        <AntModal
+        title={`Comparar Alternativas según: ${currentSaatyCriterio?.titulo || ""}`}
+        open={saatyModalOpen}
+        onCancel={() => setSaatyModalOpen(false)}
+        width={800}
+        footer={null}
+        destroyOnClose
+      >
+        {saatyModalOpen && (
+          <div className="max-h-[70vh] overflow-y-auto pr-2">
+            <Alert
+              message="Comparación de Alternativas (AHP)"
+              description="Compara par a par qué alternativa es preferible sobre otra respecto a este criterio. Los resultados actualizarán la tabla."
+              type="info"
+              showIcon
+              className="mb-4"
+            />
+            <ComparacionPorPasos 
+                nodos={alternativasComoNodos} 
+                onSave={handleSaveSaatyWeights} 
+            />
+          </div>
+        )}
+      </AntModal>
+
+      {/* Modal de Comparación Difusa (Triangular) */}
+      <AntModal
+        title={`Comparar Alternativas (Difuso) según: ${currentFuzzyCriterio?.titulo || ""}`}
+        open={fuzzyModalOpen}
+        onCancel={() => setFuzzyModalOpen(false)}
+        width={900}
+        footer={null}
+        destroyOnClose
+      >
+        {fuzzyModalOpen && (
+          <div className="max-h-[80vh] overflow-y-auto pr-2">
+            <Alert
+              message="Comparación Difusa (Fuzzy AHP)"
+              description="Realiza comparaciones utilizando lógica difusa para capturar la incertidumbre en las preferencias entre alternativas."
+              type="success"
+              showIcon
+              className="mb-4"
+            />
+            <ComparacionParesDifusos
+              nodos={alternativasComoNodos}
+              onSave={handleSaveFuzzyWeights}
+              onCancel={() => setFuzzyModalOpen(false)}
+            />
+          </div>
+        )}
+      </AntModal>
 
         <Modal
           isOpen={sensitivityModalOpen}
