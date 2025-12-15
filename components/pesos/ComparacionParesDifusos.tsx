@@ -250,7 +250,7 @@ const ComparacionParesDifusos: React.FC<ComparacionParesDifusosProps> = ({ nodos
                <div className="flex items-center justify-between gap-4 mb-6">
                   <div className="flex-1 bg-blue-50 dark:bg-blue-950/40 p-2 rounded border border-blue-100 dark:border-blue-900 flex items-center gap-2">
                      <span className="text-blue-700 dark:text-blue-300 font-semibold text-sm sm:text-base truncate flex-1">
-                        {comp.node1Title}
+                        {comp.node2Title}
                      </span>
                      {val < 0 && <span className="text-xs font-mono text-blue-600 bg-blue-100 px-1 rounded hidden sm:inline-block">Val: {getSliderLabel(val)}</span>}
                   </div>
@@ -260,7 +260,7 @@ const ComparacionParesDifusos: React.FC<ComparacionParesDifusosProps> = ({ nodos
                   <div className="flex-1 bg-green-50 dark:bg-green-950/40 p-2 rounded border border-green-100 dark:border-green-900 flex items-center gap-2 text-right justify-end">
                      {val > 0 && <span className="text-xs font-mono text-green-600 bg-green-100 px-1 rounded hidden sm:inline-block">Val: {getSliderLabel(val)}</span>}
                      <span className="text-green-700 dark:text-green-300 font-semibold text-sm sm:text-base truncate flex-1">
-                        {comp.node2Title}
+                        {comp.node1Title}
                      </span>
                   </div>
                </div>
