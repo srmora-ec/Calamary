@@ -837,10 +837,7 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                   </AlertDescription>
                 </Alert>
               )}
-              <p className="text-xs text-green-600 mt-2">
-                ✔ Consistencia mejorada mediante optimización genética
-              </p>
-
+              
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Pesos Calculados:</h4>
