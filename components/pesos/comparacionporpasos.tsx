@@ -66,6 +66,14 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
   const [loading, setLoading] = useState(false)
   const [tourOpen, setTourOpen] = useState<boolean>(false)
 
+  const [geneticLoading, setGeneticLoading] = useState(false)
+  const [geneticApplied, setGeneticApplied] = useState(false)
+  const [cleanMatrix, setCleanMatrix] = useState<number[][] | null>(null)
+
+
+
+
+
   // Referencias para el tour
   const ref1 = useRef(null) // Instrucciones
   const ref2 = useRef(null) // Primera comparación
@@ -73,8 +81,8 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
   const ref4 = useRef(null) // Botón calcular
   const ref5 = useRef(null) // Resultados
   const ref6 = useRef(null) // Botón guardar
-  const ref7= useRef(null)
-  const ref8=useRef(null)
+  const ref7 = useRef(null)
+  const ref8 = useRef(null)
 
   // Memoizar el nodo seleccionado para evitar re-renders innecesarios
   const selectedNodo = useMemo(() => {
@@ -98,6 +106,28 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     }
     return allComparisons
   }, [nodos])
+
+  //---------ARREGLAR MATRIZ-----------------------------
+  function buildCleanSaatyMatrix(
+    nodos: Nodo[],
+    matrix: Record<string, number>
+  ): number[][] {
+    const n = nodos.length
+    const M: number[][] = Array.from({ length: n }, () => Array(n).fill(1))
+
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const key = `${nodos[i].idnodo}-${nodos[j].idnodo}`
+        const v = matrix[key] ?? 1
+
+        M[i][j] = v
+        M[j][i] = 1 / v
+      }
+    }
+
+    return M
+  }
+
 
   useEffect(() => {
     setComparisons(memoizedComparisons)
@@ -269,6 +299,58 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     [matrix],
   )
 
+  //Para aplicar genetico en asignacion de pesos
+  const applyGeneticOptimization = useCallback(async () => {
+    setGeneticLoading(true)
+
+    try {
+      const n = nodos.length
+      const matrizCompleta: number[][] = []
+      setCleanMatrix(matrizCompleta)
+
+      for (let i = 0; i < n; i++) {
+        matrizCompleta[i] = []
+        for (let j = 0; j < n; j++) {
+          matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
+        }
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_URLFASTCALAMARY}/geneticAHP`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matrix: matrizCompleta }),
+      })
+
+      const data = await response.json()
+
+      // Actualizar matriz con la optimizada
+      const newMatrix: Record<string, number> = {}
+
+      nodos.forEach((ni, i) => {
+        nodos.forEach((nj, j) => {
+          newMatrix[`${ni.idnodo}-${nj.idnodo}`] = data.optimized_matrix[i][j]
+        })
+      })
+
+      setMatrix(newMatrix)
+
+      // Actualizar pesos
+      const newWeights: Record<number, number> = {}
+      nodos.forEach((nodo, i) => {
+        newWeights[nodo.idnodo] = data.weights[i]
+      })
+
+      setWeights(newWeights)
+      setConsistencyRatio(data.CR)
+      setInconsistentComparisons([])
+      setGeneticApplied(true)
+    } catch (error) {
+      console.error("Error en optimización genética:", error)
+    } finally {
+      setGeneticLoading(false)
+    }
+  }, [nodos, getMatrixValue])
+  //----------------------------------
   const detectInconsistentComparisons = useCallback(
     (matrizCompleta: number[][], ahpWeights: number[]): InconsistentComparison[] => {
       if (!comparisons || comparisons.length === 0 || !nodos || nodos.length === 0) {
@@ -318,14 +400,18 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
     }
 
     const n = nodos.length
-    const matrizCompleta: number[][] = []
 
-    for (let i = 0; i < n; i++) {
-      matrizCompleta[i] = []
-      for (let j = 0; j < n; j++) {
-        matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
-      }
-    }
+    const matrizCompleta = buildCleanSaatyMatrix(nodos, matrix)
+    setCleanMatrix(matrizCompleta)
+
+    // const matrizCompleta: number[][] = []
+
+    // for (let i = 0; i < n; i++) {
+    //   matrizCompleta[i] = []
+    //   for (let j = 0; j < n; j++) {
+    //     matrizCompleta[i][j] = getMatrixValue(nodos[i].idnodo, nodos[j].idnodo)
+    //   }
+    // }
 
     try {
       const ahpResult = await calculateAHP(matrizCompleta)
@@ -524,12 +610,12 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                 key={`${comparison.nodeId1}-${comparison.nodeId2}`}
                 className={`border rounded-lg p-4 ${isInconsistent ? "border-red-300 bg-red-50 dark:bg-red-950 dark:border-red-700" : "border-border"}`}
               >
-                <div  className="space-y-4">
+                <div className="space-y-4">
                   <div ref={index === 0 ? ref1 : null} className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="px-3 py-2 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
                         <div className="flex items-center gap-2">
-                          {nodo1 && <div  ref={index === 0 ? ref2 : null}><HelpButton onClick={() => handleHelpClick(nodo1.idnodo)} /></div>}
+                          {nodo1 && <div ref={index === 0 ? ref2 : null}><HelpButton onClick={() => handleHelpClick(nodo1.idnodo)} /></div>}
                           <h3
                             className="font-medium text-sm text-blue-700 dark:text-blue-300 truncate flex-1"
                             title={comparison.node1Title}
@@ -676,22 +762,23 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                     </tr>
                   </thead>
                   <tbody>
-                    {nodos.map((nodoFila) => (
+                    {nodos.map((nodoFila, rowIndex) => (
                       <tr key={nodoFila.idnodo}>
                         <td className="border p-2 bg-muted font-medium">
-                          <div className="truncate" title={nodoFila.titulo}>
-                            {nodoFila.titulo}
-                          </div>
+                          {nodoFila.titulo}
                         </td>
-                        {nodos.map((nodoColumna) => (
+                        {nodos.map((nodoColumna, colIndex) => (
                           <td key={nodoColumna.idnodo} className="border p-2 text-center">
                             <span className="font-mono">
-                              {getMatrixValue(nodoFila.idnodo, nodoColumna.idnodo).toFixed(2)}
+                              {cleanMatrix
+                                ? cleanMatrix[rowIndex][colIndex].toFixed(2)
+                                : "—"}
                             </span>
                           </td>
                         ))}
                       </tr>
                     ))}
+
                   </tbody>
                 </table>
               </div>
@@ -724,16 +811,36 @@ const ComparacionPorPasos: React.FC<ComparacionPorPasosProps> = ({ nodos = [], o
                 </div>
               </div>
 
-              {!isConsistent && inconsistentComparisons.length > 0 && (
+              {!isConsistent && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Consistencia mejorable:</strong> Se sugieren {inconsistentComparisons.length} cambios
-                    estratégicos (de {comparisons.length} comparaciones) para optimizar la coherencia. Estos cambios
-                    tendrán el mayor impacto positivo.
+                  <AlertDescription className="space-y-2">
+                    <p>
+                      <strong>Consistencia baja detectada.</strong> Esto puede ocurrir debido a la
+                      incertidumbre inherente en las comparaciones humanas.
+                    </p>
+
+                    <p className="text-sm text-muted-foreground">
+                      Para mejorar la coherencia del modelo, se puede aplicar una optimización genética
+                      que ajusta la matriz de comparaciones manteniendo la intención original del decisor
+                      y reduciendo el Ratio de Consistencia.
+                    </p>
+
+                    <Button
+                      size="sm"
+                      onClick={applyGeneticOptimization}
+                      disabled={geneticLoading}
+                      className="mt-2"
+                    >
+                      {geneticLoading ? "Corrigiendo..." : "Corregir automáticamente"}
+                    </Button>
                   </AlertDescription>
                 </Alert>
               )}
+              <p className="text-xs text-green-600 mt-2">
+                ✔ Consistencia mejorada mediante optimización genética
+              </p>
+
 
               <div className="space-y-2">
                 <h4 className="text-sm font-medium">Pesos Calculados:</h4>
