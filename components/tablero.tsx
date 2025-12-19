@@ -148,6 +148,11 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     }
   };
 
+  const handlePlay = async() =>{
+    await handleActualizar();
+    window.open("/evaluacion/" + data.id, "_blank")
+  }
+
 
   //-------- diseño del modelo
   // cuando el usuario hace clic derecho sobre un nodo
@@ -408,9 +413,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
         </Modal>
         <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
           <button
-            onClick={() => {
-              window.open("/evaluacion/" + data.id, "_blank")
-            }}
+            onClick={handlePlay}
             className="focus:outline-none cursor-pointer"
           >
             <Image
