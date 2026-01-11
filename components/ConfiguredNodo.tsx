@@ -70,19 +70,6 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                     />
                 </div>
 
-                {/* Acortado */}
-                <div className="form-group">
-                    <label className="form-label">Acortado</label>
-                    <input
-                        type="text"
-                        className="form-input"
-                        value={formData.acortado ?? ""}
-                        onChange={(e) => setFormData({ ...formData, acortado: e.target.value })}
-                        maxLength={5}
-
-                    />
-                </div>
-
                 <div className="form-group">
                     <label className="form-label">Descripción</label>
                     <textarea
@@ -93,6 +80,9 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                         rows={4} // opcional, para definir alto inicial
                     />
                 </div>
+                {formData.criterioFinal && (
+
+                    <>
                 <div className="form-group">
                     <label className="form-label">Unidad de medida *</label>
                     <input
@@ -100,14 +90,12 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                         className="form-input"
                         value={formData.unidadmedida}
                         onChange={(e) => setFormData({ ...formData, unidadmedida: e.target.value})}
-                        maxLength={10}
+                        maxLength={20}
                         required
                     />
                 </div>
 
-                {formData.criterioFinal && (
-
-                    <>
+                
                         <div className="form-group">
                             {/* Minimo */}
                             <label className="form-label">Mínimo *</label>

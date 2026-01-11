@@ -9,7 +9,6 @@ import { useTranslation } from "react-i18next"
 
 export default function RegisterPage() {
   const { t } = useTranslation() // Inicialización del hook
-  const [displayName, setDisplayName] = useState("")
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -38,7 +37,6 @@ export default function RegisterPage() {
       options: {
         // Campos adicionales para el perfil de usuario (opcional, se guarda en el 'user_metadata')
         data: {
-          display_name: displayName,
           phone_number: phone,
           emailRedirectTo: "https://calamary.vercel.app",
         },
@@ -73,10 +71,6 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">{t('register.username_label')}</label> {/* Traducción aplicada */}
-              <input type="text" className="form-input" maxLength={10} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required disabled={loading} />
-            </div>
 
             <div className="form-group">
               <label className="form-label">{t('register.phone_label')}</label> {/* Traducción aplicada */}
