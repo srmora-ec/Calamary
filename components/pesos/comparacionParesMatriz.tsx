@@ -586,7 +586,7 @@ console.log(erroresCoherencia.length)
 
             {/* Botón guardar */}
             <div className="flex justify-end pt-4">
-              <Button onClick={handleSave} disabled={!isConsistent} className="min-w-[120px]">
+              <Button onClick={handleSave}  className="min-w-[120px]">
                 Guardar Pesos
               </Button>
             </div>
