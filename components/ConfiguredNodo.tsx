@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Modal from "./Modal"
 import { Nodo } from "@/types/modelo"
 import Switch from "./Switch"
+import { useTranslation } from "react-i18next"
 
 interface ConfigureModalNodoProps {
     isOpen: boolean//abir
@@ -13,6 +14,7 @@ interface ConfigureModalNodoProps {
 }
 
 export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdated }: ConfigureModalNodoProps) {
+    const {t} = useTranslation();
     const [formData, setFormData] = useState<Nodo>(nodo)//formdata
     const [loading, setLoading] = useState(false)//loading
     const [error, setError] = useState("")//Errores
@@ -34,8 +36,8 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                 return
             }
 
-            if (formData.min !== undefined && formData.max !== undefined && formData.min >= formData.max) {
-                setError("El mínimo debe ser menor que el máximo.")
+            if (formData.min >= formData.max) {
+                setError(t("confignodo.minmax"))
                 setLoading(false)
                 return
             }
@@ -43,13 +45,13 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
             onNodoUpdated(formData)
             onClose()
         } catch (err: any) {
-            setError(err.message || "Error al actualizar el nodo")
+            setError(err.message || "Error")
         } finally {
             setLoading(false)
         }
     }
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Editar nodo #${formData.idnodo}`}>
+        <Modal isOpen={isOpen} onClose={onClose} title={`${t("confignodo.editnodo")} #${formData.idnodo}`}>
             <form onSubmit={handleSubmit}>
                 {error && (
                     <div className="mb-4 p-4 rounded bg-red-100 text-red-600">
@@ -59,7 +61,7 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
 
                 {/* Título */}
                 <div className="form-group">
-                    <label className="form-label">Título *</label>
+                    <label className="form-label">{t('generic.titulo')} *</label>
                     <input
                         type="text"
                         className="form-input"
@@ -71,7 +73,7 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                 </div>
 
                 <div className="form-group">
-                    <label className="form-label">Descripción</label>
+                    <label className="form-label">{t('generic.descripcion')}</label>
                     <textarea
                         className="form-input"
                         value={formData.descripcion}
@@ -84,7 +86,7 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
 
                     <>
                 <div className="form-group">
-                    <label className="form-label">Unidad de medida *</label>
+                    <label className="form-label">{t("confignodo.unime")} *</label>
                     <input
                         type="text"
                         className="form-input"
@@ -98,7 +100,7 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                 
                         <div className="form-group">
                             {/* Minimo */}
-                            <label className="form-label">Mínimo *</label>
+                            <label className="form-label">{t("generic.minimo")} *</label>
                             <input
                                 type="number"
                                 className="form-input"
@@ -110,7 +112,7 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                         </div>
                         {/* Maximo */}
                         <div className="form-group">
-                            <label className="form-label">Máximo *</label>
+                            <label className="form-label">{t("generic.maximo")} *</label>
                             <input
                                 type="number"
                                 className="form-input"
@@ -121,8 +123,8 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                             />
                         </div>
                         <Switch
-                            option1={{ label: "Beneficio", value: "true" }}
-                            option2={{ label: "Costo", value: "false" }}
+                            option1={{ label: t("generic.benefit"), value: "true" }}
+                            option2={{ label: t("generic.cost"), value: "false" }}
                             defaultValue={String(formData.beneficio)}
                             onChange={(val) => {
                                 console.log(val)
@@ -136,10 +138,10 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                 {/* Botones */}
                 <div className="modal-footer">
                     <button type="button" onClick={onClose} className="btn btn-secondary" disabled={loading}>
-                        Cancelar
+                        {t("generic.cancelar")}
                     </button>
                     <button type="submit" className="btn btn-primary" disabled={loading}>
-                        {loading ? "Guardando..." : "Guardar cambios"}
+                        {loading ? t("generic.loading") : t("botones.guardar")}
                     </button>
                 </div>
             </form>

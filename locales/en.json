@@ -7,13 +7,13 @@
   "generic": {
     "nombre": "Name",
     "del": "Delete",
-    "orientacion":"Orientation",
-    "metodo":"Method",
-    "visibilidad":"Visibility",
-    "public":"Public",
-    "private":"Private",
-    "opciones":"Options",
-    "alternativas":"Alternatives",
+    "orientacion": "Orientation",
+    "metodo": "Method",
+    "visibilidad": "Visibility",
+    "public": "Public",
+    "private": "Private",
+    "opciones": "Options",
+    "alternativas": "Alternatives",
     "cargar": "Load",
     "tipo": "Type",
     "creado": "Created",
@@ -44,7 +44,9 @@
     "cguardad": "Configuration saved",
     "utilidad": "Utility",
     "punto": "Point",
-    "descripcion": "Description"
+    "descripcion": "Description",
+    "beneficio": "Benefit",
+    "costo": "Cost"
   },
   "modelos": {
     "nonodos": "No nodes available.",
@@ -357,11 +359,16 @@
     "bezier": "Bézier"
   },
   "menutablero": {
-    "crearh": "Create child",
+    "crearh": "Create son",
     "elimrama": "Delete branch",
     "confcri": "Criterion settings",
     "confutl": "Utility settings",
     "pesos": "Weights",
-    "export":"Export"
+    "export": "Export"
+  },
+  "confignodo": {
+    "minmax": "Minimum must be less than maximum.",
+    "editnodo": "Edit node",
+    "unime": "Unit of measurement"
   }
 }

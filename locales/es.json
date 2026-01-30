@@ -44,7 +44,9 @@
     "cguardad": "Configuración guardada",
     "utilidad": "Utilidad",
     "punto": "Punto",
-    "descripcion": "Descripcion"
+    "descripcion": "Descripcion",
+    "beneficio":"Beneficio",
+    "costo":"Costo"
   },
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
@@ -363,5 +365,10 @@
     "confutl":"Configuración de utilidad",
     "pesos":"Pesos",
     "export":"Exportar"
+  },
+  "confignodo":{
+    "minmax":"El mínimo debe ser menor que el máximo.",
+    "editnodo":"Editar nodo",
+    "unime":"Unidad de medida"
   }
 }
