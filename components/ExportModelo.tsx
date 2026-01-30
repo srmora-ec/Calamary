@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Download, ChevronDown } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 interface Nodo {
   idnodo: number
@@ -30,6 +31,7 @@ interface ExportModeloProps {
 const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, nombreModelo,descripcion, metodo, logoUrl = "https://calamary.vercel.app/logo.png" }) => {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const {t} = useTranslation();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -683,7 +685,7 @@ const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, 
         className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors text-xs"
       >
         <Download size={16} />
-        <span>Exportar</span>
+        <span>{t("menutablero.export")}</span>
         <ChevronDown size={14} />
       </button>
 
@@ -693,19 +695,19 @@ const ExportModelo: React.FC<ExportModeloProps> = ({ nodos, orientacion, linea, 
             onClick={exportPNG}
             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
           >
-            Exportar PNG
+            {t("menutablero.export")} PNG
           </button>
           <button
             onClick={exportSVG}
             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
           >
-            Exportar SVG
+            {t("menutablero.export")} SVG
           </button>
           <button
             onClick={exportJSON}
             className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
           >
-            Exportar json
+            {t("menutablero.export")} json
           </button>
         </div>
       )}

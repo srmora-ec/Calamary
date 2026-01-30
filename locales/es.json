@@ -7,6 +7,13 @@
   "generic": {
     "nombre": "Nombre",
     "del": "Eliminar",
+    "orientacion":"Orientación",
+    "metodo":"Método",
+    "visibilidad":"Visibilidad",
+    "public":"Público",
+    "private":"Privado",
+    "opciones":"Opciones",
+    "alternativas":"Alternativas",
     "cargar": "Cargar",
     "tipo": "Tipo",
     "creado": "Creado",
@@ -42,7 +49,14 @@
   "modelos": {
     "nonodos": "No hay nodos disponibles.",
     "errorupdmodel": "Error actualizando modelo",
-    "modelactua": "Modelo actualizado."
+    "modelactua": "Modelo actualizado.",
+    "opmodel":"Opciones del Modelo",
+    "nommod":"Nombre del modelo",
+    "desmod":"Descripción del modelo",
+    "horizontal":"Horizontal",
+    "vertical":"Vertical",
+    "tlinea":"Tipo de línea",
+    "selmet":"Selecciona un método"
   },
   "expertos": {
     "errorguardar": "Hubo un problema al guardar tu respuesta. Intenta nuevamente.",
@@ -331,5 +345,23 @@
     "msg_error_crear": "Error al generar el token",
     "msg_exito_copiar": "Token copiado al portapapeles",
     "msg_error_copiar": "Error al copiar el token"
+  },
+  "modelcard":{
+    "seelimin":"Se eliminó el modelo",
+    "conelimin":"Confirmas que deseas eliminar",
+    "sielimin":"Sí, eliminar",
+    "linea":"Línea",
+    "direct":"Directa",
+    "escalo":"Escalonada",
+    "escalosu":"Escalonada Suave",
+    "bezier" :"Bézier"
+  },
+  "menutablero":{
+    "crearh":"Crear hijo",
+    "elimrama":"Eliminar rama",
+    "confcri":"Configuración de criterio",
+    "confutl":"Configuración de utilidad",
+    "pesos":"Pesos",
+    "export":"Exportar"
   }
 }

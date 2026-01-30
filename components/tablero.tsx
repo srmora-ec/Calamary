@@ -17,6 +17,7 @@ import Input from "antd/es/input/Input";
 import TextArea from "antd/es/input/TextArea";
 import Modal from "./Modal";
 import PaquetesDeAlternativas from "./Alternativa";
+import { useTranslation } from "react-i18next";
 
 interface TableroProps {
   modelo: Modelo, //modelo completo con todo y nodos
@@ -38,7 +39,7 @@ interface Metodo {
 const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActualizarModelo, onActualizarNodo, nodoCambios, onCriterioMaut }) => {//recuperamos elmodelo de desición que vamos a diseñar
 
   const data = modelo.getData()
-
+  const { t } = useTranslation()
   //1. Carga de datos
   const [nodes, setNodes] = useState(modelo.getNodosReactFlow()); // 1.1 Carga inicial de los nodos
   const [edges, setEdges] = useState(modelo.getEdgesReactFlow());// 1.2 Carga inicial de los edges
@@ -148,7 +149,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     }
   };
 
-  const handlePlay = async() =>{
+  const handlePlay = async () => {
     await handleActualizar();
     window.open("/evaluacion/" + data.id, "_blank")
   }
@@ -394,7 +395,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
             onClick={() => setOpenDrawer(true)}
             className="w-full lg:hidden"
           >
-            Opciones
+            {t("generic.opciones")}
           </Button>
 
           <Button
@@ -402,7 +403,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
             onClick={() => setOpenModalAlt(true)}
             className="w-full lg:w-auto"
           >
-            Alternativas
+            {t("generic.alternativas")}
           </Button>
           <div className="hidden lg:flex items-center gap-4">
             <ConfigOptions />
@@ -427,7 +428,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
 
         {/* Drawer de Ant Design para móviles */}
         <Drawer
-          title="Opciones del Modelo"
+          title={t("modelos.opmodel")}
           placement="left"
           onClose={() => setOpenDrawer(false)}
           open={openDrawer}
@@ -441,26 +442,26 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               onClick={() => { handleActualizar(); setOpenDrawer(false); }} // Cerrar al guardar
               className="text-xs px-4 py-2 bg-blue-500 text-white rounded cursor-pointer w-full"
             >
-              Guardar cambios
+              {t("botones.guardar")}
             </button>
 
             <Input
               value={nombreModelo}
               onChange={(e) => setNombreModelo(e.target.value)}
               maxLength={150}
-              placeholder="Nombre del modelo"
+              placeholder={t("modelos.nommod")}
               className="text-xs"
             />
-            <label className="block text-xs font-semibold mb-1">Descripción</label>
+            <label className="block text-xs font-semibold mb-1">{t("generic.descripcion")}</label>
             <TextArea
               value={descripcionModelo}
               onChange={(e) => setDescripcionModelo(e.target.value)}
               rows={2}
               maxLength={500}
-              placeholder="Descripción del modelo"
+              placeholder={t("modelos.desmod")}
               className="text-xs"
             />
-            <label className="form-label block mb-2">Visibilidad</label>
+            <label className="form-label block mb-2">{t("generic.visibilidad")}</label>
             <button
               type="button"
               onClick={() => setEsPublico(!esPublico)}
@@ -472,30 +473,30 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
                   }`}
               />
             </button>
-            <span className="ml-3">{esPublico ? "Público" : "Privado"}</span>
+            <span className="ml-3">{esPublico ? t("generic.public") : t("generic.private")}</span>
 
             <Switch
-              option1={{ label: "Horizontal", value: "h" }}
-              option2={{ label: "Vertical", value: "v" }}
+              option1={{ label: t("modelos.horizontal"), value: "h" }}
+              option2={{ label: t("modelos.vertical"), value: "v" }}
               defaultValue={orientacion}
               onChange={(val) => { cambiarOrientacion(val as "h" | "v") }}
             />
             <div className="w-full">
-              <label className="block text-xs mb-1">Tipo de Línea</label>
+              <label className="block text-xs mb-1">{t("modelos.tlinea")}</label>
               <select
                 className="form-select text-xs w-full p-2 border rounded"
                 defaultValue={linea}
                 onChange={(e) => cambiarLinea(Number(e.target.value))}
               >
-                <option value={1} className="text-xs">Directa</option>
-                <option value={2} className="text-xs">Escalonada</option>
-                <option value={3} className="text-xs">Escalonada Suave</option>
-                <option value={4} className="text-xs">Bézier</option>
+                <option value={1} className="text-xs">{t("modelcard.direct")}</option>
+                <option value={2} className="text-xs">{t("modelcard.escalo")}</option>
+                <option value={3} className="text-xs">{t("modelcard.escalosu")}</option>
+                <option value={4} className="text-xs">{t("modelcard.bezier")}</option>
               </select>
             </div>
             {modelo.getMetodo() != "" && (
               <div className="w-full">
-                <label className="block text-xs mb-1">Método</label>
+                <label className="block text-xs mb-1">{t("generic.metodo")}</label>
                 <select
                   className="form-select text-xs border rounded px-2 py-1 w-full"
                   value={metodo}
@@ -504,7 +505,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
                     modelo.setMetodo(e.target.value)
                   }}
                 >
-                  <option value="">Selecciona un método</option>
+                  <option value="">{t("modelos.selmet")}</option>
                   {metodos.map((metodo) => (
                     <option key={metodo.id} value={metodo.nombre}>
                       {metodo.nombre}
@@ -574,26 +575,26 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
               onClick={() => contextMenu.nodoId !== null && crearHijo(contextMenu.nodoId)}
               className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
             >
-              Crear hijo
+              {t("menutablero.crearh")}
             </button>
             <button
               onClick={() => contextMenu.nodoId !== null && eliminarRama(contextMenu.nodoId)}
               className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
             >
-              Eliminar rama
+              {t("menutablero.elimrama")}
             </button>
             <button
               onClick={() => contextMenu.nodoId !== null && configurarNodo(contextMenu.nodoId)}
               className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
             >
-              Configuración de criterio
+              {t("menutablero.confcri")}
             </button>
             {modelo.getMetodo() == "MAUT" && !modelo.tieneHijos(Number(contextMenu.nodoId)) && (
               <button
                 onClick={() => contextMenu.nodoId !== null && configurarUtilidad(contextMenu.nodoId)}
                 className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
               >
-                Configuración de utilidad
+                {t("menutablero.confutl")}
               </button>
             )}
             {contextMenu.nodoId !== null &&
@@ -602,11 +603,11 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
                   onClick={() => configurarPesos(contextMenu.nodoId!)}
                   className="block px-3 py-1 hover:bg-gray-100 w-full text-left"
                 >
-                  Pesos
+                  {t("menutablero.pesos")}
                 </button>
               )}
             <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
-              Cancelar
+              {t("generic.cancelar")}
             </button>
           </div>
         )}

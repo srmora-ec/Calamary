@@ -7,6 +7,13 @@
   "generic": {
     "nombre": "Name",
     "del": "Delete",
+    "orientacion":"Orientation",
+    "metodo":"Method",
+    "visibilidad":"Visibility",
+    "public":"Public",
+    "private":"Private",
+    "opciones":"Options",
+    "alternativas":"Alternatives",
     "cargar": "Load",
     "tipo": "Type",
     "creado": "Created",
@@ -42,7 +49,14 @@
   "modelos": {
     "nonodos": "No nodes available.",
     "errorupdmodel": "Error updating model",
-    "modelactua": "Model updated."
+    "modelactua": "Model updated.",
+    "opmodel": "Model Options",
+    "nommod": "Model name",
+    "desmod": "Model description",
+    "horizontal": "Horizontal",
+    "vertical": "Vertical",
+    "tlinea": "Line type",
+    "selmet": "Select a method"
   },
   "expertos": {
     "errorguardar": "There was a problem saving your response. Please try again.",
@@ -308,5 +322,46 @@
     "discretos": {
       "crearv": "Create discrete values for a criterion"
     }
+  },
+  "tokens_page": {
+    "titulo": "API Token",
+    "descripcion": "Manage your access token to use the Decision Models API",
+    "info_titulo": "What is an API token?",
+    "info_desc1": "An API token is a unique key that allows you to:",
+    "info_item1": "Test models created using ",
+    "info_item2": "Perform queries via the REST API",
+    "info_item3": "Integrate models with your external applications",
+    "card_titulo": "Your Access Token",
+    "token_existente": "You already have a generated token. Click the button to copy it:",
+    "sin_token": "You haven't generated a token yet. Click the button to create one:",
+    "creado_el": "Created on:",
+    "btn_copiar": "Copy Token",
+    "btn_generar": "Generate Token",
+    "seguridad_titulo": "⚠️ Important: Token Security",
+    "seguridad_desc": "Do not share your token with anyone. Anyone with access to your token will be able to use the API on your behalf. Keep it in a secure place.",
+    "no_autorizado_titulo": "Access Denied",
+    "no_autorizado_desc": "Only administrators can access this section and generate API tokens.",
+    "msg_exito_crear": "Token generated and copied to clipboard successfully",
+    "msg_error_crear": "Error generating token",
+    "msg_exito_copiar": "Token copied to clipboard",
+    "msg_error_copiar": "Error copying token"
+  },
+  "modelcard": {
+    "seelimin": "Model deleted",
+    "conelimin": "Are you sure you want to delete",
+    "sielimin": "Yes, delete",
+    "linea": "Line",
+    "direct": "Direct",
+    "escalo": "Stepped",
+    "escalosu": "Smooth Stepped",
+    "bezier": "Bézier"
+  },
+  "menutablero": {
+    "crearh": "Create child",
+    "elimrama": "Delete branch",
+    "confcri": "Criterion settings",
+    "confutl": "Utility settings",
+    "pesos": "Weights",
+    "export":"Export"
   }
 }

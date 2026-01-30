@@ -6,6 +6,7 @@ import Modal from "./Modal"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 interface Metodo {
   id: number
@@ -20,6 +21,7 @@ interface CreateModelModalProps {
 }
 
 export default function CreateModelModal({ isOpen, onClose, onModelCreated }: CreateModelModalProps) {
+    const { t } = useTranslation()
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "" as string | null,
@@ -126,7 +128,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
 
         {/* Nombre */}
         <div className="form-group">
-          <label className="form-label">Nombre *</label>
+          <label className="form-label">{t("generic.nombre")} *</label>
           <input
             type="text"
             className="form-input"
@@ -140,7 +142,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
 
         {/* Descripción */}
         <div className="form-group">
-          <label className="form-label">Descripción</label>
+          <label className="form-label">{t("generic.descripcion")}</label>
           <textarea
             className="form-input"
             rows={3}
@@ -152,7 +154,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
 
         {/* Orientación */}
         <div className="form-group">
-          <label className="form-label">Orientación *</label>
+          <label className="form-label">{t("generic.orientacion")} *</label>
           <div className="grid grid-cols-2 gap-4">
             {["h", "v"].map((val) => (
               <div
@@ -175,24 +177,24 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
 
         {/* Línea */}
         <div className="form-group">
-          <label className="form-label">Línea</label>
+          <label className="form-label">{t("modelcard.linea")}</label>
           <select
             className="form-select"
             value={formData.linea}
             onChange={(e) => setFormData({ ...formData, linea: Number.parseInt(e.target.value) })}
           >
-            <option value={1}>Directa</option>
-            <option value={2}>Escalonada</option>
-            <option value={3}>Escalonada Suave</option>
-            <option value={4}>Bézier</option>
+            <option value={1}>{t("modelcard.direct")}</option>
+            <option value={2}>{t("modelcard.escalo")}</option>
+            <option value={3}>{t("modelcard.escalosu")}</option>
+            <option value={4}>{t("modelcard.bezier")}</option>
           </select>
         </div>
 
         {/* Método */}
         <div className="form-group">
-          <label className="form-label">Método *</label>
+          <label className="form-label">{t("generic.metodo")} *</label>
           {loadingMetodos ? (
-            <div className="text-gray-500">Cargando métodos...</div>
+            <div className="text-gray-500">{t("generic.loading")}...</div>
           ) : (
             <select
               className="form-select"
@@ -212,7 +214,7 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
 
         {/* Visibilidad */}
         <div className="form-group">
-          <label className="form-label block mb-2">Visibilidad</label>
+          <label className="form-label block mb-2">{t("generic.visibilidad")}</label>
           <button
             type="button"
             onClick={() => setFormData({ ...formData, publico: !formData.publico })}
@@ -226,21 +228,21 @@ export default function CreateModelModal({ isOpen, onClose, onModelCreated }: Cr
               }`}
             />
           </button>
-          <span className="ml-3">{formData.publico ? "Público" : "Privado"}</span>
+          <span className="ml-3">{formData.publico ? t("generic.public") : t("generic.private")}</span>
         </div>
         {/* Botones */}
         <div className="modal-footer">
           <button type="button" onClick={handleClose} className="btn btn-secondary" disabled={loading}>
-            Cancelar
+            {t("generic.cancelar")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="spinner"></div>
-                Creando...
+                {t("generic.loading")}...
               </div>
             ) : (
-              "Crear Modelo"
+              t("dashboard.bt.crearmod")
             )}
           </button>
         </div>

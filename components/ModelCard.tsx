@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import Spinner from "./pesos/Spinner"
 import { supabase } from "@/lib/supabase"
+import { useTranslation } from 'react-i18next';
 
 interface Modelo {
   id: string
@@ -21,21 +22,23 @@ interface ModelCardProps {
   modelo: Modelo
 }
 
-const getLineaText = (linea: number) => {
-  switch (linea) {
-    case 1: return "Directa"
-    case 2: return "Escalonada"
-    case 3: return "Escalonada Suave"
-    case 4: return "Bézier"
-    default: return "Directa"
-  }
-}
 
 export default function ModelCard({ modelo }: ModelCardProps) {
   const [loading, SetLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false) // Nuevo estado para la vista de eliminado
   const router = useRouter()
+  const { t } = useTranslation() // Inicialización del de traducción
+
+  const getLineaText = (linea: number) => {
+    switch (linea) {
+      case 1: return t("modelcard.direct")
+      case 2: return t("modelcard.escalo")
+      case 3: return t("modelcard.escalosu")
+      case 4: return t("modelcard.bezier")
+      default: return t("modelcard.direct")
+    }
+  }
 
   const handleDesactivarModelo = async () => {
     SetLoading(true)
@@ -43,7 +46,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
     try {
       const { error } = await supabase
         .rpc('desactivar_modelo', {
-          modelo_id: modelo.id 
+          modelo_id: modelo.id
         })
 
       if (error) {
@@ -51,7 +54,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
       } else {
         setIsDeleted(true) // Activamos el mensaje de éxito
         // Opcional: Refrescar los datos en segundo plano
-        router.refresh() 
+        router.refresh()
       }
     } catch (err) {
       console.error('Error inesperado:', err)
@@ -69,7 +72,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
             <Image src="/borrar.png" alt="Eliminado" width={24} height={24} className="opacity-60" />
           </div>
           <p className="text-gray-500 font-medium">
-            Se eliminó el modelo <span className="text-gray-800 block font-bold">"{modelo.nombre}"</span>
+            {t('modelcard.seelimin')} <span className="text-gray-800 block font-bold">"{modelo.nombre}"</span>
           </p>
         </div>
       </div>
@@ -80,25 +83,25 @@ export default function ModelCard({ modelo }: ModelCardProps) {
   return (
     <div className="card h-[240px] flex flex-col justify-between relative overflow-hidden bg-white shadow-md rounded-lg border border-gray-200">
       <Spinner visible={loading} />
-      
+
       {/* OVERLAY DE CONFIRMACIÓN (MODAL) */}
       {showConfirm && (
         <div className="absolute inset-0 z-50 bg-white/95 flex flex-col items-center justify-center p-4 text-center animate-in fade-in duration-200">
           <p className="text-gray-800 font-semibold mb-4">
-            ¿Confirmas que deseas eliminar "{modelo.nombre}"?
+            ¿{t('modelcard.conelimin')} "{modelo.nombre}"?
           </p>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={() => setShowConfirm(false)}
               className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors text-sm font-medium"
             >
-              Cancelar
+              {t("generic.cancelar")}
             </button>
-            <button 
+            <button
               onClick={handleDesactivarModelo}
               className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors text-sm font-medium"
             >
-              Sí, eliminar
+              {t("modelcard.sielimin")}
             </button>
           </div>
         </div>
@@ -132,7 +135,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
             <span className="text-xs text-gray-500 font-medium">
-              Línea: {getLineaText(modelo.linea)}
+              {t("modelcard.linea")}: {getLineaText(modelo.linea)}
             </span>
             <span className="text-[10px] text-gray-400">
               {new Date(modelo.updated_at || modelo.created_at).toLocaleDateString()}
@@ -152,7 +155,7 @@ export default function ModelCard({ modelo }: ModelCardProps) {
               <button
                 onClick={() => setShowConfirm(true)}
                 className="p-1 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
-                title="Eliminar"
+                title={t("generic.del")}
               >
                 <Image src="/borrar.png" alt="Borrar" width={30} height={30} />
               </button>
