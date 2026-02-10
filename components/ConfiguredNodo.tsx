@@ -123,8 +123,8 @@ export default function ConfigureModalNodo({ isOpen, onClose, nodo, onNodoUpdate
                             />
                         </div>
                         <Switch
-                            option1={{ label: t("generic.benefit"), value: "true" }}
-                            option2={{ label: t("generic.cost"), value: "false" }}
+                            option1={{ label: t("generic.beneficio"), value: "true" }}
+                            option2={{ label: t("generic.costo"), value: "false" }}
                             defaultValue={String(formData.beneficio)}
                             onChange={(val) => {
                                 console.log(val)

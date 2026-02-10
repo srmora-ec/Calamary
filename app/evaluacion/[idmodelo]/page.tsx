@@ -20,7 +20,7 @@ import {
   Tooltip,
   Alert,
 } from "antd"
-import { UploadOutlined, FolderOpenOutlined,DeploymentUnitOutlined,CalculatorOutlined } from "@ant-design/icons"
+import { UploadOutlined, FolderOpenOutlined, DeploymentUnitOutlined, CalculatorOutlined } from "@ant-design/icons"
 import { Modelo, type ModeloData, type Nodo } from "@/types/modelo"
 import ModeloSvgViewer from "@/components/modelo-svg-viewer"
 import UnidimensionalSensitivityAnalysis from "@/app/evaluacion/[idmodelo]/asensibilidaduni"
@@ -130,7 +130,7 @@ export default function AlternativasPage() {
       return false
     }
     if (alternativas.length < 2) {
-     alert("Se necesitan al menos 2 alternativas para realizar una comparación.")
+      alert("Se necesitan al menos 2 alternativas para realizar una comparación.")
       return false
     }
     return true
@@ -1299,35 +1299,35 @@ export default function AlternativasPage() {
             {t('generic.descripcion')}
           </div>
           {modelo?.getMetodo() !== "MAUT" && (
-             <div className="mt-1">
-                {modoValor === "unico" && (
-                  <Tooltip title={`Comparar alternativas por pasos (AHP) bajo el criterio: ${criterio.titulo}`}>
-                    <Button
-                      size="small"
-                      type="dashed"
-                      icon={<DeploymentUnitOutlined />}
-                      onClick={() => handleOpenSaaty(criterio)}
-                      className="text-xs flex items-center justify-center w-full h-6"
-                    >
-                      Comparar
-                    </Button>
-                  </Tooltip>
-                )}
+            <div className="mt-1">
+              {modoValor === "unico" && (
+                <Tooltip title={`Comparar alternativas por pasos (AHP) bajo el criterio: ${criterio.titulo}`}>
+                  <Button
+                    size="small"
+                    type="dashed"
+                    icon={<DeploymentUnitOutlined />}
+                    onClick={() => handleOpenSaaty(criterio)}
+                    className="text-xs flex items-center justify-center w-full h-6"
+                  >
+                    Comparar
+                  </Button>
+                </Tooltip>
+              )}
 
-                {modoValor === "fuzzy" && (
-                  <Tooltip title={`Comparar alternativas (Fuzzy AHP) bajo el criterio: ${criterio.titulo}`}>
-                    <Button
-                      size="small"
-                      type="dashed"
-                      icon={<CalculatorOutlined />}
-                      onClick={() => handleOpenFuzzy(criterio)}
-                      className="text-xs flex items-center justify-center w-full h-6"
-                    >
-                      Comp. Difuso
-                    </Button>
-                  </Tooltip>
-                )}
-             </div>
+              {modoValor === "fuzzy" && (
+                <Tooltip title={`Comparar alternativas (Fuzzy AHP) bajo el criterio: ${criterio.titulo}`}>
+                  <Button
+                    size="small"
+                    type="dashed"
+                    icon={<CalculatorOutlined />}
+                    onClick={() => handleOpenFuzzy(criterio)}
+                    className="text-xs flex items-center justify-center w-full h-6"
+                  >
+                    Comp. Difuso
+                  </Button>
+                </Tooltip>
+              )}
+            </div>
           )}
         </div>
       ),
@@ -2003,6 +2003,11 @@ export default function AlternativasPage() {
     <>
       <Header />
       <div className="p-6">
+        <div className="flex items-center">
+          <h1 className="font-bold text-xl">{modelo?.getData().nombre}</h1>
+ 
+        </div>
+
         <div className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out`}>
           <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
             <button
@@ -2375,56 +2380,56 @@ export default function AlternativasPage() {
         </AntModal>
 
         <AntModal
-        title={`Comparar Alternativas según: ${currentSaatyCriterio?.titulo || ""}`}
-        open={saatyModalOpen}
-        onCancel={() => setSaatyModalOpen(false)}
-        width={800}
-        footer={null}
-        destroyOnClose
-      >
-        {saatyModalOpen && (
-          <div className="max-h-[70vh] overflow-y-auto pr-2">
-            <Alert
-              message="Comparación de Alternativas (AHP)"
-              description="Compara par a par qué alternativa es preferible sobre otra respecto a este criterio. Los resultados actualizarán la tabla."
-              type="info"
-              showIcon
-              className="mb-4"
-            />
-            <ComparacionPorPasos 
-                nodos={alternativasComoNodos} 
-                onSave={handleSaveSaatyWeights} 
-            />
-          </div>
-        )}
-      </AntModal>
+          title={`Comparar Alternativas según: ${currentSaatyCriterio?.titulo || ""}`}
+          open={saatyModalOpen}
+          onCancel={() => setSaatyModalOpen(false)}
+          width={800}
+          footer={null}
+          destroyOnClose
+        >
+          {saatyModalOpen && (
+            <div className="max-h-[70vh] overflow-y-auto pr-2">
+              <Alert
+                message="Comparación de Alternativas (AHP)"
+                description="Compara par a par qué alternativa es preferible sobre otra respecto a este criterio. Los resultados actualizarán la tabla."
+                type="info"
+                showIcon
+                className="mb-4"
+              />
+              <ComparacionPorPasos
+                nodos={alternativasComoNodos}
+                onSave={handleSaveSaatyWeights}
+              />
+            </div>
+          )}
+        </AntModal>
 
-      {/* Modal de Comparación Difusa (Triangular) */}
-      <AntModal
-        title={`Comparar Alternativas (Difuso) según: ${currentFuzzyCriterio?.titulo || ""}`}
-        open={fuzzyModalOpen}
-        onCancel={() => setFuzzyModalOpen(false)}
-        width={900}
-        footer={null}
-        destroyOnClose
-      >
-        {fuzzyModalOpen && (
-          <div className="max-h-[80vh] overflow-y-auto pr-2">
-            <Alert
-              message="Comparación Difusa (Fuzzy AHP)"
-              description="Realiza comparaciones utilizando lógica difusa para capturar la incertidumbre en las preferencias entre alternativas."
-              type="success"
-              showIcon
-              className="mb-4"
-            />
-            <ComparacionParesDifusos
-              nodos={alternativasComoNodos}
-              onSave={handleSaveFuzzyWeights}
-              onCancel={() => setFuzzyModalOpen(false)}
-            />
-          </div>
-        )}
-      </AntModal>
+        {/* Modal de Comparación Difusa (Triangular) */}
+        <AntModal
+          title={`Comparar Alternativas (Difuso) según: ${currentFuzzyCriterio?.titulo || ""}`}
+          open={fuzzyModalOpen}
+          onCancel={() => setFuzzyModalOpen(false)}
+          width={900}
+          footer={null}
+          destroyOnClose
+        >
+          {fuzzyModalOpen && (
+            <div className="max-h-[80vh] overflow-y-auto pr-2">
+              <Alert
+                message="Comparación Difusa (Fuzzy AHP)"
+                description="Realiza comparaciones utilizando lógica difusa para capturar la incertidumbre en las preferencias entre alternativas."
+                type="success"
+                showIcon
+                className="mb-4"
+              />
+              <ComparacionParesDifusos
+                nodos={alternativasComoNodos}
+                onSave={handleSaveFuzzyWeights}
+                onCancel={() => setFuzzyModalOpen(false)}
+              />
+            </div>
+          )}
+        </AntModal>
 
         <Modal
           isOpen={sensitivityModalOpen}
