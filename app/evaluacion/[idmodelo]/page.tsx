@@ -2123,7 +2123,12 @@ export default function AlternativasPage() {
                   )}
 
                   <div className="bg-white rounded-lg border overflow-x-auto">
-                    <Table columns={columns} dataSource={alternativas} pagination={false} scroll={{ x: "max-content" }} />
+                    <Table
+                      columns={columns}
+                      dataSource={alternativas}
+                      pagination={alternativas.length > 100 ? { pageSize: 100, showSizeChanger: false, showTotal: (total) => `${total} alternativas` } : false}
+                      scroll={{ x: "max-content" }}
+                    />
                   </div>
 
                   <div className="text-sm text-gray-500">
@@ -2176,7 +2181,7 @@ export default function AlternativasPage() {
                         <Table
                           columns={columnasNormalizadas}
                           dataSource={datosNormalizados}
-                          pagination={false}
+                          pagination={datosNormalizados.length > 100 ? { pageSize: 100, showSizeChanger: false, showTotal: (total) => `${total} alternativas` } : false}
                           scroll={{ x: "max-content" }}
                         />
                       </div>
@@ -2227,7 +2232,7 @@ export default function AlternativasPage() {
                         <Table
                           columns={columnasResultados}
                           dataSource={datosResultados}
-                          pagination={false}
+                          pagination={datosResultados.length > 100 ? { pageSize: 100, showSizeChanger: false, showTotal: (total) => `${total} alternativas` } : false}
                           rowClassName={(record) =>
                             record.ranking === 1 ? "bg-green-50" : record.ranking === 2 ? "bg-blue-50" : ""
                           }
