@@ -121,6 +121,8 @@ export default function AlternativasPage() {
   const [currentSaatyCriterio, setCurrentSaatyCriterio] = useState<Nodo | null>(null);
   const [fuzzyModalOpen, setFuzzyModalOpen] = useState(false);
   const [currentFuzzyCriterio, setCurrentFuzzyCriterio] = useState<Nodo | null>(null);
+  //-------------- Al finalizar evaluacion cambiar a resultados
+  const [tabactive, setTabactive] = useState("1");
 
   // Validar antes de abrir comparación
   const validarParaComparacion = () => {
@@ -703,6 +705,7 @@ export default function AlternativasPage() {
             score_max: puntuacionesMaxOrdenadas,
           })
           notify(t('alertas.exito'), "success", t('evaluacion.alertas.mautexito'))
+          setTabactive("3");
           setEvaluando(false)
           return
         }
@@ -787,9 +790,11 @@ export default function AlternativasPage() {
       message.success(`Evaluación ${modoValor === "fuzzy" ? "difusa " : ""}completada exitosamente`)
       if (modoValor === "fuzzy") {
         notify(t('alertas.exito'), "success", t('evaluacion.alertas.fuzzyexito'))
+        setTabactive("3");
 
       } else {
         notify(t('alertas.exito'), "success", t('evaluacion.alertas.evaexito'))
+        setTabactive("3");
       }
     } catch (error) {
       console.error(" Error ejecutando evaluación:", error)
@@ -2005,7 +2010,7 @@ export default function AlternativasPage() {
       <div className="p-6">
         <div className="flex items-center">
           <h1 className="font-bold text-xl">{modelo?.getData().nombre}</h1>
- 
+
         </div>
 
         <div className={`border-r bg-white flex flex-col transition-all duration-300 ease-in-out`}>
@@ -2031,6 +2036,8 @@ export default function AlternativasPage() {
 
         <Tabs
           defaultActiveKey="1"
+          onChange={(key) => setTabactive(key)}
+          activeKey={tabactive}
           items={[
             {
               key: "1",
