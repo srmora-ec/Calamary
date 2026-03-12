@@ -137,6 +137,61 @@ export default function AlternativasPage() {
     }
     return true
   }
+  //Descargar resultados
+  const descargarResultadosExcel = () => {
+    if (!resultado || alternativas.length === 0) return;
+
+    // Construir encabezados
+    const headers = [
+      "Nombre",
+      ...criteriosFinales.map((c) => {
+        if (modoValor === "fuzzy") return [`${c.titulo} (L)`, `${c.titulo} (M)`, `${c.titulo} (U)`];
+        if (modoValor === "rango") return [`${c.titulo} (Min)`, `${c.titulo} (Max)`];
+        return [c.titulo];
+      }).flat(),
+      ...(modoValor === "rango" && resultado.score_min
+        ? ["Puntaje Mín", "Puntaje Promedio", "Puntaje Máx"]
+        : ["Puntaje"]),
+      "Ranking",
+    ];
+
+    // Construir filas en orden de ranking 
+    const filas = datosResultados.map((item) => {
+      const alt = alternativas.find((a) => a.key === item.key);
+      if (!alt) return [];
+
+      const valoresCriterios = criteriosFinales.flatMap((criterio) => {
+        const val = alt.valores[criterio.idnodo];
+        if (modoValor === "fuzzy" && val?.tipo === "fuzzy") {
+          return [Number(val.l), Number(val.m), Number(val.u)];
+        }
+        if (modoValor === "rango" && val?.tipo === "rango") {
+          return [Number(val.min), Number(val.max)];
+        }
+        if (val?.tipo === "unico") {
+          return [typeof val.valor === "string" ? val.valor : Number(val.valor)];
+        }
+        return [0];
+      });
+
+      const puntajes =
+        modoValor === "rango" && resultado.score_min
+          ? [
+            Number(item.puntuacion_min?.toFixed(4)),
+            Number(item.puntuacion?.toFixed(4)),
+            Number(item.puntuacion_max !== undefined ? item.puntuacion_max?.toFixed(4) : item.puntuacion?.toFixed(4)),
+          ]
+          : [Number(item.puntuacion?.toFixed(4))];
+
+      return [item.nombre, ...valoresCriterios, ...puntajes, item.ranking];
+    });
+
+    const wsData = [headers, ...filas];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+    XLSX.writeFile(wb, `resultados_${modelo?.getData().nombre || "evaluacion"}_${Date.now()}.xlsx`);
+  };
 
   // Transformar Alternativas a Nodos para los componentes de comparación
   // Usamos el índice de la alternativa como 'idnodo' temporal para mapear la respuesta
@@ -2234,7 +2289,15 @@ export default function AlternativasPage() {
                           {t('resultados.presentacion')}
                           {modoValor === "rango" && " (Mín, Avg, Máx)"}
                         </p>
+                        <Button
+                          icon={<UploadOutlined style={{ transform: "rotate(180deg)" }} />}
+                          onClick={descargarResultadosExcel}
+                          type="default"
+                        >
+                          Descargar Excel
+                        </Button>
                       </div>
+                      
                       <div className="bg-white rounded-lg border">
                         <Table
                           columns={columnasResultados}
