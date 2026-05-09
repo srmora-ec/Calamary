@@ -8,7 +8,7 @@ export interface ValorDiscretoMAUT {
 }
 
 export interface MAUTConfig {
-  tipoFuncion: "simple" | "dual" | "discreta" // simple = una función, dual = dos funciones (min/max)
+  tipoFuncion: "simple" | "dual" | "discreta" | "programada" // simple = una función, dual = dos funciones (min/max)
   funcionSimple?: {
     puntos: Array<{ x: number; y: number }>
     pendientes: number[]
@@ -27,6 +27,11 @@ export interface MAUTConfig {
   funcionDiscreta?: {
     valores: ValorDiscretoMAUT[]
   }
+
+  funcionProgramada?: {
+    codigo: string // Cuerpo de la función Python que recibe x y retorna utilidad
+  }
+
 }
 
 export interface Nodo {
@@ -468,6 +473,12 @@ export class Modelo {
         return (
           !nodo.MAUT.funcionDiscreta ||
           nodo.MAUT.funcionDiscreta.valores.length < 2
+        )
+      } else if (nodo.MAUT.tipoFuncion === "programada") {
+        // Válida si el código no está vacío
+        return (
+          !nodo.MAUT.funcionProgramada ||
+          nodo.MAUT.funcionProgramada.codigo.trim().length === 0
         )
       }
 
