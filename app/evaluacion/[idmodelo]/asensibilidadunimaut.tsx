@@ -76,6 +76,16 @@ export default function UnidimensionalSensitivityMAUT({
     const { t } = useTranslation()
     const { notify } = useNotification()
 
+    const getInitialGlobalWeight = () => {
+    if (!selectedCriterion || !hierarchy) return 0
+
+    const targetNode = hierarchy.find(
+        n => n.idnodo.toString() === selectedCriterion
+    )
+
+    return targetNode?.pesofinal || 0
+}
+
     const handleAnalyze = async () => {
         if (!selectedCriterion) {
             message.warning("Por favor selecciona un criterio")
@@ -187,7 +197,7 @@ export default function UnidimensionalSensitivityMAUT({
                             </div>
                             <div className="bg-green-50 p-4 rounded-lg">
                                 <p className="text-sm text-gray-600">{t('asensibilidad.pgloactual')}</p>
-                                <p className="text-xl font-bold">{(result.initial_global_weight * 100).toFixed(2)}%</p>
+                                <p className="text-xl font-bold"> {(getInitialGlobalWeight() * 100).toFixed(2)}%</p>
                             </div>
                         </div>
 

@@ -1,0 +1,113 @@
+[33md99db47[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m HEAD@{0}: reset: moving to origin/master
+[33m0f547e3[m HEAD@{1}: commit: Funcion programada
+[33m2d40538[m HEAD@{2}: commit: backend por si preguntan
+[33md99db47[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m HEAD@{3}: commit: Descargar resultados en excel
+[33m25383e2[m HEAD@{4}: commit: Cambiar de tab al terminar de evaluar un modelo
+[33m5094092[m HEAD@{5}: commit: Inicio page
+[33mff6137e[m HEAD@{6}: commit: Agregación de titulo en modelo de evaluación
+[33mc1b7b3e[m HEAD@{7}: commit: Nuevas traducciones al ingles
+[33m0266ba6[m HEAD@{8}: commit: Nuevas traducciones al ingles
+[33m06ddef1[m HEAD@{9}: commit: Eliminar modelos
+[33m3d1ce45[m HEAD@{10}: commit: Permitir guardar inconsistentes, debido a que muchos articulos lo hacen, ya será cosa del usuario
+[33m37d8198[m HEAD@{11}: commit: Inicial
+[33m8ca1ae2[m HEAD@{12}: commit: Guardar al evaluar
+[33md7f824f[m HEAD@{13}: commit: Arreglar difusos
+[33mfb08f97[m HEAD@{14}: commit: Eliminar texto random
+[33m5f11cb1[m HEAD@{15}: commit: Optimización genetica para satty
+[33m60caeac[m HEAD@{16}: commit: Mejoras generales
+[33mbc34295[m HEAD@{17}: commit: Mejoras generales
+[33ma735430[m HEAD@{18}: commit: Se quito la pagina de expertos
+[33m2669243[m HEAD@{19}: commit: Aumento de descripción de criterio
+[33m10fdac4[m HEAD@{20}: commit: Documentos guía
+[33m44427dc[m HEAD@{21}: commit: Traducciones y mejora en la asignación lineal
+[33m159d60f[m HEAD@{22}: commit: Traducciones y mejora en la asignación lineal
+[33m994c153[m HEAD@{23}: commit: cambio de next
+[33m85f580c[m HEAD@{24}: commit: Establecer discretos
+[33m7480429[m HEAD@{25}: commit: Establecer discretos
+[33m79bc305[m HEAD@{26}: commit: Establecer discretos
+[33mc00e964[m HEAD@{27}: commit: Esta nueva estructura funciona?
+[33m6ec50a3[m HEAD@{28}: commit: Prueba de arregle de bug x17
+[33m49d97be[m HEAD@{29}: commit: Prueba de arregle de bug x16
+[33m9f3033a[m HEAD@{30}: commit: Prueba de arregle de bug x15
+[33m76e077f[m HEAD@{31}: commit: Prueba de arregle de bug x14
+[33m40bc031[m HEAD@{32}: commit: Prueba de arregle de bug x13
+[33me5e7567[m HEAD@{33}: commit: Prueba de arregle de bug x12
+[33m0a1ba44[m HEAD@{34}: commit: Prueba de arregle de bug x11
+[33mbb889aa[m HEAD@{35}: commit: Prueba de arregle de bug x10
+[33m545c9ee[m HEAD@{36}: commit: Prueba de arregle de bug x9
+[33mfef1fde[m HEAD@{37}: commit: Prueba de arregle de bug x8
+[33mb47b5cd[m HEAD@{38}: commit: Prueba de arregle de bug x7
+[33mf434292[m HEAD@{39}: commit: Prueba de arregle de bug x6
+[33me68f65d[m HEAD@{40}: commit: Prueba de arregle de bug x5
+[33m1efc0d0[m HEAD@{41}: commit: Prueba de arregle de bug x4
+[33mc0fe6c5[m HEAD@{42}: commit: Prueba de arregle de bug x3
+[33m0297124[m HEAD@{43}: commit: Prueba de arregle de bug x3
+[33mce20815[m HEAD@{44}: commit: Prueba de arregle de bug x2
+[33mb26dbaf[m HEAD@{45}: commit: Prueba de arregle de bug x2
+[33ma8c3938[m HEAD@{46}: commit: Prueba de arregle de bug
+[33md992794[m HEAD@{47}: commit: Prueba de arregle de bug
+[33m760028b[m HEAD@{48}: commit: Prueba de arregle de bug
+[33m7a66de6[m HEAD@{49}: commit: Mas traducciones a ingles para los componentes
+[33m803428c[m HEAD@{50}: commit: Mas traducciones a ingles para los componentes
+[33mfa3faf1[m HEAD@{51}: commit: Mas traducciones a ingles para los componentes
+[33mdf728cd[m HEAD@{52}: commit: Cambiar de idioma
+[33m2fd7ff0[m HEAD@{53}: commit: Cambiar de idioma
+[33m8f4663f[m HEAD@{54}: commit: Cambiar de idioma
+[33mea27293[m HEAD@{55}: commit: Cambiar de idioma
+[33m0e13a66[m HEAD@{56}: commit: Cambiar de idioma
+[33mfcc630a[m HEAD@{57}: commit: Cambiar de idioma
+[33m996585f[m HEAD@{58}: commit: No cargar metodos eliminado
+[33md27edd7[m HEAD@{59}: commit: No cargar metodos eliminado
+[33m282e3d3[m HEAD@{60}: commit: Metodo difuso
+[33mb6f6348[m HEAD@{61}: commit: Analisis de sensibilidad alta
+[33m2906d9f[m HEAD@{62}: commit: Nueva versión para que los usuarios puedan hacer evaluación de expertos
+[33m27b2831[m HEAD@{63}: commit: Agregar alternativas (Paquetes) y llamarlas en la evaluación de un modelo
+[33ma86edd9[m HEAD@{64}: commit: Cambios visuales en modelCard iconos de privado y public y cambio de modelos public en muestra
+[33m57156cb[m HEAD@{65}: commit: Se redujo la cantidad de lineas a mostrar en descripcion
+[33m6e36268[m HEAD@{66}: commit: Actualizacion en el card de losmodelos publicos
+[33mce170a8[m HEAD@{67}: commit: Cambios que no se enviaron por fallo: registro, mejora en cards, edición
+[33m64ebbb5[m HEAD@{68}: commit: Mejoras en los cards, se incluýó sistema de registro de sesión, y edición del nombre y descripcion del modelo
+[33m857dd59[m HEAD@{69}: commit: Un bug al desplegar
+[33ma2fe203[m HEAD@{70}: commit: Analisis de sensibilidad WIS
+[33maaa1502[m HEAD@{71}: commit: Comentarios y corrección de errores
+[33md0bfe37[m HEAD@{72}: commit: Analisis de sensibilidad WIS
+[33m79a33f9[m HEAD@{73}: commit: Sacar puntaje y normalizar para maut con rango
+[33m0224a7d[m HEAD@{74}: commit: Ver modelos publicos
+[33mc5756f5[m HEAD@{75}: commit: aVANCES MAUT
+[33m2fdb578[m HEAD@{76}: commit: aVANCES MAUT
+[33m5b9ef3c[m HEAD@{77}: commit: Crear y editar y eliminar metodos
+[33m61ea5ea[m HEAD@{78}: commit: Metodo para corregir pesos finales, y evaluacion de alternativas mas carga de excel
+[33md82cc0e[m HEAD@{79}: commit: Alternativas
+[33mf7f3ef2[m HEAD@{80}: commit: Metodosalcrear
+[33meb0ebd5[m HEAD@{81}: commit: Satty expertos
+[33m61e143d[m HEAD@{82}: commit: Cambio botón editar
+[33m7e3e6a5[m HEAD@{83}: commit: Cuestionario para expertos
+[33m0352c62[m HEAD@{84}: commit: Aumento de texto para correo
+[33m238f97c[m HEAD@{85}: commit: Aumento de texto para correo
+[33m60a594e[m HEAD@{86}: commit: Invitar expertos
+[33m91aca09[m HEAD@{87}: commit: Mejora en los pesos
+[33m37dbcae[m HEAD@{88}: commit: Mejora de spinner y mostrar info de los criterios
+[33mfb7635d[m HEAD@{89}: commit: Spinner mejorado
+[33m5947405[m HEAD@{90}: commit: Spinner
+[33m650cd23[m HEAD@{91}: commit: Instalacion de antdesing
+[33mae6e8b9[m HEAD@{92}: commit: Ahora las matrices de comapracion por par se guardan en supabase y ademas mejoramos la vista de la compración por pasos
+[33m5d7bf63[m HEAD@{93}: commit: Integración con fastAPi
+[33m6349f05[m HEAD@{94}: commit: Integración con fastAPi
+[33m08c59cb[m HEAD@{95}: commit: Mejora en la comparación por pasos
+[33m56f25f3[m HEAD@{96}: commit: Configuración de pesos por el método Satty
+[33m68472fc[m HEAD@{97}: commit: Mostramos el peso en pantalla
+[33m9697d0f[m HEAD@{98}: commit: Ahora si cambiamos el tipo de linea o el tipo de orientación no se pierden las ubicaciones anteriores
+[33mc2fb946[m HEAD@{99}: commit: Mejoras en el diseño de los nodos, se aplican cambios visuales y customNodo
+[33m5a1ae13[m HEAD@{100}: commit: Corrigiendo error de carga de modelos
+[33mf160637[m HEAD@{101}: commit: Provider de sesión
+[33m71b0233[m HEAD@{102}: commit: Prueba
+[33mc707770[m HEAD@{103}: commit: Prueba
+[33m74d81b7[m HEAD@{104}: commit: Prueba
+[33mfdc06a6[m HEAD@{105}: commit: Prueba
+[33mbc58482[m HEAD@{106}: commit: Prueba
+[33m619fcaa[m HEAD@{107}: commit: Intento de despligue se agregó use client al supabase
+[33ma2f6acf[m HEAD@{108}: commit: Intento de despligue se agregó use client al supabase
+[33mcfb6e0c[m HEAD@{109}: commit: Agregar variables secret
+[33mdf1d4bd[m HEAD@{110}: commit: Agregar variables de supabase
+[33m7bf1c5b[m HEAD@{111}: commit: chore: setup Firebase Hosting with GitHub Actions
+[33m07befc6[m HEAD@{112}: commit (initial): Cargando proyecto supabase
