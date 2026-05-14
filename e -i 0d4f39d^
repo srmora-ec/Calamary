@@ -1,0 +1,116 @@
+[33m7d003ee[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m Subir backend ejemplar
+[33m7867416[m Clean commit without secrets
+[33m141aab0[m Agregar backend de muestra
+[33m0d4f39d[m Agregar backend de muestra
+[33ma87984e[m[33m ([m[1;31morigin/master[m[33m)[m mostrar peso local en maut
+[33m5bfe263[m Funcion programada
+[33md99db47[m Descargar resultados en excel
+[33m25383e2[m Cambiar de tab al terminar de evaluar un modelo
+[33m5094092[m Inicio page
+[33mff6137e[m Agregación de titulo en modelo de evaluación
+[33mc1b7b3e[m Nuevas traducciones al ingles
+[33m0266ba6[m Nuevas traducciones al ingles
+[33m06ddef1[m Eliminar modelos
+[33m3d1ce45[m Permitir guardar inconsistentes, debido a que muchos articulos lo hacen, ya será cosa del usuario
+[33m37d8198[m Inicial
+[33m8ca1ae2[m Guardar al evaluar
+[33md7f824f[m Arreglar difusos
+[33mfb08f97[m Eliminar texto random
+[33m5f11cb1[m Optimización genetica para satty
+[33m60caeac[m Mejoras generales
+[33mbc34295[m Mejoras generales
+[33ma735430[m Se quito la pagina de expertos
+[33m2669243[m Aumento de descripción de criterio
+[33m10fdac4[m Documentos guía
+[33m44427dc[m Traducciones y mejora en la asignación lineal
+[33m159d60f[m Traducciones y mejora en la asignación lineal
+[33m994c153[m cambio de next
+[33m85f580c[m Establecer discretos
+[33m7480429[m Establecer discretos
+[33m79bc305[m Establecer discretos
+[33mc00e964[m Esta nueva estructura funciona?
+[33m6ec50a3[m Prueba de arregle de bug x17
+[33m49d97be[m Prueba de arregle de bug x16
+[33m9f3033a[m Prueba de arregle de bug x15
+[33m76e077f[m Prueba de arregle de bug x14
+[33m40bc031[m Prueba de arregle de bug x13
+[33me5e7567[m Prueba de arregle de bug x12
+[33m0a1ba44[m Prueba de arregle de bug x11
+[33mbb889aa[m Prueba de arregle de bug x10
+[33m545c9ee[m Prueba de arregle de bug x9
+[33mfef1fde[m Prueba de arregle de bug x8
+[33mb47b5cd[m Prueba de arregle de bug x7
+[33mf434292[m Prueba de arregle de bug x6
+[33me68f65d[m Prueba de arregle de bug x5
+[33m1efc0d0[m Prueba de arregle de bug x4
+[33mc0fe6c5[m Prueba de arregle de bug x3
+[33m0297124[m Prueba de arregle de bug x3
+[33mce20815[m Prueba de arregle de bug x2
+[33mb26dbaf[m Prueba de arregle de bug x2
+[33ma8c3938[m Prueba de arregle de bug
+[33md992794[m Prueba de arregle de bug
+[33m760028b[m Prueba de arregle de bug
+[33m7a66de6[m Mas traducciones a ingles para los componentes
+[33m803428c[m Mas traducciones a ingles para los componentes
+[33mfa3faf1[m Mas traducciones a ingles para los componentes
+[33mdf728cd[m Cambiar de idioma
+[33m2fd7ff0[m Cambiar de idioma
+[33m8f4663f[m Cambiar de idioma
+[33mea27293[m Cambiar de idioma
+[33m0e13a66[m Cambiar de idioma
+[33mfcc630a[m Cambiar de idioma
+[33m996585f[m No cargar metodos eliminado
+[33md27edd7[m No cargar metodos eliminado
+[33m282e3d3[m Metodo difuso
+[33mb6f6348[m Analisis de sensibilidad alta
+[33m2906d9f[m Nueva versión para que los usuarios puedan hacer evaluación de expertos
+[33m27b2831[m Agregar alternativas (Paquetes) y llamarlas en la evaluación de un modelo
+[33ma86edd9[m Cambios visuales en modelCard iconos de privado y public y cambio de modelos public en muestra
+[33m57156cb[m Se redujo la cantidad de lineas a mostrar en descripcion
+[33m6e36268[m Actualizacion en el card de losmodelos publicos
+[33mce170a8[m Cambios que no se enviaron por fallo: registro, mejora en cards, edición
+[33m64ebbb5[m Mejoras en los cards, se incluýó sistema de registro de sesión, y edición del nombre y descripcion del modelo
+[33m857dd59[m Un bug al desplegar
+[33ma2fe203[m Analisis de sensibilidad WIS
+[33maaa1502[m Comentarios y corrección de errores
+[33md0bfe37[m Analisis de sensibilidad WIS
+[33m79a33f9[m Sacar puntaje y normalizar para maut con rango
+[33m0224a7d[m Ver modelos publicos
+[33mc5756f5[m aVANCES MAUT
+[33m2fdb578[m aVANCES MAUT
+[33m5b9ef3c[m Crear y editar y eliminar metodos
+[33m61ea5ea[m Metodo para corregir pesos finales, y evaluacion de alternativas mas carga de excel
+[33md82cc0e[m Alternativas
+[33mf7f3ef2[m Metodosalcrear
+[33meb0ebd5[m Satty expertos
+[33m61e143d[m Cambio botón editar
+[33m7e3e6a5[m Cuestionario para expertos
+[33m0352c62[m Aumento de texto para correo
+[33m238f97c[m Aumento de texto para correo
+[33m60a594e[m Invitar expertos
+[33m91aca09[m Mejora en los pesos
+[33m37dbcae[m Mejora de spinner y mostrar info de los criterios
+[33mfb7635d[m Spinner mejorado
+[33m5947405[m Spinner
+[33m650cd23[m Instalacion de antdesing
+[33mae6e8b9[m Ahora las matrices de comapracion por par se guardan en supabase y ademas mejoramos la vista de la compración por pasos
+[33m5d7bf63[m Integración con fastAPi
+[33m6349f05[m Integración con fastAPi
+[33m08c59cb[m Mejora en la comparación por pasos
+[33m56f25f3[m Configuración de pesos por el método Satty
+[33m68472fc[m Mostramos el peso en pantalla
+[33m9697d0f[m Ahora si cambiamos el tipo de linea o el tipo de orientación no se pierden las ubicaciones anteriores
+[33mc2fb946[m Mejoras en el diseño de los nodos, se aplican cambios visuales y customNodo
+[33m5a1ae13[m Corrigiendo error de carga de modelos
+[33mf160637[m Provider de sesión
+[33m71b0233[m Prueba
+[33mc707770[m Prueba
+[33m74d81b7[m Prueba
+[33mfdc06a6[m Prueba
+[33mbc58482[m Prueba
+[33m619fcaa[m Intento de despligue se agregó use client al supabase
+[33ma2f6acf[m Intento de despligue se agregó use client al supabase
+[33mcfb6e0c[m Agregar variables secret
+[33mdf1d4bd[m Agregar variables de supabase
+[33m7bf1c5b[m chore: setup Firebase Hosting with GitHub Actions
+[33m07befc6[m Cargando proyecto supabase
