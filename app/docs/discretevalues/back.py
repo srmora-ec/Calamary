@@ -2339,7 +2339,7 @@ async def send_email(request: EmailRequest):
         print(f'To: {request.to}')
         print(f'Subject: {request.subject}')
 
-        SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+        sg = SendGridAPIClient(sendgrid_api_key)
         print('Cliente SendGrid inicializado...')
         
         response = sg.send(message)
