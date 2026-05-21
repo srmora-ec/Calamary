@@ -322,6 +322,56 @@ export class Modelo {
     return hijo
   }
 
+  // En la clase Modelo, agregar después de crearHijo()
+
+crearPadre(idsHijos: number[]): Nodo {
+  const nodos = this.getNodos()
+  
+  // Validar que todos los nodos existan
+  const nodosHijos = idsHijos.map(id => nodos.find(n => n.idnodo === id)).filter(Boolean) as Nodo[]
+  if (nodosHijos.length < 2) throw new Error("Se necesitan al menos 2 nodos para crear un padre")
+
+  // Verificar que todos tengan el mismo padre
+  const padresUnicos = [...new Set(nodosHijos.map(n => n.idpadre))]
+  if (padresUnicos.length > 1) throw new Error("Los nodos seleccionados deben tener el mismo padre")
+
+  const idAbuelo = padresUnicos[0] // padre actual de los nodos seleccionados (puede ser null si son raíz)
+
+  // Calcular posición promedio para el nuevo padre
+  const avgX = nodosHijos.reduce((sum, n) => sum + n.posx, 0) / nodosHijos.length
+  const avgY = nodosHijos.reduce((sum, n) => sum + n.posy, 0) / nodosHijos.length
+
+  const nuevoId = nodos.length ? Math.max(...nodos.map(n => n.idnodo)) + 1 : 1
+
+  const nuevoPadre: Nodo = {
+    idnodo: nuevoId,
+    posx: avgX,
+    posy: idAbuelo !== null ? avgY - 80 : avgY, // lo ponemos un poco arriba
+    titulo: `Grupo ${nuevoId}`,
+    descripcion: "",
+    idpadre: idAbuelo ?? null,
+    peso: 0,
+    min: -100,
+    max: 100,
+    beneficio: true,
+    unidadmedida: "Unidad",
+  }
+
+  // Reasignar los hijos seleccionados al nuevo padre
+  const nodosActualizados = nodos.map(n =>
+    idsHijos.includes(n.idnodo) ? { ...n, idpadre: nuevoId } : n
+  )
+
+  this.setNodos([...nodosActualizados, nuevoPadre])
+
+  // Recalcular pesos: del abuelo hacia el nuevo padre, y del nuevo padre hacia sus hijos
+  if (idAbuelo !== null) this.recalcularPesos(idAbuelo)
+  this.recalcularPesos(nuevoId)
+
+  this.actualizarCriterios()
+  return nuevoPadre
+}
+
   // Eliminar un nodo y todos sus descendientes
   eliminarNodo(idNodo: number): void {
     const nodos = this.getNodos()

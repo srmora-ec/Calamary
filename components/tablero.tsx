@@ -100,6 +100,27 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
     }
   }, [nodoCambios]);
 
+  // Estado nuevo para ids seleccionados en el canvas
+  const [idsSeleccionadosCanvas, setIdsSeleccionadosCanvas] = useState<number[]>([])
+
+  // Handler para ReactFlow
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }: { nodes: any[] }) => {
+    setIdsSeleccionadosCanvas(selectedNodes.map(n => Number(n.id)))
+  }, [])
+
+
+  const crearPadre = () => {
+    if (idsSeleccionadosCanvas.length < 2) return
+    guardarpos()
+    try {
+      modelo.crearPadre(idsSeleccionadosCanvas)
+      setNodes(modelo.getNodosReactFlow())
+      setEdges(modelo.getEdgesReactFlow())
+    } catch (e: any) {
+      alert(e.message)
+    }
+    closeContextMenu()
+  }
 
   // contexto (usamos position: fixed y clientX/clientY)
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; nodoId: number | null }>({
@@ -533,6 +554,7 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onSelectionChange={onSelectionChange}
           nodeTypes={nodeTypes}
           // onConnect={onConnect}
           onNodeContextMenu={handleNodeContextMenu as any}
@@ -606,6 +628,16 @@ const Tablero: React.FC<TableroProps> = ({ modelo, orientacion, linea, onActuali
                   {t("menutablero.pesos")}
                 </button>
               )}
+
+            {idsSeleccionadosCanvas.length >= 2 && contextMenu.nodoId !== null && idsSeleccionadosCanvas.includes(contextMenu.nodoId) && (
+              <button
+                onClick={crearPadre}
+                className="block px-3 py-1 hover:bg-blue-50 text-blue-700 font-semibold w-full text-left border-t"
+              >
+                Crear padre para selección ({idsSeleccionadosCanvas.length})
+              </button>
+            )}
+
             <button onClick={closeContextMenu} className="block px-3 py-1 hover:bg-gray-100 w-full text-left">
               {t("generic.cancelar")}
             </button>
